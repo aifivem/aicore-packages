@@ -100,6 +100,9 @@ export type AiCoreClientExports = {
 export type AiTargetClientExports = {
   /** The interaction key was pressed: runs the focused target option; false when no target is in focus. */
   HandleInteract(): boolean;
+  /** ox_target shape: options on every entity of these models; `onSelect` runs in the calling resource. */
+  addModel(models: Array<string | number>, options: Array<{ name: string; label: string; icon?: string; distance?: number; onSelect?: (data: unknown) => void }>): void;
+  removeModel(models: Array<string | number>, names?: string[]): void;
 };
 
 /** ai-inventory's server exports other ai-* resources use (ox / qb names are answered too, see its compat notes). */
