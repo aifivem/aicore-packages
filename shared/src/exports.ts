@@ -102,6 +102,18 @@ export type AiTargetClientExports = {
   HandleInteract(): boolean;
 };
 
+/** ai-inventory's server exports other ai-* resources use (ox / qb names are answered too, see its compat notes). */
+export type AiInventoryServerExports = {
+  AddItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>, slot?: number): boolean;
+  RemoveItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>, slot?: number): boolean;
+  GetItemCount(inv: number | string, item: string, metadata?: Record<string, unknown>): number;
+  CanCarryItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>): boolean;
+  /** `handler` returning false keeps the item (otherwise the item's "consume" amount is taken). */
+  RegisterUsableItem(name: string, handler: (source: number, item: { name: string; slot: number; count: number; metadata: Record<string, unknown> }) => unknown): void;
+  RegisterStash(name: string, label: string, slots: number, maxWeight: number, jobs?: string[], personal?: boolean): void;
+  OpenInventory(source: number, inv: number | string): boolean;
+};
+
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
@@ -110,5 +122,6 @@ declare global {
     "ai-core": AiCoreExports;
     "ai-target": AiTargetClientExports;
     "ai-vehicles": AiVehiclesServerExports;
+    "ai-inventory": AiInventoryServerExports;
   }
 }
