@@ -48,6 +48,7 @@ export { RateLimit, SourceLock } from "./rateLimit";
 export { DataFile } from "./dataFile";
 export { AdminPanel } from "./admin/panel";
 export { aiLog, aiLogChannels } from "./log";
+export { notify } from "./notify";
 export { onClientCallback, triggerClientCallback } from "./callback";
 export { onClientEvent } from "./netEvent";
 export { ClientGate, hasCharacter, isAdmin, near, type ClientInputOptions, type Guard, type ParsedInputOptions } from "./gate";

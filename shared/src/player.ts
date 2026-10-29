@@ -101,3 +101,14 @@ export interface AiPlayerData {
   gangs: GangMembership[];
   activeGang: string | null;
 }
+
+export type NotificationKind = "success" | "error" | "info" | "warning";
+
+/** A notification card (ai-core draws it); texts are already translated by the sender. */
+export interface Notification {
+  text: string;
+  title?: string;
+  kind: NotificationKind;
+  /** Milliseconds on screen (default 4000). */
+  duration?: number;
+}

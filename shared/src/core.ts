@@ -38,6 +38,9 @@ export const CORE = {
   deleteCharacterCallback: "ai-core:deleteCharacter",
   selectCharacterCallback: "ai-core:selectCharacter",
 
+  /** Server -> client: (notification: Notification) a notification card on the player's screen. */
+  clientNotifyEvent: "ai-core:client:notify",
+
   /** Server -> client: (spawn: SpawnPoint) puts the loaded character into the world. */
   spawnEvent: "ai-core:client:spawn",
   /** Server -> client: () the character was let go (switch); show the character screen again. */
