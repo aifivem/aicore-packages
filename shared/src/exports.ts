@@ -2,6 +2,7 @@ import type { AdminDelta } from "./admin";
 import type { LogChannel, LogOptions } from "./logs";
 import type { AiPlayerData, CharacterInfo, GangMembership, JobMembership, Notification } from "./player";
 import type { AiVehiclesServerExports } from "./vehicles";
+import type { InputRequest, MenuRequest } from "./menu";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -94,6 +95,10 @@ export type AiCoreClientExports = {
   /** Shows the progress bar for `duration` ms (the calling resource runs the action and its animation). */
   ShowProgress(label: string, duration: number): void;
   HideProgress(): void;
+  /** Shows a menu for the calling resource; the pick arrives as `MENU_EVENTS.menuResult`. */
+  OpenMenu(requestId: number, request: MenuRequest): void;
+  /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */
+  OpenInput(requestId: number, request: InputRequest): void;
 };
 
 /** ai-target's client exports that ai-core uses. */

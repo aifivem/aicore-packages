@@ -5,3 +5,4 @@ export type * from "./logs";
 export type * from "./exports";
 export * from "./admin";
 export * from "./vehicles";
+export * from "./menu";
