@@ -142,6 +142,18 @@ export type AiVehicleKeysServerExports = {
   RemoveKeys(source: number, vehicle: number | string): void;
 };
 
+/** ai-police's server exports. */
+export type AiPoliceServerExports = {
+  /** A translated alert text at a place, to on-duty officers (blip + notification). */
+  SendAlert(x: number, y: number, z: number, text: string): void;
+};
+
+/** ai-doorlock's server exports (doors by panel id). */
+export type AiDoorlockServerExports = {
+  SetDoorState(id: string, locked: boolean): void;
+  IsLocked(id: string): boolean;
+};
+
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
@@ -152,6 +164,8 @@ declare global {
     "ai-vehicles": AiVehiclesServerExports;
     "ai-vehiclekeys": AiVehicleKeysServerExports;
     "ai-radialmenu": AiRadialClientExports;
+    "ai-police": AiPoliceServerExports;
+    "ai-doorlock": AiDoorlockServerExports;
     "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
   }
 }
