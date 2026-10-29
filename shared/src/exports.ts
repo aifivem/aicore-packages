@@ -123,6 +123,18 @@ export type AiInventoryServerExports = {
   ClearInventory(inv: number | string): void;
 };
 
+/** ai-inventory's client exports other ai-* resources use. */
+export type AiInventoryClientExports = {
+  /** Opens the player's own inventory screen (with the ground / trunk / glovebox around). */
+  OpenSelf(): void;
+};
+
+/** ai-radialmenu's client exports: items on the wheel (removed when the adding resource stops). */
+export type AiRadialClientExports = {
+  AddItem(item: { id: string; label: string; icon?: string; onSelect?: () => void }): void;
+  RemoveItem(id: string): void;
+};
+
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
@@ -131,6 +143,7 @@ declare global {
     "ai-core": AiCoreExports;
     "ai-target": AiTargetClientExports;
     "ai-vehicles": AiVehiclesServerExports;
-    "ai-inventory": AiInventoryServerExports;
+    "ai-radialmenu": AiRadialClientExports;
+    "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
   }
 }
