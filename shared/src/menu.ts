@@ -28,6 +28,8 @@ export interface InputRequest {
 export const MENU_EVENTS = {
   /** Client local: (resource, requestId, itemId | null) the player picked an item or closed the menu. */
   menuResult: "ai-core:client:menuResult",
+  /** Client local: (resource, requestId, itemId) the pointer or focus is on an item (previews). */
+  menuHover: "ai-core:client:menuHover",
   /** Client local: (resource, requestId, values | null) the player confirmed or closed the input dialog. */
   inputResult: "ai-core:client:inputResult",
 } as const;
