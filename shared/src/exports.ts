@@ -135,6 +135,13 @@ export type AiRadialClientExports = {
   RemoveItem(id: string): void;
 };
 
+/** ai-vehiclekeys' server exports: a vehicle is an entity or a plate. */
+export type AiVehicleKeysServerExports = {
+  HasKeys(source: number, vehicle: number | string): boolean;
+  GiveKeys(source: number, vehicle: number | string): void;
+  RemoveKeys(source: number, vehicle: number | string): void;
+};
+
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
@@ -143,6 +150,7 @@ declare global {
     "ai-core": AiCoreExports;
     "ai-target": AiTargetClientExports;
     "ai-vehicles": AiVehiclesServerExports;
+    "ai-vehiclekeys": AiVehicleKeysServerExports;
     "ai-radialmenu": AiRadialClientExports;
     "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
   }
