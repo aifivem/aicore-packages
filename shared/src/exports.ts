@@ -115,6 +115,7 @@ export type AiInventoryServerExports = {
   RegisterUsableItem(name: string, handler: (source: number, item: { name: string; slot: number; count: number; metadata: Record<string, unknown> }) => unknown): void;
   RegisterStash(name: string, label: string, slots: number, maxWeight: number, jobs?: string[], personal?: boolean): void;
   OpenInventory(source: number, inv: number | string): boolean;
+  ClearInventory(inv: number | string): void;
 };
 
 /** Both sides share the resource key; a caller uses the half of its own side. */
