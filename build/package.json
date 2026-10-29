@@ -1,0 +1,22 @@
+{
+  "name": "@aicore-fivem/build",
+  "version": "0.1.0",
+  "description": "Build steps every ai-core resource runs after tsdown.",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "bin": {
+    "aicore-client-errors": "./clientErrors.ts"
+  },
+  "files": [
+    "*.ts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@aicore-fivem/shared": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

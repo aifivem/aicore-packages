@@ -1,0 +1,31 @@
+{
+  "name": "@aicore-fivem/lib",
+  "version": "0.1.0",
+  "description": "Helpers every ai-core resource uses: logging, exports, rate limits, database tables.",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "exports": {
+    "./shared": "./src/shared/index.ts",
+    "./fivem": "./src/fivem/index.ts",
+    "./server": "./src/server/index.ts",
+    "./client": "./src/client/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@aicore-fivem/shared": "^0.1.0",
+    "@aicore-fivem/mysql": "^0.1.0"
+  },
+  "devDependencies": {
+    "@citizenfx/client": "latest",
+    "@citizenfx/server": "latest",
+    "@types/node": "^22"
+  },
+  "scripts": {
+    "bench": "bun bench/zones.bench.ts"
+  }
+}
