@@ -4,3 +4,4 @@ export type * from "./player";
 export type * from "./logs";
 export type * from "./exports";
 export * from "./admin";
+export * from "./vehicles";

@@ -26,6 +26,7 @@ export { Zones, type ZoneOptions, type ZoneShape } from "./zones";
 export { cache, onCache, readPlayerState } from "./cache";
 export { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 export { notify, progress, type ProgressOptions } from "./notify";
+export { getVehicleProps, setVehicleProps } from "./vehicleProps";
 export { getPlayerData, onPlayerData, seedPlayerData } from "./playerData";
 export { Keybind, type KeybindOptions } from "./keybind";
 export { requestAnimDict, requestModel, requestPtfxAsset } from "./streaming";

@@ -2,6 +2,7 @@
 
 export { sleep, waitFor } from "./wait";
 export { bool, int, num, record, str, vec4, type Vec4 } from "./read";
+export { toVehicleProps, type VehicleProps } from "./vehicleProps";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

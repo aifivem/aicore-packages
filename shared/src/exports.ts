@@ -1,6 +1,7 @@
 import type { AdminDelta } from "./admin";
 import type { LogChannel, LogOptions } from "./logs";
 import type { AiPlayerData, CharacterInfo, GangMembership, JobMembership, Notification } from "./player";
+import type { AiVehiclesServerExports } from "./vehicles";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -108,5 +109,6 @@ declare global {
   interface CitizenExports {
     "ai-core": AiCoreExports;
     "ai-target": AiTargetClientExports;
+    "ai-vehicles": AiVehiclesServerExports;
   }
 }
