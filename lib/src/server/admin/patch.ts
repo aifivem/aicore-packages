@@ -22,6 +22,14 @@ export function toPatch(value: unknown): AdminPatch | null {
         : null;
     case "delete":
       return key ? { file: value.file, action: "delete", key } : null;
+    case "import": {
+      if (!isRecord(value.records)) return null;
+      const records: Record<string, Record<string, unknown>> = {};
+      for (const [k, v] of Object.entries(value.records)) if (isRecord(v)) records[k] = v;
+      return Object.keys(records).length > 0 && Object.keys(records).length <= 500
+        ? { file: value.file, action: "import", records }
+        : null;
+    }
     default:
       return null;
   }

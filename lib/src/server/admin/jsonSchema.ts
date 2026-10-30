@@ -14,13 +14,18 @@ type Descriptions = Map<string, string>;
 
 const SCHEMA_KEY = { type: "string", description: "This file's JSON Schema (for editors)." };
 
-function texts(resource: string): Record<string, string> {
+function langFile(resource: string): Record<string, string> {
   try {
     const raw: unknown = JSON.parse(LoadResourceFile(resource, "locales/en.json") ?? "{}");
     return isRecord(raw) ? Object.fromEntries(Object.entries(raw).filter((e): e is [string, string] => typeof e[1] === "string")) : {};
   } catch {
     return {};
   }
+}
+
+/** The script's texts over ai-core's generic panel texts (shared fields such as a place's NPC use those). */
+function texts(resource: string): Record<string, string> {
+  return { ...langFile("ai-core"), ...langFile(resource) };
 }
 
 function collect(fields: WidgetSpec[], prefix: string, lang: Record<string, string>, out: Descriptions): void {

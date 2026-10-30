@@ -109,7 +109,7 @@ export type AiCoreServerExports = {
   RegisterCommands(resource: string, commands: CommandInfo[]): void;
 
   /** Values of a lookup list (items of the active inventory, jobs, gangs, accounts) for the admin panel's validation. */
-  GetLookupValues(source: "item" | "job" | "gang" | "account" | "resource"): string[];
+  GetLookupValues(source: import("./admin").LookupSource): string[];
   /** Lists another script's own settings screen on the dashboard (opened by `command` or embedded `url`). */
   RegisterExternalPanel(panel: {
     id?: string;

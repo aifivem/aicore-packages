@@ -26,6 +26,17 @@ type Rule = (key: string | undefined, next: Data) => string | null;
 
 const DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
 
+/** An imported record: only the file's sections, a section it lacks taken from the new-record template. */
+function imported(spec: FileSpec, value: Record<string, unknown>): Record<string, unknown> {
+  const base = clone(spec.newRecord ?? {});
+  const out: Record<string, unknown> = {};
+  for (const name of Object.keys(spec.sections)) {
+    const v = name in value ? value[name] : base[name];
+    if (v !== undefined) out[name] = clone(v);
+  }
+  return out;
+}
+
 /**
  * A resource's panel content: loads `data/<file>.json` once, keeps it in memory, validates every panel edit against
  * the schema, saves it (atomic, debounced), tells its own code, ai-core (open panels) and, for `sync: "all"` files,
@@ -119,6 +130,21 @@ export class AdminPanel {
       if (spec.kind !== "records" || !(patch.key in data)) return ERR.type;
       return spec.locked?.includes(patch.key) ? "ADMIN_ERR_LOCKED" : null;
     }
+    if (patch.action === "import") {
+      if (spec.kind !== "records") return ERR.type;
+      const pattern = new RegExp(spec.keyPattern ?? DEFAULT_KEY);
+      for (const [key, value] of Object.entries(patch.records)) {
+        if (!pattern.test(key)) return ERR.pattern;
+        const record = imported(spec, value);
+        for (const [name, section] of Object.entries(spec.sections)) {
+          const refusal = validate(section, record[name], name);
+          if (refusal) return refusal.error;
+        }
+        const ruled = this.rules.get(patch.file)?.(key, record);
+        if (ruled) return ruled;
+      }
+      return null;
+    }
     const section = spec.sections[patch.section];
     if (!section) return ERR.type;
     if (spec.kind === "records" && (!patch.key || !(patch.key in data)))
@@ -141,6 +167,11 @@ export class AdminPanel {
       data[patch.key] = record;
     } else if (patch.action === "delete") {
       delete data[patch.key];
+    } else if (patch.action === "import") {
+      for (const [key, value] of Object.entries(patch.records)) data[key] = imported(spec, value);
+      this.data.set(patch.file, data);
+      for (const key of Object.keys(patch.records)) this.changed(patch.file, key);
+      return;
     } else {
       const target = spec.kind === "records" ? data[patch.key ?? ""] : data;
       if (!isRecord(target)) return;
