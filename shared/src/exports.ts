@@ -16,6 +16,8 @@ import type {
 } from "./inventory";
 import type { VehicleKeysServerExports } from "./vehicleKeys";
 import type { PhoneServerExports } from "./phone";
+import type { DispatchAlert, DispatchServerExports } from "./dispatch";
+import type { RadialClientExports, RadialItem } from "./radial";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -170,7 +172,8 @@ export type AiCoreServerExports = {
   ): boolean;
 } & InventoryServerExports &
   VehicleKeysServerExports &
-  PhoneServerExports;
+  PhoneServerExports &
+  DispatchServerExports;
 
 /** ai-core's client exports. */
 export type AiCoreClientExports = {
@@ -213,7 +216,8 @@ export type AiCoreClientExports = {
   /** The local player has the hands up / points, in whichever emote script runs. */
   IsHandsUp(): boolean;
   IsPointing(): boolean;
-} & InventoryClientExports;
+} & InventoryClientExports &
+  RadialClientExports;
 
 /** ai-target's client exports that ai-core uses. */
 export type AiTargetClientExports = {
@@ -313,15 +317,15 @@ export type AiAppearanceClientExports = {
   ApplyCharacterAppearance(ped: number, charId: number): boolean;
 };
 
-/** ai-radialmenu's client exports: items on the wheel (removed when the adding resource stops). */
+/**
+ * ai-radialmenu's own client exports (ai-core's radial layer calls them; scripts use lib `radial`). Items are removed
+ * when the adding resource stops; `onSelect` is the older name of `onPressed`.
+ */
 export type AiRadialClientExports = {
-  AddItem(item: {
-    id: string;
-    label: string;
-    icon?: string;
-    onSelect?: () => void;
-  }): void;
-  RemoveItem(id: string): void;
+  AddItem(item: RadialItem & { onSelect?: () => void }): void;
+  RemoveItem(id: string, parent?: string): void;
+  /** Reads every `canShow` of an open wheel again. */
+  Refresh(): void;
 };
 
 /** ai-vehiclekeys' server exports: a vehicle is an entity or a plate. */
@@ -340,10 +344,10 @@ export type AiDeathServerExports = {
   Heal(source: number): void;
 };
 
-/** ai-police's server exports. */
-export type AiPoliceServerExports = {
-  /** A translated alert text at a place, to on-duty officers (blip + notification). */
-  SendAlert(x: number, y: number, z: number, text: string): void;
+/** ai-policealert's server exports. */
+export type AiPoliceAlertServerExports = {
+  /** ai-core's dispatch layer hands an alert to the built-in alert cards (scripts call lib `dispatch`). */
+  DispatchAlert(alert: DispatchAlert): void;
 };
 
 /** ai-doorlock's server exports (doors by panel id). */
@@ -377,7 +381,7 @@ declare global {
     "ai-vehiclekeys": AiVehicleKeysServerExports;
     "ai-death": AiDeathServerExports;
     "ai-radialmenu": AiRadialClientExports;
-    "ai-police": AiPoliceServerExports;
+    "ai-policealert": AiPoliceAlertServerExports;
     "ai-doorlock": AiDoorlockServerExports;
     "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
     "ai-smallresources": AiSmallResourcesClientExports;

@@ -73,6 +73,8 @@ export class Keybind {
   /** The mapping command in use; earlier ones (older keys) stay registered but do nothing. */
   private command = "";
   private readonly registered = new Set<string>();
+  /** The key the current mapping was registered with. */
+  private boundKey = "";
 
   constructor(private readonly options: KeybindOptions) {
     this.name = options.name;
@@ -98,6 +100,7 @@ export class Keybind {
     const command = key ? `${this.name}_${key}` : this.name;
     if (command === this.command) return;
     this.command = command;
+    this.boundKey = key;
     if (this.registered.has(command)) {
       this.hash = GetHashKey(`+${command}`) | 0x80000000;
       return;
@@ -143,11 +146,14 @@ export class Keybind {
     return this.pressed;
   }
 
-  /** The key the player has bound right now, for HUD hints ("" until the mapping is registered). */
+  /**
+   * The key the player has bound right now, for HUD hints and NUI close keys ("" until the mapping is registered).
+   * GTA names keys with a picture (F1-F12, Tab...) by an icon code (`b_171`): those give the registered key instead.
+   */
   get currentKey(): string {
-    return this.hash
-      ? GetControlInstructionalButton(0, this.hash, true).substring(2)
-      : "";
+    if (!this.hash) return "";
+    const button = GetControlInstructionalButton(0, this.hash, true);
+    return button.startsWith("t_") ? button.slice(2) : this.boundKey;
   }
 
   disable(disabled: boolean): void {

@@ -53,3 +53,4 @@ export { hud } from "./hud";
 export { world } from "./world";
 export { gestures } from "./gestures";
 export { keyHints } from "./keyHints";
+export { radial } from "./radial";

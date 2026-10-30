@@ -103,7 +103,7 @@ export type WidgetSpec = WidgetBase &
         lookup?: LookupSource;
         /** Pick a record of another `records` file of this panel by its label (the data spec carries the same `records`). */
         records?: string;
-        /** Name suggestions as buttons: street and zone names at the point at `from` (a path in the same record), else at the admin. */
+        /** Name suggestions (a button inside the box lists them): street and zone names at the point at `from` (a path in the same record), else at the admin. */
         suggest?: { from?: string };
       }
     | {
@@ -181,6 +181,8 @@ interface WidgetBase {
   label: string;
   /** Lang key of a one-sentence hint (unit, rule, what it does in game). */
   hint?: string;
+  /** Shown only while the value at `path` (same record or settings section) is one of `values` (a door's second leaf for double doors). */
+  showIf?: { path: string; values: Array<string | number | boolean> };
 }
 
 export interface CardSpec {
