@@ -66,7 +66,12 @@ export { notify } from "./notify";
 export { inventory } from "./inventory";
 export { online } from "./online";
 export { vehicleKeys } from "./vehicleKeys";
-export { spawnVehicle, vehicleType, type SpawnVehicleOptions } from "./vehicle";
+export {
+  nearestVehicleTo,
+  spawnVehicle,
+  vehicleType,
+  type SpawnVehicleOptions,
+} from "./vehicle";
 export { playersNear, playersNearEntity } from "./proximity";
 export {
   addCommand,
@@ -96,4 +101,9 @@ export {
 } from "../fivem/exports";
 export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "../fivem/locale";
 export { EntityState, GlobalGroup, GlobalKey, PlayerState } from "./state";
-export { stateBoolean, stateNumber, stateString, type StateParse } from "../fivem/state";
+export {
+  stateBoolean,
+  stateNumber,
+  stateString,
+  type StateParse,
+} from "../fivem/state";

@@ -77,4 +77,9 @@ export function withoutSchemaKey(value: unknown): unknown {
   const { $schema: _schema, ...rest } = value;
   return rest;
 }
-export { PLACE_PED_SPEC, placePedFields, readPlacePed, type PlacePed } from "./placePed";
+export {
+  PLACE_PED_SPEC,
+  placePedFields,
+  readPlacePed,
+  type PlacePed,
+} from "./placePed";

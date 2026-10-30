@@ -98,3 +98,19 @@ export async function spawnVehicle(
     vehicleKeys.give(options.keysTo, vehicle, options.purpose ?? "temporary");
   return vehicle;
 }
+
+/** The closest vehicle within `metres` of a player (the one the player sits in first); 0 when none. Walks every vehicle: for commands and actions, not ticks. */
+export function nearestVehicleTo(source: number, metres: number): number {
+  const ped = GetPlayerPed(String(source));
+  const own = GetVehiclePedIsIn(ped, false);
+  if (own) return own;
+  const [x = 0, y = 0, z = 0] = GetEntityCoords(ped);
+  let best = 0;
+  let bestDistance = metres;
+  for (const vehicle of GetAllVehicles() as number[]) {
+    const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle);
+    const d = Math.hypot(vx - x, vy - y, vz - z);
+    if (d < bestDistance) [best, bestDistance] = [vehicle, d];
+  }
+  return best;
+}

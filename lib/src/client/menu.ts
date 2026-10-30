@@ -50,7 +50,8 @@ const requests = new Requests();
 
 /**
  * Shows ai-core's menu and resolves with the picked item id, or null when the player closed it; `onHover` hears the
- * item under the pointer or focus (live previews).
+ * item under the pointer or focus (live previews). Arrows move, Enter picks; in a sub menu (`back: true`) a short
+ * Escape resolves `MENU_BACK` and holding Escape closes (null).
  */
 export function menu(
   request: MenuRequest,

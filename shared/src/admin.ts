@@ -12,7 +12,15 @@
  * and the admin game's (`vehicle`: every vehicle model it has, addons included; `ped`: GTA's ped models). The server
  * cannot list game models, so those two never refuse a value.
  */
-export type LookupSource = "item" | "job" | "gang" | "account" | "resource" | "player" | "vehicle" | "ped";
+export type LookupSource =
+  | "item"
+  | "job"
+  | "gang"
+  | "account"
+  | "resource"
+  | "player"
+  | "vehicle"
+  | "ped";
 
 /** One choice of a lookup list. */
 export interface LookupOption {
@@ -126,7 +134,11 @@ export type WidgetSpec = WidgetBase &
     /** A map blip `{ sprite, color, scale }` (data: an object of three numbers): picture grid, colour swatches, size. */
     | { widget: "blip" }
     /** A game model name (data: text): a search over the game's models with pictures; a typed addon name is kept. */
-    | { widget: "model"; kind: "vehicle" | "ped" | "object"; placeholder?: string }
+    | {
+        widget: "model";
+        kind: "vehicle" | "ped" | "object";
+        placeholder?: string;
+      }
     /** A colour (data: text `#rrggbb`): swatch, hex box, preset colours. */
     | { widget: "color" }
     /** A world object picked with the free camera (data at `path`: vec3 of the object; its model name goes to `modelPath`). Doors, props. */
@@ -214,7 +226,11 @@ export type AdminPatch =
   | { file: string; action: "create"; key: string; label: string }
   | { file: string; action: "delete"; key: string }
   /** Whole records from the panel's JSON import (all or none): added, or put in place of the records with those keys. */
-  | { file: string; action: "import"; records: Record<string, Record<string, unknown>> };
+  | {
+      file: string;
+      action: "import";
+      records: Record<string, Record<string, unknown>>;
+    };
 
 export type AdminResult = { ok: true } | { ok: false; error: string };
 
@@ -244,6 +260,8 @@ export interface ExternalPanel {
 /** A script whose GitHub release is newer than the version running (ai-core's update check). */
 export interface UpdateInfo {
   resource: string;
+  /** The name people know it by (`monitor` is txAdmin). */
+  label: string;
   current: string;
   latest: string;
   url: string;

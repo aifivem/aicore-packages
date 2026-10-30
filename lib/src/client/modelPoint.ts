@@ -1,5 +1,11 @@
 import { cache } from "./cache";
-import { readAllowed, readLabel, runPress, target, type Style } from "./interact";
+import {
+  readAllowed,
+  readLabel,
+  runPress,
+  target,
+  type Style,
+} from "./interact";
 import { hidePrompt, showPrompt } from "./prompt";
 
 export interface ModelPointOptions {
@@ -46,7 +52,9 @@ export class ModelPoint {
     readonly promptId: string,
     readonly options: ModelPointOptions,
   ) {
-    this.hashes = options.models.map((m) => (typeof m === "number" ? m : GetHashKey(m)));
+    this.hashes = options.models.map((m) =>
+      typeof m === "number" ? m : GetHashKey(m),
+    );
   }
 
   attach(mode: Style): void {
@@ -59,7 +67,10 @@ export class ModelPoint {
           distance: this.options.radius ?? 1.5,
           canInteract: () => readAllowed(this.options.canShow),
           onSelect: (data: unknown) => {
-            const entity = typeof data === "object" && data !== null ? Reflect.get(data, "entity") : 0;
+            const entity =
+              typeof data === "object" && data !== null
+                ? Reflect.get(data, "entity")
+                : 0;
             this.run(typeof entity === "number" ? entity : 0);
           },
         },
@@ -72,7 +83,8 @@ export class ModelPoint {
   }
 
   detach(targetRunning: boolean): void {
-    if (this.attached && targetRunning) target("removeModel", this.options.models, this.promptId);
+    if (this.attached && targetRunning)
+      target("removeModel", this.options.models, this.promptId);
     this.attached = false;
     scanning.delete(this);
     schedule();
@@ -84,11 +96,24 @@ export class ModelPoint {
     const radius = this.options.radius ?? 1.5;
     let found = 0;
     for (const hash of this.hashes) {
-      found = GetClosestObjectOfType(x, y, z, radius, hash, false, false, false);
+      found = GetClosestObjectOfType(
+        x,
+        y,
+        z,
+        radius,
+        hash,
+        false,
+        false,
+        false,
+      );
       if (found) break;
     }
     this.entity = found;
-    this.show(found && readAllowed(this.options.canShow) ? readLabel(this.options.label) : null);
+    this.show(
+      found && readAllowed(this.options.canShow)
+        ? readLabel(this.options.label)
+        : null,
+    );
   }
 
   press(): void {

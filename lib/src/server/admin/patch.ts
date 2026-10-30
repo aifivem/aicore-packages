@@ -25,8 +25,10 @@ export function toPatch(value: unknown): AdminPatch | null {
     case "import": {
       if (!isRecord(value.records)) return null;
       const records: Record<string, Record<string, unknown>> = {};
-      for (const [k, v] of Object.entries(value.records)) if (isRecord(v)) records[k] = v;
-      return Object.keys(records).length > 0 && Object.keys(records).length <= 500
+      for (const [k, v] of Object.entries(value.records))
+        if (isRecord(v)) records[k] = v;
+      return Object.keys(records).length > 0 &&
+        Object.keys(records).length <= 500
         ? { file: value.file, action: "import", records }
         : null;
     }

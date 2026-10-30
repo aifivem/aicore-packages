@@ -39,6 +39,8 @@ export const CORE = {
   clientPromptPressedEvent: "ai-core:client:promptPressed",
   /** (key: keyof PlayerCache, value) a cached value of the local player changed (one watcher in ai-core for every resource). */
   clientCacheEvent: "ai-core:client:cache",
+  /** Client local event: (visible: boolean) HUDs show or hide (a full-screen UI opened or closed; lib `hud`). */
+  clientHudVisibleEvent: "ai-core:client:hudVisible",
   /** Server -> client callback: (model: string) the `CreateVehicleServerSetter` type of a model, null when the game has no such vehicle (ai-core's client answers for every resource, lib `spawnVehicle`). */
   vehicleTypeCallback: "ai-core:vehicleType",
   /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */
@@ -61,7 +63,8 @@ export const CORE = {
 
 /** GlobalState key holding how many players are on duty in a job (counts only, never member lists). */
 export const DUTY_COUNT_PREFIX = "ai:duty:";
-export const dutyCountKey = (job: string): string => `${DUTY_COUNT_PREFIX}${job}`;
+export const dutyCountKey = (job: string): string =>
+  `${DUTY_COUNT_PREFIX}${job}`;
 
 /** GlobalState key holding the resource name of the active inventory (null while none runs). */
 export const INVENTORY_STATE_KEY = "ai:inventory";

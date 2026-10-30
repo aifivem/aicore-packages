@@ -170,6 +170,10 @@ export type AiCoreClientExports = {
   /** Shows (or updates) the calling resource's prompt `id` on the right of the screen. */
   ShowPrompt(id: string, text: string): void;
   HidePrompt(id: string): void;
+  /** Hides every HUD while any reason holds (the calling resource's reasons go when it stops). */
+  HideHud(reason: string): void;
+  ShowHud(reason: string): void;
+  IsHudVisible(): boolean;
   Notify(notification: Notification): void;
   /** Shows the progress bar for `duration` ms (the calling resource runs the action and its animation). */
   ShowProgress(label: string, duration: number): void;

@@ -27,7 +27,10 @@ type Rule = (key: string | undefined, next: Data) => string | null;
 const DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
 
 /** An imported record: only the file's sections, a section it lacks taken from the new-record template. */
-function imported(spec: FileSpec, value: Record<string, unknown>): Record<string, unknown> {
+function imported(
+  spec: FileSpec,
+  value: Record<string, unknown>,
+): Record<string, unknown> {
   const base = clone(spec.newRecord ?? {});
   const out: Record<string, unknown> = {};
   for (const name of Object.keys(spec.sections)) {
@@ -168,9 +171,11 @@ export class AdminPanel {
     } else if (patch.action === "delete") {
       delete data[patch.key];
     } else if (patch.action === "import") {
-      for (const [key, value] of Object.entries(patch.records)) data[key] = imported(spec, value);
+      for (const [key, value] of Object.entries(patch.records))
+        data[key] = imported(spec, value);
       this.data.set(patch.file, data);
-      for (const key of Object.keys(patch.records)) this.changed(patch.file, key);
+      for (const key of Object.keys(patch.records))
+        this.changed(patch.file, key);
       return;
     } else {
       const target = spec.kind === "records" ? data[patch.key ?? ""] : data;
@@ -211,7 +216,12 @@ export class AdminPanel {
     const file = new DataFile(this.resource, name, this.log);
     this.dataFiles.set(name, file);
     file.schemaRef = `./schemas/${name}.schema.json`;
-    writeSchema(this.resource, name, fileSchema(this.resource, this.schema, name, spec), this.log);
+    writeSchema(
+      this.resource,
+      name,
+      fileSchema(this.resource, this.schema, name, spec),
+      this.log,
+    );
     const raw = file.read();
     const data: Data = isRecord(raw) ? raw : {};
     let filled = false;

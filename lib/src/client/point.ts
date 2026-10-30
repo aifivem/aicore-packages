@@ -1,11 +1,19 @@
 import { isResourceStarted } from "../fivem/exports";
-import { onStyleChange, readAllowed, readLabel, runPress, style, target, TARGET, type Style } from "./interact";
+import {
+  onStyleChange,
+  readAllowed,
+  readLabel,
+  runPress,
+  style,
+  target,
+  TARGET,
+  type Style,
+} from "./interact";
 import { Blips, type BlipOptions } from "./blip";
 import { LocalPed, type LocalPedOptions } from "./localPed";
 import { ModelPoint, type ModelPointOptions } from "./modelPoint";
 import { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 import { Zones } from "./zones";
-
 
 interface Vec3 {
   x: number;
@@ -200,7 +208,8 @@ export class Points {
   }
 
   clear(): void {
-    for (const id of [...this.points.keys(), ...this.modelPoints.keys()]) this.remove(id);
+    for (const id of [...this.points.keys(), ...this.modelPoints.keys()])
+      this.remove(id);
   }
 
   /**
@@ -210,6 +219,15 @@ export class Points {
   refresh(id?: string): void {
     const mode = style();
     const one = id !== undefined ? this.points.get(id) : undefined;
+    if (mode === "target")
+      for (const [mid, model] of this.modelPoints)
+        if (
+          (id === undefined || id === mid) &&
+          typeof model.options.label === "function"
+        ) {
+          model.detach(true);
+          model.attach(mode);
+        }
     for (const point of one
       ? [one]
       : id === undefined

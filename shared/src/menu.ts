@@ -12,7 +12,12 @@ export interface MenuItem {
 export interface MenuRequest {
   title: string;
   items: MenuItem[];
+  /** A sub menu: a short Escape answers `MENU_BACK` (the caller opens the menu before), holding Escape closes. */
+  back?: boolean;
 }
+
+/** What `menu()` resolves with when the player goes back from a sub menu (`back: true`). */
+export const MENU_BACK = "__back";
 
 export type InputField =
   | {

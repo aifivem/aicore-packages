@@ -17,11 +17,11 @@ export interface KeybindOptions {
 }
 
 const resource = GetCurrentResourceName();
-/** Keybinds of this resource waiting for ai-core's answer (the panel's default key, else their own). */
-const waiting = new Map<string, (key: string) => void>();
+/** This resource's keybinds by name: ai-core answers each with its key at start and again when the panel changes it. */
+const keybinds = new Map<string, (key: string) => void>();
 let listening = false;
 
-/** Asks ai-core's client for the default key (it knows the panel's keybind defaults); without ai-core the script's own. */
+/** Asks ai-core's client for the key (it knows the panel's keybind defaults); without ai-core the script's own. */
 function requestKey(info: KeybindInfo, apply: (key: string) => void): void {
   // ai-core's own keybinds are made while it is still "starting".
   if (resource !== CORE.resource && !isResourceStarted(CORE.resource))
@@ -30,23 +30,22 @@ function requestKey(info: KeybindInfo, apply: (key: string) => void): void {
     listening = true;
     on(KEYBIND.keyEvent, (owner: unknown, name: unknown, key: unknown) => {
       if (
-        owner !== resource ||
-        typeof name !== "string" ||
-        typeof key !== "string"
+        owner === resource &&
+        typeof name === "string" &&
+        typeof key === "string"
       )
-        return;
-      const done = waiting.get(name);
-      waiting.delete(name);
-      done?.(key);
+        keybinds.get(name)?.(key);
     });
   }
-  waiting.set(info.name, apply);
+  let answered = false;
+  keybinds.set(info.name, (key) => {
+    answered = true;
+    apply(key);
+  });
   emit(KEYBIND.announceEvent, info);
   // ai-core answers once it knows the panel values (one server round trip at most); never leave a key unbound.
   setTimeout(() => {
-    if (waiting.get(info.name) !== apply) return;
-    waiting.delete(info.name);
-    apply(info.defaultKey);
+    if (!answered) apply(info.defaultKey);
   }, 15_000);
 }
 
@@ -60,6 +59,9 @@ export class Keybind {
   private disabled: boolean;
   private pressed = false;
   private hash = 0;
+  /** The mapping command in use; earlier ones (older keys) stay registered but do nothing. */
+  private command = "";
+  private readonly registered = new Set<string>();
 
   constructor(private readonly options: KeybindOptions) {
     this.name = options.name;
@@ -74,11 +76,30 @@ export class Keybind {
     requestKey(info, (key) => this.register(key.toUpperCase()));
   }
 
+  /**
+   * Registers the mapping of a key; a later key (a panel change) registers its own mapping and the old one stops
+   * acting. FiveM keeps every registered mapping and the player's binding per command, so the key is in the name.
+   */
   private register(key: string): void {
     const command = key ? `${this.name}_${key}` : this.name;
+    if (command === this.command) return;
+    this.command = command;
+    if (this.registered.has(command)) {
+      this.hash = GetHashKey(`+${command}`) | 0x80000000;
+      return;
+    }
+    this.registered.add(command);
     this.hash = GetHashKey(`+${command}`) | 0x80000000;
-    RegisterCommand(`+${command}`, () => this.press(true), false);
-    RegisterCommand(`-${command}`, () => this.press(false), false);
+    RegisterCommand(
+      `+${command}`,
+      () => command === this.command && this.press(true),
+      false,
+    );
+    RegisterCommand(
+      `-${command}`,
+      () => command === this.command && this.press(false),
+      false,
+    );
     RegisterKeyMapping(
       `+${command}`,
       this.options.description,

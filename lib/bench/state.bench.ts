@@ -11,14 +11,20 @@ const stored = new Map<string, string>();
 g.IsDuplicityVersion = () => true;
 g.on = () => undefined;
 g.setInterval = () => 0;
-g.AddStateBagChangeHandler = (_key: string, _bag: string, fn: Handler) => handlers.push(fn);
+g.AddStateBagChangeHandler = (_key: string, _bag: string, fn: Handler) =>
+  handlers.push(fn);
 g.GetEntityFromStateBagName = (bag: string) => Number(bag.slice(7));
 g.NetworkGetNetworkIdFromEntity = (entity: number) => entity;
 g.NetworkGetEntityIsNetworked = () => true;
 g.Entity = (entity: number) => ({
   state: new Proxy(
     {},
-    { get: (_t, k) => JSON.parse(stored.get(`entity:${entity}:${String(k)}`) ?? "null") as unknown },
+    {
+      get: (_t, k) =>
+        JSON.parse(
+          stored.get(`entity:${entity}:${String(k)}`) ?? "null",
+        ) as unknown,
+    },
   ),
 });
 
@@ -44,7 +50,9 @@ for (const n of [100_000, 1_000_000]) {
   let sum = 0;
   const raw = time(() => {
     for (let e = 1; e <= n; e++) {
-      const v: unknown = (g.Entity as (e: number) => { state: Record<string, unknown> })(e).state.fuel;
+      const v: unknown = (
+        g.Entity as (e: number) => { state: Record<string, unknown> }
+      )(e).state.fuel;
       if (typeof v === "number") sum += v;
     }
   });

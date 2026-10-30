@@ -10,9 +10,12 @@
 export type StateParse<T> = (value: unknown) => T | undefined;
 type Listener<I, T> = (id: I, value: T | undefined, old: T | undefined) => void;
 
-export const stateNumber: StateParse<number> = (v) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
-export const stateBoolean: StateParse<boolean> = (v) => (typeof v === "boolean" ? v : undefined);
-export const stateString: StateParse<string> = (v) => (typeof v === "string" ? v : undefined);
+export const stateNumber: StateParse<number> = (v) =>
+  typeof v === "number" && Number.isFinite(v) ? v : undefined;
+export const stateBoolean: StateParse<boolean> = (v) =>
+  typeof v === "boolean" ? v : undefined;
+export const stateString: StateParse<string> = (v) =>
+  typeof v === "string" ? v : undefined;
 
 const PRUNE_MS = 30_000;
 const isServer = IsDuplicityVersion();
@@ -41,7 +44,8 @@ abstract class Mirror<I, T> {
   protected apply(id: I, value: T | undefined): void {
     const old = this.values.get(id);
     this.values.set(id, value);
-    if (old !== value) for (const listener of this.listeners) listener(id, value, old);
+    if (old !== value)
+      for (const listener of this.listeners) listener(id, value, old);
   }
 }
 
@@ -52,13 +56,20 @@ export class EntityState<T> extends Mirror<number, T> {
 
   constructor(key: string, parse: StateParse<T>) {
     super(key, parse);
-    AddStateBagChangeHandler(key, "", (bag: string, _key: string, value: unknown) => {
-      if (!bag.startsWith("entity:")) return;
-      const netId = Number(bag.slice(7));
-      this.handles.set(netId, GetEntityFromStateBagName(bag));
-      this.store(netId, value);
-    });
-    if (isServer) on("entityRemoved", (entity: number) => this.forget(NetworkGetNetworkIdFromEntity(entity)));
+    AddStateBagChangeHandler(
+      key,
+      "",
+      (bag: string, _key: string, value: unknown) => {
+        if (!bag.startsWith("entity:")) return;
+        const netId = Number(bag.slice(7));
+        this.handles.set(netId, GetEntityFromStateBagName(bag));
+        this.store(netId, value);
+      },
+    );
+    if (isServer)
+      on("entityRemoved", (entity: number) =>
+        this.forget(NetworkGetNetworkIdFromEntity(entity)),
+      );
     else setInterval(() => this.prune(), PRUNE_MS);
   }
 
@@ -102,7 +113,9 @@ export class EntityState<T> extends Mirror<number, T> {
 
   /** Clients never hear about entities leaving their scope: drop the ones that no longer exist here. */
   private prune(): void {
-    for (const netId of this.values.keys()) if (!DoesEntityExist(NetworkGetEntityFromNetworkId(netId))) this.forget(netId);
+    for (const netId of this.values.keys())
+      if (!DoesEntityExist(NetworkGetEntityFromNetworkId(netId)))
+        this.forget(netId);
   }
 }
 
@@ -112,13 +125,18 @@ export class PlayerState<T> extends Mirror<number, T> {
 
   constructor(key: string, parse: StateParse<T>) {
     super(key, parse);
-    AddStateBagChangeHandler(key, "", (bag: string, _key: string, value: unknown) => {
-      if (!bag.startsWith("player:")) return;
-      const id = Number(bag.slice(7));
-      this.seen.add(id);
-      this.store(id, value);
-    });
-    if (isServer) on("playerDropped", () => this.forget(Number(globalThis.source)));
+    AddStateBagChangeHandler(
+      key,
+      "",
+      (bag: string, _key: string, value: unknown) => {
+        if (!bag.startsWith("player:")) return;
+        const id = Number(bag.slice(7));
+        this.seen.add(id);
+        this.store(id, value);
+      },
+    );
+    if (isServer)
+      on("playerDropped", () => this.forget(Number(globalThis.source)));
   }
 
   /** The value of a player by server id (the local player: `cache.serverId`). */
@@ -148,7 +166,12 @@ export class GlobalKey<T> extends Mirror<"global", T> {
     super(key, parse);
     const raw: unknown = GlobalState[key];
     this.values.set("global", raw == null ? undefined : parse(raw));
-    AddStateBagChangeHandler(key, "global", (_bag: string, _key: string, value: unknown) => this.store("global", value));
+    AddStateBagChangeHandler(
+      key,
+      "global",
+      (_bag: string, _key: string, value: unknown) =>
+        this.store("global", value),
+    );
   }
 
   get(): T | undefined {
@@ -171,9 +194,14 @@ function listenPrefix(prefix: string, listener: PrefixListener): void {
   set.add(listener);
   if (prefixHandler) return;
   prefixHandler = true;
-  AddStateBagChangeHandler("", "global", (_bag: string, key: string, value: unknown) => {
-    for (const [p, listeners] of prefixListeners) if (key.startsWith(p)) for (const l of listeners) l(key, value);
-  });
+  AddStateBagChangeHandler(
+    "",
+    "global",
+    (_bag: string, key: string, value: unknown) => {
+      for (const [p, listeners] of prefixListeners)
+        if (key.startsWith(p)) for (const l of listeners) l(key, value);
+    },
+  );
 }
 
 /** Many GlobalState keys with one prefix (`door:<id>`, `rob:<id>`), by the id after the prefix. */
@@ -187,9 +215,14 @@ export class GlobalGroup<T> extends Mirror<string, T> {
     for (const key of Array.isArray(keys) ? keys : []) {
       if (typeof key !== "string" || !key.startsWith(prefix)) continue;
       const raw: unknown = GlobalState[key];
-      this.values.set(key.slice(prefix.length), raw == null ? undefined : parse(raw));
+      this.values.set(
+        key.slice(prefix.length),
+        raw == null ? undefined : parse(raw),
+      );
     }
-    listenPrefix(prefix, (key, value) => this.store(key.slice(prefix.length), value));
+    listenPrefix(prefix, (key, value) =>
+      this.store(key.slice(prefix.length), value),
+    );
   }
 
   get(id: string): T | undefined {

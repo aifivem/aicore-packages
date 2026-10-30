@@ -10,11 +10,15 @@ export const TARGET = "ox_target";
 export const log = createLogger(GetCurrentResourceName());
 
 /** The ox_target API (ai-target answers it under that name). */
-export const target = (name: string, ...args: unknown[]) => callExport(TARGET, name, ...args);
+export const target = (name: string, ...args: unknown[]) =>
+  callExport(TARGET, name, ...args);
 
 const interaction = new GlobalKey(CORE.interactionStateKey, stateString);
 /** Prompt mode, or target mode when the owner picked it and a resource answers the ox_target API. */
-export const style = (): Style => (interaction.get() === "target" && isResourceStarted(TARGET) ? "target" : "prompt");
+export const style = (): Style =>
+  interaction.get() === "target" && isResourceStarted(TARGET)
+    ? "target"
+    : "prompt";
 export const onStyleChange = (fn: () => void) => interaction.onChange(fn);
 
 let busy = false;
@@ -30,7 +34,9 @@ export function runPress(allowed: () => boolean, action: () => unknown): void {
   }
   if (!(result instanceof Promise)) return;
   busy = true;
-  result.catch((error: unknown) => log.error("point onPressed failed", error)).finally(() => (busy = false));
+  result
+    .catch((error: unknown) => log.error("point onPressed failed", error))
+    .finally(() => (busy = false));
 }
 
 /** A label or a label function, read safely. */
