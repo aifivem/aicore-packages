@@ -84,6 +84,13 @@ export type AiCoreServerExports = {
   /** The lib's `addCommand` announces a resource's commands for the panel's Commands tab (dropped when it stops). */
   RegisterCommands(resource: string, commands: CommandInfo[]): void;
 
+  /** Adds a check every connecting player passes: return a refusal text, or null to let the player through. */
+  AddConnectionCheck(id: string, check: (source: number, identifiers: Record<string, string>) => string | null | undefined): void;
+  /** Declares that `keep` makes the `remove` resources unneeded (console warning, refused joins while both run). */
+  RegisterReplacement(keep: string, remove: string | string[]): void;
+  /** Scripts installed next to the one that replaces them; `running` = both started. */
+  GetConflicts(): { keep: string; remove: string; running: boolean; from: string }[];
+
   GetSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string): number | null;
   AddSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string, amount: number, reason?: string): boolean;
   RemoveSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string, amount: number, reason?: string): boolean;
