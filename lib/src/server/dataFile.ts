@@ -1,5 +1,5 @@
 import { copyFile, mkdir, rename, writeFile } from "node:fs/promises";
-import type { Logger } from "../shared";
+import { isRecord, withoutSchemaKey, type Logger } from "../shared";
 
 /** Bursts of admin edits are written once they settle. */
 const WRITE_DELAY_MS = 250;
@@ -15,11 +15,21 @@ export class DataFile {
   private pending: unknown = undefined;
   private timer: ReturnType<typeof setTimeout> | null = null;
 
+  /** `"$schema"` written as the file's first key (`./schemas/<name>.schema.json`), never part of the data. */
+  schemaRef: string | null = null;
+
   constructor(
     private readonly resource: string,
     private readonly name: string,
     private readonly log: Logger,
   ) {}
+
+  /** Whether the file on disk names its schema (`"$schema"`). */
+  hasSchemaRef(): boolean {
+    return (LoadResourceFile(this.resource, this.path) ?? "").includes(
+      '"$schema"',
+    );
+  }
 
   /** The parsed file (or its backup when it is broken); null when neither exists. */
   read(): unknown {
@@ -27,7 +37,7 @@ export class DataFile {
       const raw = LoadResourceFile(this.resource, path);
       if (!raw) continue;
       try {
-        return JSON.parse(raw) as unknown;
+        return withoutSchemaKey(JSON.parse(raw));
       } catch (error) {
         this.log.error(
           `${this.resource}/${path} is not valid JSON${path === this.path ? ", trying the backup" : ""}`,
@@ -44,7 +54,11 @@ export class DataFile {
     if (this.timer) return;
     this.timer = setTimeout(() => {
       this.timer = null;
-      const text = `${JSON.stringify(this.pending, null, 2)}\n`;
+      const data =
+        this.schemaRef && isRecord(this.pending)
+          ? { $schema: this.schemaRef, ...this.pending }
+          : this.pending;
+      const text = `${JSON.stringify(data, null, 2)}\n`;
       this.writes = this.writes
         .then(() => this.flush(text))
         .catch((error: unknown) =>

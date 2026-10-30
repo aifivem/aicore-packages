@@ -7,7 +7,7 @@
  * Values a field picks from what exists in the game: items of the active inventory, jobs, gangs, money accounts.
  * A `lookup` on a text or names spec makes the server refuse anything else and the panel offer the list.
  */
-export type LookupSource = "item" | "job" | "gang" | "account";
+export type LookupSource = "item" | "job" | "gang" | "account" | "resource";
 
 /** One choice of a lookup list. */
 export interface LookupOption {
@@ -228,10 +228,19 @@ export interface ExternalPanel {
 }
 
 /** What ai-core answers when an admin opens the panel. */
+/** A script whose GitHub release is newer than the version running (ai-core's update check). */
+export interface UpdateInfo {
+  resource: string;
+  current: string;
+  latest: string;
+  url: string;
+}
+
 export interface AdminOpenData {
   panels: AdminPanelSnapshot[];
   lookups: Lookups;
   external: ExternalPanel[];
+  updates: UpdateInfo[];
 }
 
 /** A changed record (records: `key`; settings: no key, `value` is the whole object); `null` = deleted. */

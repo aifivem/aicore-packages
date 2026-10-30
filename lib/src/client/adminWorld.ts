@@ -1,5 +1,5 @@
 import { ADMIN } from "@aicore-fivem/shared";
-import { createLogger, isRecord } from "../shared";
+import { createLogger, isRecord, withoutSchemaKey } from "../shared";
 import { triggerServerCallback } from "./callback";
 import { onServerEvent } from "./netEvent";
 
@@ -24,7 +24,7 @@ export class AdminWorld {
     for (const file of files) {
       const raw = LoadResourceFile(this.resource, `data/${file}.json`);
       try {
-        const parsed: unknown = raw ? JSON.parse(raw) : {};
+        const parsed: unknown = raw ? withoutSchemaKey(JSON.parse(raw)) : {};
         this.data.set(file, isRecord(parsed) ? parsed : {});
       } catch (error) {
         log.error(`data/${file}.json is not valid JSON`, error);

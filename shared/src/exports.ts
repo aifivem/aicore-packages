@@ -109,7 +109,7 @@ export type AiCoreServerExports = {
   RegisterCommands(resource: string, commands: CommandInfo[]): void;
 
   /** Values of a lookup list (items of the active inventory, jobs, gangs, accounts) for the admin panel's validation. */
-  GetLookupValues(source: "item" | "job" | "gang" | "account"): string[];
+  GetLookupValues(source: "item" | "job" | "gang" | "account" | "resource"): string[];
   /** Lists another script's own settings screen on the dashboard (opened by `command` or embedded `url`). */
   RegisterExternalPanel(panel: {
     id?: string;
@@ -138,6 +138,8 @@ export type AiCoreServerExports = {
   }[];
   /** The players in a player's OneSync scope (~424 m), kept from ai-core's one set of scope handlers (lib `playersNear`). */
   GetPlayersInScope(source: number): number[];
+  /** Scripts with a newer GitHub release than the running version (ai-core's update check). */
+  GetUpdates(): import("./admin").UpdateInfo[];
 
   GetSharedMoney(
     ownerType: "job" | "gang",

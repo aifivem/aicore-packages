@@ -70,3 +70,10 @@ export function createLogger(resource: string): Logger {
       console.error(`${prefix} ^1${message}^7`, ...details),
   };
 }
+
+/** A data file's `"$schema"` key is for editors only: readers of panel files never see it. */
+export function withoutSchemaKey(value: unknown): unknown {
+  if (!isRecord(value) || !("$schema" in value)) return value;
+  const { $schema: _schema, ...rest } = value;
+  return rest;
+}

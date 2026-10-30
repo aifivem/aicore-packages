@@ -14,6 +14,7 @@ import { onClientCallback } from "../callback";
 import { DataFile } from "../dataFile";
 import { clone, toPatch } from "./patch";
 import { ERR, validate } from "./validate";
+import { fileSchema, writeSchema } from "./jsonSchema";
 
 const core = resourceExport(CORE.resource);
 
@@ -178,6 +179,8 @@ export class AdminPanel {
     }
     const file = new DataFile(this.resource, name, this.log);
     this.dataFiles.set(name, file);
+    file.schemaRef = `./schemas/${name}.schema.json`;
+    writeSchema(this.resource, name, fileSchema(this.resource, this.schema, name, spec), this.log);
     const raw = file.read();
     const data: Data = isRecord(raw) ? raw : {};
     let filled = false;
@@ -189,6 +192,6 @@ export class AdminPanel {
       }
     }
     this.data.set(name, data);
-    if (filled || raw === null) file.write(data);
+    if (filled || raw === null || !file.hasSchemaRef()) file.write(data);
   }
 }
