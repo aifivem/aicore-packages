@@ -39,6 +39,8 @@ export type DataSpec =
       max?: number;
       pattern?: string;
       lookup?: LookupSource;
+      /** The key of a record in another `records` file of the same panel ("" allowed: none). */
+      records?: string;
       optional?: boolean;
     }
   | {
@@ -99,6 +101,8 @@ export type WidgetSpec = WidgetBase &
         placeholder?: string;
         /** Pick from a lookup list (autocomplete; the data spec carries the same lookup). */
         lookup?: LookupSource;
+        /** Pick a record of another `records` file of this panel by its label (the data spec carries the same `records`). */
+        records?: string;
         /** Name suggestions as buttons: street and zone names at the point at `from` (a path in the same record), else at the admin. */
         suggest?: { from?: string };
       }

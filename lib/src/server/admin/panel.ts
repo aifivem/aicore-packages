@@ -4,6 +4,7 @@ import {
   type AdminPanelSnapshot,
   type AdminPatch,
   type AdminResult,
+  type DataSpec,
   type FileSpec,
   type PanelSchema,
 } from "@aicore-fivem/shared";
@@ -118,6 +119,17 @@ export class AdminPanel {
     this.changed(file, key);
   }
 
+  /** A text section with `records` must name a record of that file of this panel (or be empty). */
+  private linked(spec: DataSpec, value: unknown): string | null {
+    return spec.type === "text" &&
+      spec.records &&
+      typeof value === "string" &&
+      value !== "" &&
+      !(value in this.get(spec.records))
+      ? "ADMIN_ERR_LOOKUP"
+      : null;
+  }
+
   private check(patch: AdminPatch, spec: FileSpec): string | null {
     const data = this.get(patch.file);
     if (patch.action === "create") {
@@ -142,6 +154,8 @@ export class AdminPanel {
         for (const [name, section] of Object.entries(spec.sections)) {
           const refusal = validate(section, record[name], name);
           if (refusal) return refusal.error;
+          const link = this.linked(section, record[name]);
+          if (link) return link;
         }
         const ruled = this.rules.get(patch.file)?.(key, record);
         if (ruled) return ruled;
@@ -154,6 +168,8 @@ export class AdminPanel {
       return ERR.type;
     const refusal = validate(section, patch.value, patch.section);
     if (refusal) return refusal.error;
+    const link = this.linked(section, patch.value);
+    if (link) return link;
     const current = spec.kind === "records" ? data[patch.key ?? ""] : data;
     const next = {
       ...(isRecord(current) ? current : {}),
