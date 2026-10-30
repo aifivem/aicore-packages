@@ -1,4 +1,5 @@
 import { createLogger } from "../shared";
+import { zoneBounds, zoneContains, type ZoneShape } from "../shared/zone";
 import { cache } from "./cache";
 
 /**
@@ -9,24 +10,7 @@ import { cache } from "./cache";
 
 const log = createLogger(GetCurrentResourceName());
 
-interface Vec3 {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export type ZoneShape =
-  /** A ball around a point. */
-  | { type: "sphere"; center: Vec3; radius: number }
-  /** A circle on the ground plane, `height` metres up and down from the centre. */
-  | { type: "cylinder"; center: Vec3; radius: number; height: number }
-  /** A ground polygon (x, y points in order) between two heights. */
-  | {
-      type: "poly";
-      points: Array<{ x: number; y: number }>;
-      minZ: number;
-      maxZ: number;
-    };
+export type { ZoneShape };
 
 export interface ZoneOptions {
   shape: ZoneShape;
@@ -41,67 +25,6 @@ const CELL = 64;
 const MAX_CELLS = 64;
 const cellKey = (cx: number, cy: number): number =>
   ((cx + 32768) << 16) | (cy + 32768);
-
-function contains(shape: ZoneShape, x: number, y: number, z: number): boolean {
-  switch (shape.type) {
-    case "sphere": {
-      const dx = x - shape.center.x;
-      const dy = y - shape.center.y;
-      const dz = z - shape.center.z;
-      return dx * dx + dy * dy + dz * dz <= shape.radius * shape.radius;
-    }
-    case "cylinder": {
-      const dx = x - shape.center.x;
-      const dy = y - shape.center.y;
-      return (
-        dx * dx + dy * dy <= shape.radius * shape.radius &&
-        Math.abs(z - shape.center.z) <= shape.height
-      );
-    }
-    case "poly": {
-      if (z < shape.minZ || z > shape.maxZ) return false;
-      // Ray casting: count the edges a ray to +x crosses.
-      let inside = false;
-      const p = shape.points;
-      for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
-        const a = p[i]!;
-        const b = p[j]!;
-        if (
-          a.y > y !== b.y > y &&
-          x < ((b.x - a.x) * (y - a.y)) / (b.y - a.y) + a.x
-        )
-          inside = !inside;
-      }
-      return inside;
-    }
-    default: {
-      const _exhaustive: never = shape;
-      return _exhaustive;
-    }
-  }
-}
-
-/** Ground bounding box of a shape: [minX, minY, maxX, maxY]. */
-function bounds(shape: ZoneShape): [number, number, number, number] {
-  if (shape.type !== "poly")
-    return [
-      shape.center.x - shape.radius,
-      shape.center.y - shape.radius,
-      shape.center.x + shape.radius,
-      shape.center.y + shape.radius,
-    ];
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  for (const p of shape.points) {
-    minX = Math.min(minX, p.x);
-    minY = Math.min(minY, p.y);
-    maxX = Math.max(maxX, p.x);
-    maxY = Math.max(maxY, p.y);
-  }
-  return [minX, minY, maxX, maxY];
-}
 
 class Zone {
   inside = false;
@@ -134,7 +57,7 @@ export class Zones {
     this.remove(id);
     const zone = new Zone(options);
     this.zones.set(id, zone);
-    const [minX, minY, maxX, maxY] = bounds(options.shape);
+    const [minX, minY, maxX, maxY] = zoneBounds(options.shape);
     const x0 = Math.floor(minX / CELL);
     const y0 = Math.floor(minY / CELL);
     const x1 = Math.floor(maxX / CELL);
@@ -220,7 +143,7 @@ export class Zones {
   private test(zone: Zone, now: number, x: number, y: number, z: number): void {
     if (now < zone.nextCheck) return;
     zone.nextCheck = now + zone.interval;
-    const inside = contains(zone.options.shape, x, y, z);
+    const inside = zoneContains(zone.options.shape, x, y, z);
     if (inside === zone.inside) return;
     if (inside) this.insideNow.add(zone);
     else this.insideNow.delete(zone);

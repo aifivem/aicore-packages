@@ -63,3 +63,4 @@ for (const n of [100_000, 1_000_000]) {
     `${n.toLocaleString("en")} entities: fill ${fill.toFixed(0)} ms, raw pass ${raw.toFixed(0)} ms, mirror pass ${mirror.toFixed(0)} ms (${(raw / mirror).toFixed(1)}x), per read ${((mirror / n) * 1e6).toFixed(0)} ns (${sum > 0})`,
   );
 }
+export {};

@@ -103,12 +103,23 @@ export interface InventoryAdapter {
   ): void;
 }
 
+/** The weapon item the local player holds, as the inventory knows it (HUD weapon box). */
+export interface HeldWeapon {
+  /** Item name (`WEAPON_PISTOL`). */
+  name: string;
+  label: string;
+  /** Picture url (`nui://...`); absent when the inventory has none. */
+  image?: string;
+}
+
 /** One inventory resource behind the layer (client side). */
 export interface InventoryClientAdapter {
   readonly resource: string;
   /** Opens the player's own inventory screen. */
   openInventory(): void;
   hasItem(item: string, count: number): boolean;
+  /** The held weapon item, or null (unarmed, or the inventory has no such export). */
+  currentWeapon(): HeldWeapon | null;
 }
 
 /** ai-core's server inventory exports; the active inventory answers them (false / 0 / empty while none runs). */
@@ -164,4 +175,6 @@ export type InventoryClientExports = {
   /** Opens the player's own inventory screen. */
   OpenInventory(): void;
   HasItem(item: string, count?: number): boolean;
+  /** The held weapon item through the active inventory, or null. */
+  GetCurrentWeapon(): HeldWeapon | null;
 };

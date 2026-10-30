@@ -44,6 +44,21 @@ export interface AccountTypeDefinition {
   allowNegative: boolean;
 }
 
+/** A money account for `TransferMoney`: a loaded player's, or a job's / gang's shared account. */
+export type MoneyRef =
+  | { source: number; account: string }
+  | { owner: "job" | "gang"; id: string; account: string };
+
+/** One death / ambulance script behind ai-core's medical layer (`resource/server/medical/`). */
+export interface MedicalAdapter {
+  resource: string;
+  version?: string;
+  /** False when the player was not down. */
+  revive(source: number): boolean;
+  heal(source: number): void;
+  isDead(source: number): boolean;
+}
+
 /**
  * ai-core's server exports: synchronous, small values. Callers mirror what they need and follow ai-core's local
  * events (`CORE.*Event`) instead of calling these in hot paths. A type alias, not an interface: it must fit
@@ -85,6 +100,8 @@ export type AiCoreServerExports = {
   SetJob(src: number, job: string, grade: number): boolean;
   RemoveJob(src: number, job: string): boolean;
   GetOnDutyCount(job: string): number;
+  /** Whether it is prime time for `job` (the default hours without one): tgiann-policealert's hours while it runs, else ai-core's panel hours. */
+  IsPrimeTime(job?: string): boolean;
 
   GetGangs(src: number): GangMembership[] | null;
   GetActiveGang(src: number): string | null;
@@ -169,6 +186,39 @@ export type AiCoreServerExports = {
     account: string,
     amount: number,
     reason?: string,
+  ): boolean;
+  /**
+   * Moves `amount` between two accounts in one DB transaction with both ledger rows; `from` also pays `fee`.
+   * False when an account is missing, both are the same or `from` cannot pay.
+   */
+  TransferMoney(
+    from: MoneyRef,
+    to: MoneyRef,
+    amount: number,
+    reason?: string,
+    fee?: number,
+  ): boolean;
+
+  /** A free routing bucket for the calling resource (no population, strict lockdown); freed when it stops. */
+  AcquireBucket(tag: string): number;
+  /** Gives a bucket back (only the resource that took it can); move its players out first. */
+  ReleaseBucket(id: number): boolean;
+
+  /** The death / ambulance script ai-core's medical layer forwards to, or null. */
+  GetMedicalSystem(): string | null;
+  /** Gets a downed player up where they lie; false when not down or no death script runs. */
+  RevivePlayer(source: number): boolean;
+  /** Full health for a player who is not down; false when no death script runs. */
+  HealPlayer(source: number): boolean;
+  IsPlayerDead(source: number): boolean;
+
+  /**
+   * Moves a stored (not loaded) character's spawn point once no load or unload save holds it; false when the
+   * character is loaded or the arguments are wrong (true = accepted, the write follows).
+   */
+  SetOfflinePosition(
+    charId: number,
+    position: { x: number; y: number; z: number; heading?: number },
   ): boolean;
 } & InventoryServerExports &
   VehicleKeysServerExports &

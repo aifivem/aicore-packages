@@ -10,8 +10,11 @@ interface Vec3 {
 
 export interface TeleportOptions {
   heading?: number;
-  /** `z` is the floor (panel points): the game puts the ped's feet on it. Otherwise z is the ped's root (`coords()`). Default true. */
-  ground?: boolean;
+  /**
+   * `true` (default): `z` is the floor (panel points), the game puts the ped's feet on it. `false`: z is the ped's
+   * root (`coords()`). `"find"` (also when `z` is missing): the ground under x / y is searched (map waypoint).
+   */
+  ground?: boolean | "find";
   /** Behind a screen fade (default true). */
   fade?: boolean;
   /** Take the vehicle the player sits in along (default false). */
@@ -25,6 +28,28 @@ export interface AnimOptions {
   duration?: number;
   blendIn?: number;
   blendOut?: number;
+}
+
+/** Heights tried for the ground under a point, bottom to top. */
+const PROBE_STEP = 25;
+const PROBE_TOP = 1000;
+
+/** Streams the area by standing the (frozen) ped at rising heights until the game knows the ground there; null if never. */
+async function findGround(
+  ped: number,
+  x: number,
+  y: number,
+  keepVehicle: boolean,
+): Promise<number | null> {
+  for (let height = 0; height <= PROBE_TOP; height += PROBE_STEP) {
+    if (keepVehicle) SetPedCoordsKeepVehicle(ped, x, y, height);
+    else SetEntityCoordsNoOffset(ped, x, y, height, false, false, false);
+    RequestCollisionAtCoord(x, y, height);
+    await sleep(50);
+    const [found, groundZ] = GetGroundZFor_3dCoord(x, y, height, false);
+    if (found) return groundZ;
+  }
+  return null;
 }
 
 /** Fades the screen out and resolves once it is black. */
@@ -63,16 +88,32 @@ export const player = {
     FreezeEntityPosition(PlayerPedId(), state);
   },
 
-  /** Moves the player and waits for the collision there, behind a fade unless `fade: false`. */
-  async teleport(to: Vec3, options: TeleportOptions = {}): Promise<void> {
+  /**
+   * Moves the player and waits for the collision there, behind a fade unless `fade: false`. Without `z` (or with
+   * `ground: "find"`) the player lands on the ground under x / y.
+   */
+  async teleport(
+    to: { x: number; y: number; z?: number },
+    options: TeleportOptions = {},
+  ): Promise<void> {
     const fade = options.fade !== false;
     if (fade) await fadeOut();
     const ped = PlayerPedId();
-    RequestCollisionAtCoord(to.x, to.y, to.z);
-    if (options.keepVehicle) SetPedCoordsKeepVehicle(ped, to.x, to.y, to.z);
-    else if (options.ground === false)
-      SetEntityCoordsNoOffset(ped, to.x, to.y, to.z, false, false, false);
-    else SetEntityCoords(ped, to.x, to.y, to.z, false, false, false, false);
+    let z = to.z ?? 0;
+    let ground = options.ground;
+    if (to.z === undefined || ground === "find") {
+      FreezeEntityPosition(ped, true);
+      z =
+        ((await findGround(ped, to.x, to.y, options.keepVehicle === true)) ??
+          0) + 1;
+      FreezeEntityPosition(ped, false);
+      ground = false;
+    }
+    RequestCollisionAtCoord(to.x, to.y, z);
+    if (options.keepVehicle) SetPedCoordsKeepVehicle(ped, to.x, to.y, z);
+    else if (ground === false)
+      SetEntityCoordsNoOffset(ped, to.x, to.y, z, false, false, false);
+    else SetEntityCoords(ped, to.x, to.y, z, false, false, false, false);
     if (options.heading !== undefined) SetEntityHeading(ped, options.heading);
     await waitFor(
       () => HasCollisionLoadedAroundEntity(ped) || undefined,

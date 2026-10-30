@@ -8,7 +8,7 @@ export { Zones, type ZoneOptions, type ZoneShape } from "./zones";
 export { cache, onCache, readPlayerState, readWeapon } from "./cache";
 export { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 export { Points, type PointOptions } from "./point";
-export type { ModelPointOptions } from "./modelPoint";
+export type { ModelPointOptions, VehiclePointOptions } from "./modelPoint";
 export { LocalPed, type LocalPedOptions } from "./localPed";
 export { Blips, createBlip, type BlipOptions, type BlipStyle } from "./blip";
 export {
@@ -49,6 +49,10 @@ export {
 } from "../fivem/state";
 export { controls } from "./controls";
 export { nearestVehicle } from "./vehicles";
+export { nearestPlayer } from "./players";
+export { onShot } from "./shot";
+export { callAction, type CallActionOptions } from "./action";
+export { isActionOk, replyError } from "../shared/action";
 export { hud } from "./hud";
 export { world } from "./world";
 export { gestures } from "./gestures";

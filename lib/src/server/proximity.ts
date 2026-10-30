@@ -1,5 +1,7 @@
 import { CORE } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
+import type { Vec3 } from "../shared/vec";
+import { coordsOf, entityCoords } from "./position";
 
 /**
  * Who is near whom without scanning every player: ai-core keeps which players are in each other's OneSync scope
@@ -7,22 +9,15 @@ import { resourceExport } from "../fivem/exports";
  */
 const core = resourceExport(CORE.resource);
 
-type Vec = { x: number; y: number; z: number };
-
-const posOf = (source: number): Vec => {
-  const [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
-  return { x, y, z };
-};
-
 /** Players within `radius` metres of a point, measured only among `candidates`. */
 function within(
-  point: Vec,
+  point: Vec3,
   radius: number,
   candidates: Iterable<number>,
 ): number[] {
   const out: number[] = [];
   for (const source of candidates) {
-    const p = posOf(source);
+    const p = coordsOf(source);
     if (Math.hypot(p.x - point.x, p.y - point.y, p.z - point.z) <= radius)
       out.push(source);
   }
@@ -31,7 +26,7 @@ function within(
 
 /** Players within `radius` (up to ~424 m) of a player, that player included. */
 export function playersNear(source: number, radius: number): number[] {
-  return within(posOf(source), radius, [
+  return within(coordsOf(source), radius, [
     source,
     ...core.GetPlayersInScope(source),
   ]);
@@ -45,6 +40,31 @@ export function playersNearEntity(entity: number, radius: number): number[] {
   if (!DoesEntityExist(entity)) return [];
   const owner = NetworkGetEntityOwner(entity);
   if (owner <= 0) return [];
-  const [x = 0, y = 0, z = 0] = GetEntityCoords(entity);
-  return within({ x, y, z }, radius, [owner, ...core.GetPlayersInScope(owner)]);
+  return within(entityCoords(entity), radius, [
+    owner,
+    ...core.GetPlayersInScope(owner),
+  ]);
+}
+
+/**
+ * The closest other player within `metres` of `source` (up to ~424 m, OneSync scope candidates only) that passes
+ * `filter` (loaded character, on foot, not cuffed...); null when none.
+ */
+export function nearestPlayerTo(
+  source: number,
+  metres: number,
+  filter?: (other: number) => boolean,
+): number | null {
+  const from = coordsOf(source);
+  let best: number | null = null;
+  let bestDistance = metres;
+  for (const other of core.GetPlayersInScope(source)) {
+    if (other === source) continue;
+    const p = coordsOf(other);
+    const d = Math.hypot(p.x - from.x, p.y - from.y, p.z - from.z);
+    if (d > bestDistance || (filter && !filter(other))) continue;
+    best = other;
+    bestDistance = d;
+  }
+  return best;
 }

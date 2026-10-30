@@ -69,10 +69,20 @@ export { vehicleKeys } from "./vehicleKeys";
 export {
   nearestVehicleTo,
   spawnVehicle,
+  vehicleFromNet,
+  vehicleNearPlayer,
   vehicleType,
   type SpawnVehicleOptions,
 } from "./vehicle";
-export { playersNear, playersNearEntity } from "./proximity";
+export { nearestPlayerTo, playersNear, playersNearEntity } from "./proximity";
+export { coordsOf, entityCoords, isNear } from "./position";
+export {
+  Cooldowns,
+  onCharacter,
+  PlayerMap,
+  type CharacterHandlers,
+} from "./players";
+export { PendingActions } from "./pending";
 export {
   addCommand,
   type CommandArgs,
@@ -110,3 +120,8 @@ export {
 export { world } from "./world";
 export { phone } from "./phone";
 export { dispatch } from "./dispatch";
+export { money } from "./money";
+export { buckets } from "./buckets";
+export { medical } from "./medical";
+export { characters } from "./characters";
+export { isPrimeTime } from "./primeTime";

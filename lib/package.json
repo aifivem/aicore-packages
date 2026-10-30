@@ -26,6 +26,6 @@
     "@types/node": "^22"
   },
   "scripts": {
-    "bench": "bun bench/zones.bench.ts && bun bench/command.bench.ts && bun bench/state.bench.ts"
+    "bench": "bun bench/zones.bench.ts && bun bench/command.bench.ts && bun bench/state.bench.ts && bun bench/online.bench.ts && bun bench/players.bench.ts"
   }
 }

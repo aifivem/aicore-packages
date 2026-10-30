@@ -11,7 +11,7 @@ const g = globalThis as Record<string, unknown>;
 let natives = 0;
 // Every PascalCase call in the lib's client code gets a counting stub that returns 0.
 for (const dir of ["../src/client", "../src/fivem", "../src/shared"]) {
-  const path = join(import.meta.dir, dir);
+  const path = join(import.meta.dirname, dir);
   for (const file of readdirSync(path)) {
     if (!file.endsWith(".ts")) continue;
     const text = readFileSync(join(path, file), "utf8");
@@ -145,7 +145,9 @@ for (const count of [100_000, 1_000_000]) {
     byId.set(i, { id: i, plantedAt: now - rand(0, 4 * 3_600_000) });
   const limit = 3 * 3_600_000;
   const ms = time(() => {
-    [...byId.values()].filter((p) => now - p.plantedAt > limit).map((p) => p.id);
+    [...byId.values()]
+      .filter((p) => now - p.plantedAt > limit)
+      .map((p) => p.id);
   });
   console.log(
     `drugs rotten() sweep, ${count.toLocaleString("en")} plants: ${fmt(ms)} once a minute`,

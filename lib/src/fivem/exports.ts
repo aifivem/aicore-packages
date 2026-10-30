@@ -7,8 +7,21 @@
 // oxlint-disable-next-line typescript/no-explicit-any -- export handlers take whatever their contract declares
 type ExportHandler = (...args: any[]) => unknown;
 
+/** Names registered by name (not as the other-case twin): a twin never replaces one of them. */
+const named = new Set<string>();
+
+/**
+ * Registers an export under `name` and under its twin with the first letter's case swapped (`GetItems` and
+ * `getItems`), so scripts written for either style find it. A name registered explicitly always wins over a twin.
+ */
 export function registerExport(name: string, handler: ExportHandler): void {
+  named.add(name);
   globalThis.exports(name, handler);
+  const first = name.charAt(0);
+  const swapped =
+    first === first.toUpperCase() ? first.toLowerCase() : first.toUpperCase();
+  const twin = swapped + name.slice(1);
+  if (twin !== name && !named.has(twin)) globalThis.exports(twin, handler);
 }
 
 /** Typed access to another resource's exports (types come from CitizenExports in @aicore-fivem/shared). */

@@ -8,7 +8,8 @@ import {
   type FileSpec,
   type PanelSchema,
 } from "@aicore-fivem/shared";
-import { createLogger, isRecord, type Logger } from "../../shared";
+import { createLogger, isRecord, previewJson, type Logger } from "../../shared";
+import { FileViews, type RecordReader } from "../../shared/records";
 import { registerExport, resourceExport } from "../../fivem/exports";
 import { loadLocaleTexts } from "../../fivem/locale";
 import { onClientCallback } from "../callback";
@@ -24,6 +25,14 @@ type Data = Record<string, unknown>;
 type ChangeHandler = (key: string | undefined, value: unknown) => void;
 /** Cross-field check on the value about to be stored: a lang key refuses it. */
 type Rule = (key: string | undefined, next: Data) => string | null;
+/** An `action` widget's handler: a lang key refuses (shown under the button), null succeeds. */
+/** A patch that edits data (every kind but an action button's `run`). */
+type EditPatch = Exclude<AdminPatch, { action: "run" }>;
+type ActionHandler = (
+  admin: number,
+  record: Data,
+  key: string | undefined,
+) => string | null;
 
 const DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
 
@@ -51,10 +60,17 @@ export class AdminPanel {
   private readonly dataFiles = new Map<string, DataFile>();
   private readonly handlers = new Map<string, ChangeHandler[]>();
   private readonly rules = new Map<string, Rule>();
+  private readonly actions = new Map<string, ActionHandler>();
+  private readonly views = new FileViews((file) => this.get(file));
   /** World files: records changed since start, for clients that read the file FiveM cached at start. */
   private readonly worldChanges = new Map<string, Data>();
   private readonly resource = GetCurrentResourceName();
   private readonly log: Logger = createLogger(this.resource);
+  /**
+   * The admin whose panel edit or action is being applied, readable in `rule`, `onChange` and `onAction` handlers;
+   * 0 for the resource's own `commit`. Set by the lib only.
+   */
+  editor = 0;
 
   constructor(private readonly schema: PanelSchema) {
     for (const [name, spec] of Object.entries(schema.files))
@@ -83,6 +99,21 @@ export class AdminPanel {
     this.rules.set(file, rule);
   }
 
+  /** Runs when an admin presses the `action` widget whose `path` is `id` (on a record, or the settings object). */
+  onAction(id: string, handler: ActionHandler): void {
+    this.actions.set(id, handler);
+  }
+
+  /** A file parsed by `read`, kept current on every change (settings files; parsed before `onChange` handlers run). */
+  view<T>(file: string, read: (raw: unknown) => T): { readonly value: T } {
+    return this.views.view(file, read);
+  }
+
+  /** A records file parsed per record through `readOne` (null leaves a record out); a change re-reads only that record. */
+  records<T>(file: string, readOne: RecordReader<T>): ReadonlyMap<string, T> {
+    return this.views.records(file, readOne);
+  }
+
   snapshot(): AdminPanelSnapshot {
     return {
       resource: this.resource,
@@ -96,16 +127,42 @@ export class AdminPanel {
   apply(admin: number, raw: unknown): AdminResult {
     const patch = toPatch(raw);
     const spec = patch ? this.schema.files[patch.file] : undefined;
-    if (!patch || !spec || spec.memory) return { ok: false, error: ERR.type };
-    const error = this.check(patch, spec);
-    if (error) {
-      this.log.warn(
-        `admin ${admin} edit refused (${error}): ${JSON.stringify(patch).slice(0, 300)}`,
-      );
-      return { ok: false, error };
+    if (!patch || !spec) return { ok: false, error: ERR.type };
+    this.editor = admin;
+    try {
+      if (patch.action === "run") return this.run(admin, patch, spec);
+      if (spec.memory) return { ok: false, error: ERR.type };
+      const error = this.check(patch, spec);
+      if (error) {
+        this.log.warn(
+          `admin ${admin} edit refused (${error}): ${previewJson(patch, 300)}`,
+        );
+        return { ok: false, error };
+      }
+      this.store(patch, spec);
+      return { ok: true };
+    } finally {
+      this.editor = 0;
     }
-    this.store(patch, spec);
-    return { ok: true };
+  }
+
+  /** An `action` widget pressed: the script's handler decides; nothing is stored here. */
+  private run(
+    admin: number,
+    patch: Extract<AdminPatch, { action: "run" }>,
+    spec: FileSpec,
+  ): AdminResult {
+    const handler = this.actions.get(patch.id);
+    const data = this.get(patch.file);
+    const target = spec.kind === "records" ? data[patch.key ?? ""] : data;
+    if (!handler || !isRecord(target)) return { ok: false, error: ERR.type };
+    try {
+      const error = handler(admin, clone(target), patch.key);
+      return error ? { ok: false, error } : { ok: true };
+    } catch (error) {
+      this.log.error(`panel action ${patch.id} failed`, error);
+      return { ok: false, error: ERR.type };
+    }
   }
 
   /** A change made by the resource itself (game state the panel shows), stored without validation (a `memory` file only in memory). */
@@ -119,6 +176,11 @@ export class AdminPanel {
     this.changed(file, key);
   }
 
+  /** `commit` after the current change has reached the panel (a form that resets itself after an admin sent it). */
+  commitAfter(file: string, key: string | undefined, value: unknown): void {
+    setImmediate(() => this.commit(file, key, value));
+  }
+
   /** A text section with `records` must name a record of that file of this panel (or be empty). */
   private linked(spec: DataSpec, value: unknown): string | null {
     return spec.type === "text" &&
@@ -130,7 +192,7 @@ export class AdminPanel {
       : null;
   }
 
-  private check(patch: AdminPatch, spec: FileSpec): string | null {
+  private check(patch: EditPatch, spec: FileSpec): string | null {
     const data = this.get(patch.file);
     if (patch.action === "create") {
       if (
@@ -178,7 +240,7 @@ export class AdminPanel {
     return this.rules.get(patch.file)?.(patch.key, next) ?? null;
   }
 
-  private store(patch: AdminPatch, spec: FileSpec): void {
+  private store(patch: EditPatch, spec: FileSpec): void {
     const data = this.data.get(patch.file) ?? {};
     if (patch.action === "create") {
       const record = clone(spec.newRecord ?? {});
@@ -210,6 +272,7 @@ export class AdminPanel {
     const data = this.get(file);
     const value = key === undefined ? data : (data[key] ?? null);
     this.dataFiles.get(file)?.write(data);
+    this.views.changed(file, key, value);
     for (const handler of this.handlers.get(file) ?? []) handler(key, value);
     core.AdminPanelChanged({
       resource: this.resource,

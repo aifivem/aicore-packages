@@ -2,6 +2,16 @@
 
 export { sleep, waitFor } from "./wait";
 export { bool, int, num, record, str, vec4, type Vec4 } from "./read";
+export { oneArg, readFinite, readId, readInt, readText } from "./strict";
+export { fail, isActionOk, replyError, type ActionResult } from "./action";
+export { distance, type Vec3 } from "./vec";
+export {
+  polyFromCorners,
+  zoneBounds,
+  zoneContains,
+  type ZoneShape,
+} from "./zone";
+export { LiveRecords, readRecords, type RecordReader } from "./records";
 export {
   toVehicleProps,
   toVehicleSetup,
@@ -21,6 +31,50 @@ export function logSafe(text: string, max: number): string {
     .replace(/[\u0000-\u001f\u007f]/g, "")
     .replace(/\^\d/g, "")
     .slice(0, max);
+}
+
+/**
+ * JSON-like text of an untrusted value cut at `max` characters, built without serializing the rest (a hostile
+ * payload can be megabytes): for log lines. Deeper than 4 levels shows as `[...]` / `{...}`.
+ */
+export function previewJson(value: unknown, max: number): string {
+  let out = "";
+  const walk = (v: unknown, depth: number): void => {
+    if (out.length >= max) return;
+    if (typeof v === "string") {
+      out += JSON.stringify(v.length > max ? v.slice(0, max) : v);
+      return;
+    }
+    if (v === null || typeof v !== "object") {
+      out += String(v);
+      return;
+    }
+    if (depth > 4) {
+      out += Array.isArray(v) ? "[...]" : "{...}";
+      return;
+    }
+    if (Array.isArray(v)) {
+      out += "[";
+      for (let i = 0; i < v.length && out.length < max; i++) {
+        if (i > 0) out += ",";
+        walk(v[i], depth + 1);
+      }
+      out += "]";
+      return;
+    }
+    out += "{";
+    let first = true;
+    for (const key in v) {
+      if (out.length >= max) break;
+      if (!first) out += ",";
+      first = false;
+      out += `${JSON.stringify(key.slice(0, 50))}:`;
+      walk((v as Record<string, unknown>)[key], depth + 1);
+    }
+    out += "}";
+  };
+  walk(value, 0);
+  return out.slice(0, max);
 }
 
 /** Fills `{0}`, `{1}`... with the arguments by position (a translation may reorder or repeat them). */

@@ -94,7 +94,7 @@ export interface CreateCharacterInput {
 }
 
 /** Answer of the character screen actions: `ok`, or a lang key telling why not. */
-export type CharacterActionResult = { ok: true } | { ok: false; error: string };
+export type CharacterActionResult = import("./action").ActionResult;
 
 export interface JobMembership {
   job: string;

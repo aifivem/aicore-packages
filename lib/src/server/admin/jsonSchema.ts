@@ -51,6 +51,8 @@ function collect(
   out: Descriptions,
 ): void {
   for (const field of fields) {
+    // An action button names a handler, not a stored value.
+    if (field.widget === "action") continue;
     const path = prefix + field.path;
     const label = lang[field.label] ?? field.label;
     const hint = field.hint ? (lang[field.hint] ?? field.hint) : "";

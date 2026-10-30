@@ -1,6 +1,8 @@
 import { ADMIN, CORE } from "@aicore-fivem/shared";
-import { createLogger, logSafe } from "../shared";
+import { createLogger, logSafe, previewJson } from "../shared";
+import type { Vec3 } from "../shared/vec";
 import { resourceExport } from "../fivem/exports";
+import { isNear } from "./position";
 import { RateLimit, SourceLock } from "./rateLimit";
 
 const core = resourceExport(CORE.resource);
@@ -40,24 +42,17 @@ export const isAdmin =
 export const hasCharacter = (): Guard => (source) =>
   core.GetCharacter(source) !== null || "no character loaded";
 
-interface Point {
-  x: number;
-  y: number;
-  z: number;
-}
-
 /** The player's ped is within `metres` of a point (or of the point a function returns for this player). */
 export const near =
-  (point: Point | ((source: number) => Point | null), metres: number): Guard =>
+  (point: Vec3 | ((source: number) => Vec3 | null), metres: number): Guard =>
   (source) => {
     const target = typeof point === "function" ? point(source) : point;
     if (!target) return "no target point";
-    const [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
-    return (
-      Math.hypot(x - target.x, y - target.y, z - target.z) <= metres ||
-      `too far (${metres} m)`
-    );
+    return isNear(source, target, metres) || `too far (${metres} m)`;
   };
+
+/** One refusal line per player and input in this window; the refusals in between are counted into the next line. */
+const REFUSAL_LOG_MS = 10_000;
 
 /** Every gate of this resource; one playerDropped listener frees them all (one listener per gate trips Node's limit). */
 const gates = new Set<{ release(source: number): void }>();
@@ -68,11 +63,17 @@ on("playerDropped", () => {
 
 /**
  * The checks every client input passes, in this order: a real player sent it (not the resource itself), rate,
- * guards, arguments. Refusals with a reason are logged with the player and the input's name.
+ * guards, arguments. Refusals with a reason (and rate-limit refusals) are logged with the player and the input's name,
+ * at most one line per player per 10 s.
  */
 export class ClientGate<A extends readonly unknown[]> {
   private readonly limit: RateLimit;
   private readonly lock: SourceLock | null;
+  /** Per player: when the last refusal was logged and how many were skipped since. */
+  private readonly refusals = new Map<
+    number,
+    { at: number; skipped: number }
+  >();
 
   constructor(
     private readonly name: string,
@@ -93,7 +94,10 @@ export class ClientGate<A extends readonly unknown[]> {
   check(source: number, raw: unknown[]): A | null {
     // A local emit of the same name has no player source.
     if (!(source > 0) || !GetPlayerName(String(source))) return null;
-    if (!this.limit.take(source)) return null;
+    if (!this.limit.take(source)) {
+      this.refuse(source, "rate limit");
+      return null;
+    }
     for (const guard of this.options.guards ?? []) {
       const verdict = guard(source);
       if (verdict === true) continue;
@@ -105,7 +109,7 @@ export class ClientGate<A extends readonly unknown[]> {
     if (args === null)
       this.refuse(
         source,
-        `invalid arguments ${logSafe(JSON.stringify(raw) ?? "", 200)}`,
+        () => `invalid arguments ${logSafe(previewJson(raw, 200), 200)}`,
       );
     return args;
   }
@@ -124,11 +128,21 @@ export class ClientGate<A extends readonly unknown[]> {
   release(source: number): void {
     this.limit.release(source);
     this.lock?.release(source);
+    this.refusals.delete(source);
   }
 
-  private refuse(source: number, reason: string): void {
+  /** Logs a refusal, at most one line per player per window (a hostile client firing every input stays readable). */
+  private refuse(source: number, reason: string | (() => string)): void {
+    const now = GetGameTimer();
+    const last = this.refusals.get(source);
+    if (last && now - last.at < REFUSAL_LOG_MS) {
+      last.skipped++;
+      return;
+    }
+    const more = last?.skipped ? ` (+${last.skipped} more refused)` : "";
+    this.refusals.set(source, { at: now, skipped: 0 });
     log.warn(
-      `${this.name} refused for ${GetPlayerName(String(source))} (${source}): ${reason}`,
+      `${this.name} refused for ${GetPlayerName(String(source))} (${source}): ${typeof reason === "string" ? reason : reason()}${more}`,
     );
   }
 }

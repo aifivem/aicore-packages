@@ -1,0 +1,133 @@
+import { CORE, type CharacterInfo } from "@aicore-fivem/shared";
+import { createLogger } from "../shared";
+import { online } from "./online";
+
+const log = createLogger(GetCurrentResourceName());
+
+/** Every per-player store of this resource; one playerDropped listener frees them all (one listener each trips Node's limit). */
+const dropped = new Set<(source: number) => void>();
+let listening = false;
+
+function onDropped(fn: (source: number) => void): void {
+  if (!listening) {
+    listening = true;
+    on("playerDropped", () => {
+      const source = Number(globalThis.source);
+      for (const handler of dropped) handler(source);
+    });
+  }
+  dropped.add(fn);
+}
+
+/**
+ * A Map keyed by player source that empties itself when the player drops (one shared playerDropped listener).
+ * Create it once at module level: every instance stays registered for the resource's life.
+ */
+export class PlayerMap<V> extends Map<number, V> {
+  constructor(options: { onDrop?: (source: number, value: V) => void } = {}) {
+    super();
+    onDropped((source) => {
+      if (!this.has(source)) return;
+      const value = this.get(source) as V;
+      this.delete(source);
+      options.onDrop?.(source, value);
+    });
+  }
+}
+
+/** Per-player cooldowns on the game clock, freed when the player drops. Create once at module level. */
+export class Cooldowns {
+  private readonly until = new PlayerMap<number>();
+
+  /** No cooldown runs for the player. */
+  ready(source: number): boolean {
+    return this.left(source) === 0;
+  }
+
+  /** Starts (or restarts) the player's cooldown for `ms`. */
+  start(source: number, ms: number): void {
+    this.until.set(source, GetGameTimer() + ms);
+  }
+
+  /** Starts the cooldown when it is ready and answers true; false while one still runs. */
+  take(source: number, ms: number): boolean {
+    if (!this.ready(source)) return false;
+    this.start(source, ms);
+    return true;
+  }
+
+  /** Milliseconds left, 0 when ready. */
+  left(source: number): number {
+    const until = this.until.get(source);
+    if (until === undefined) return 0;
+    const left = until - GetGameTimer();
+    if (left > 0) return left;
+    this.until.delete(source);
+    return 0;
+  }
+
+  /** Ends the player's cooldown. */
+  clear(source: number): void {
+    this.until.delete(source);
+  }
+}
+
+export interface CharacterHandlers {
+  /** A character entered the world; also once at start for every character loaded before this resource (re)started. */
+  loaded?: (source: number, character: CharacterInfo) => void | Promise<void>;
+  /** The character left: logout, character switch or drop (each `loaded` gets exactly one). */
+  unloaded?: (source: number, charId: number) => void;
+}
+
+/**
+ * A loaded character's lifecycle from ai-core's events. `loaded` replays the characters already in the world after
+ * a restart (from lib `online`, on the next tick so the caller's module has finished loading); no extra
+ * playerDropped handler is needed next to it.
+ */
+export function onCharacter(handlers: CharacterHandlers): void {
+  // source -> charId of each `loaded` delivered, so every one gets its `unloaded` and the replay skips repeats.
+  const live = new Map<number, number>();
+  const deliver = (source: number, character: CharacterInfo): void => {
+    live.set(source, character.id);
+    if (!handlers.loaded) return;
+    try {
+      const result = handlers.loaded(source, character);
+      if (result instanceof Promise)
+        result.catch((error: unknown) =>
+          log.error(`character loaded handler failed for ${source}`, error),
+        );
+    } catch (error) {
+      log.error(`character loaded handler failed for ${source}`, error);
+    }
+  };
+  const end = (source: number, charId: number): void => {
+    if (!live.delete(source)) return;
+    try {
+      handlers.unloaded?.(source, charId);
+    } catch (error) {
+      log.error(`character unloaded handler failed for ${source}`, error);
+    }
+  };
+  on(CORE.playerLoadedEvent, (source: number, character: CharacterInfo) => {
+    const previous = live.get(source);
+    if (previous !== undefined) end(source, previous);
+    deliver(source, character);
+  });
+  on(CORE.playerUnloadedEvent, (source: number, charId: number) =>
+    end(source, charId),
+  );
+  // ai-core unloads on drop itself; this only catches a drop whose unload never came (ai-core stopping).
+  onDropped((source) =>
+    setImmediate(() => {
+      const charId = live.get(source);
+      if (charId !== undefined) end(source, charId);
+    }),
+  );
+  setImmediate(() => {
+    for (const source of online.sources()) {
+      if (live.has(source)) continue;
+      const character = online.character(source);
+      if (character) deliver(source, character);
+    }
+  });
+}

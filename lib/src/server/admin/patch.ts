@@ -1,7 +1,7 @@
 import type { AdminPatch } from "@aicore-fivem/shared";
 import { isRecord } from "../../shared";
 
-/** A patch from a client: only the three known shapes pass, extra fields drop. */
+/** A patch from a client: only the known shapes pass, extra fields drop. */
 export function toPatch(value: unknown): AdminPatch | null {
   if (!isRecord(value) || typeof value.file !== "string") return null;
   const key = typeof value.key === "string" ? value.key : undefined;
@@ -22,6 +22,10 @@ export function toPatch(value: unknown): AdminPatch | null {
         : null;
     case "delete":
       return key ? { file: value.file, action: "delete", key } : null;
+    case "run":
+      return typeof value.id === "string" && value.id.length <= 64
+        ? { file: value.file, action: "run", key, id: value.id }
+        : null;
     case "import": {
       if (!isRecord(value.records)) return null;
       const records: Record<string, Record<string, unknown>> = {};

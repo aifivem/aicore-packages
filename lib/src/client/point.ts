@@ -11,7 +11,11 @@ import {
 } from "./interact";
 import { Blips, type BlipOptions } from "./blip";
 import { LocalPed, type LocalPedOptions } from "./localPed";
-import { ModelPoint, type ModelPointOptions } from "./modelPoint";
+import {
+  ModelPoint,
+  type ModelPointOptions,
+  type VehiclePointOptions,
+} from "./modelPoint";
 import { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 import { Zones } from "./zones";
 
@@ -187,6 +191,14 @@ export class Points {
     this.modelPoints.set(id, point);
     byPrompt.set(point.promptId, point);
     point.attach(style());
+  }
+
+  /**
+   * Adds (or replaces) a point on every vehicle (trunk, hood, push): a global vehicle option in target mode, a prompt
+   * at the nearest networked vehicle within `radius` otherwise. `canShow` and `onPressed` get the vehicle.
+   */
+  addVehicle(id: string, options: VehiclePointOptions): void {
+    this.addModel(id, { ...options, models: [], vehicles: true });
   }
 
   remove(id: string): void {

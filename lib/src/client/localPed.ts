@@ -14,6 +14,20 @@ export interface LocalPedOptions {
   anim?: { dict: string; clip: string };
   /** Spawned when the player comes this close, removed past it (default 50 m). */
   distance?: number;
+  /**
+   * Attached to an entity (a bed, a vehicle, another ped) at a bone with an offset and rotation; `entity` may be a
+   * function read at each spawn (an entity found from a network id). Not frozen while attached. `coords` stays where
+   * the ped is created and the distance is measured from.
+   */
+  attach?: {
+    entity: number | (() => number);
+    /** Bone index (`GetEntityBoneIndexByName`, `GetPedBoneIndex`); default 0, the entity's root. */
+    bone?: number;
+    offset?: { x: number; y: number; z: number };
+    rotation?: { x: number; y: number; z: number };
+  };
+  /** Sitting in a vehicle seat (-1 driver, 0 front passenger...); `vehicle` may be a function read at each spawn. */
+  seat?: { vehicle: number | (() => number); seat: number };
   /** After the ped appears (target options, props) and before it goes. */
   onSpawn?: (ped: number) => void;
   onDespawn?: (ped: number) => void;
@@ -77,7 +91,7 @@ export class LocalPed {
         false,
       );
       SetModelAsNoLongerNeeded(hash);
-      FreezeEntityPosition(ped, true);
+      if (!this.place(ped)) FreezeEntityPosition(ped, true);
       SetEntityInvincible(ped, true);
       SetBlockingOfNonTemporaryEvents(ped, true);
       SetPedCanRagdoll(ped, false);
@@ -101,6 +115,42 @@ export class LocalPed {
     } catch (error) {
       log.error(`local ped ${o.model} could not be created`, error);
     }
+  }
+
+  /** Puts the new ped into its seat or attaches it; false when it stands free (no target entity right now). */
+  private place(ped: number): boolean {
+    const read = (e: number | (() => number)) =>
+      typeof e === "function" ? e() : e;
+    const { seat, attach } = this.options;
+    if (seat) {
+      const vehicle = read(seat.vehicle);
+      if (!vehicle || !DoesEntityExist(vehicle)) return false;
+      SetPedIntoVehicle(ped, vehicle, seat.seat);
+      return true;
+    }
+    if (!attach) return false;
+    const entity = read(attach.entity);
+    if (!entity || !DoesEntityExist(entity)) return false;
+    const o = attach.offset ?? { x: 0, y: 0, z: 0 };
+    const r = attach.rotation ?? { x: 0, y: 0, z: 0 };
+    AttachEntityToEntity(
+      ped,
+      entity,
+      attach.bone ?? 0,
+      o.x,
+      o.y,
+      o.z,
+      r.x,
+      r.y,
+      r.z,
+      false,
+      false,
+      false,
+      false,
+      2,
+      true,
+    );
+    return true;
   }
 
   private despawn(): void {

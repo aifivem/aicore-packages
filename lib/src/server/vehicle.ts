@@ -1,5 +1,6 @@
 import { CORE, VEHICLE_BAGS, type KeyPurpose } from "@aicore-fivem/shared";
 import { waitFor, type VehicleProps, type VehicleSetup } from "../shared";
+import { readId } from "../shared/strict";
 import { triggerClientCallback } from "./callback";
 import { vehicleKeys } from "./vehicleKeys";
 
@@ -75,12 +76,16 @@ async function seatPlayer(
 ): Promise<boolean> {
   const ped = GetPlayerPed(String(source));
   if (!ped) return false;
-  return waitFor(() => {
-    if (!DoesEntityExist(vehicle)) return false;
-    if (GetPedInVehicleSeat(vehicle, seat) === ped) return true;
-    SetPedIntoVehicle(ped, vehicle, seat);
-    return undefined;
-  }, 2000, 150).catch(() => false);
+  return waitFor(
+    () => {
+      if (!DoesEntityExist(vehicle)) return false;
+      if (GetPedInVehicleSeat(vehicle, seat) === ped) return true;
+      SetPedIntoVehicle(ped, vehicle, seat);
+      return undefined;
+    },
+    2000,
+    150,
+  ).catch(() => false);
 }
 
 const PLATE_LETTERS = "ABCDEFGHJKLMNPRSTUVWXYZ";
@@ -159,18 +164,56 @@ export async function spawnVehicle(
   return vehicle;
 }
 
-/** The closest vehicle within `metres` of a player (the one the player sits in first); 0 when none. Walks every vehicle: for commands and actions, not ticks. */
-export function nearestVehicleTo(source: number, metres: number): number {
+/**
+ * The closest vehicle within `metres` of a player (the one the player sits in first) that passes `filter` (locked
+ * doors, a model...); 0 when none. Walks every vehicle: for commands and actions, not ticks.
+ */
+export function nearestVehicleTo(
+  source: number,
+  metres: number,
+  filter?: (vehicle: number) => boolean,
+): number {
   const ped = GetPlayerPed(String(source));
   const own = GetVehiclePedIsIn(ped, false);
-  if (own) return own;
+  if (own && (!filter || filter(own))) return own;
   const [x = 0, y = 0, z = 0] = GetEntityCoords(ped);
   let best = 0;
   let bestDistance = metres;
   for (const vehicle of GetAllVehicles() as number[]) {
     const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle);
     const d = Math.hypot(vx - x, vy - y, vz - z);
-    if (d < bestDistance) [best, bestDistance] = [vehicle, d];
+    if (d < bestDistance && (!filter || filter(vehicle)))
+      [best, bestDistance] = [vehicle, d];
   }
   return best;
+}
+
+/** The live vehicle behind a client's network id, or 0 (not a positive integer, not networked, gone, not a vehicle). */
+export function vehicleFromNet(netId: unknown): number {
+  if (readId(netId) === null) return 0;
+  const entity = NetworkGetEntityFromNetworkId(netId as number);
+  return entity && DoesEntityExist(entity) && GetEntityType(entity) === 2
+    ? entity
+    : 0;
+}
+
+/**
+ * The vehicle behind a client's network id when the player is near it: within `metres` (default 5) of it, or, with
+ * `driver: true`, in its driver seat. 0 otherwise.
+ */
+export function vehicleNearPlayer(
+  source: number,
+  netId: unknown,
+  options: { metres?: number; driver?: boolean } = {},
+): number {
+  const vehicle = vehicleFromNet(netId);
+  if (!vehicle) return 0;
+  const ped = GetPlayerPed(String(source));
+  if (options.driver)
+    return GetPedInVehicleSeat(vehicle, -1) === ped ? vehicle : 0;
+  const [px = 0, py = 0, pz = 0] = GetEntityCoords(ped);
+  const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle);
+  return Math.hypot(vx - px, vy - py, vz - pz) <= (options.metres ?? 5)
+    ? vehicle
+    : 0;
 }

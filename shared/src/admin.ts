@@ -149,6 +149,25 @@ export type WidgetSpec = WidgetBase &
     | { widget: "entity"; modelPath: string }
     /** Read only: shows the value (state the script fills in, e.g. a default it reports). */
     | ({ widget: "info"; mono?: boolean } & ValueLabels)
+    /**
+     * A button that runs the script's `panel.onAction(path, (admin, record) => error | null)` on this record (or the
+     * settings object); nothing is stored at `path`, it names the action. `button`: lang key of the button text;
+     * `confirm`: lang key of a question asked first (destructive or costly actions); `danger`: red button.
+     */
+    | {
+        widget: "action";
+        button: string;
+        icon?: string;
+        confirm?: string;
+        danger?: boolean;
+      }
+    /**
+     * A ground polygon (data: a list of `{ x, y, z }` corners, data spec `{ type: "list", of: { type: "vec3" }, min: 3 }`):
+     * corners added with the free camera or the admin's position, removed one by one; the shape is drawn in the world
+     * while the field is on screen. `heightPath`: a number section of the same record drawn as the metres above and
+     * below the corners.
+     */
+    | { widget: "zone"; heightPath?: string; max?: number }
   );
 
 /** How a read-only value is shown: stored values with a lang key show that text; an empty value shows `empty`. */
@@ -236,9 +255,11 @@ export type AdminPatch =
       file: string;
       action: "import";
       records: Record<string, Record<string, unknown>>;
-    };
+    }
+  /** An `action` widget's button: runs the script's `panel.onAction(id, ...)` handler on the record; stores nothing itself. */
+  | { file: string; action: "run"; key?: string; id: string };
 
-export type AdminResult = { ok: true } | { ok: false; error: string };
+export type AdminResult = import("./action").ActionResult;
 
 /** What the panel gets per script when it opens: the schema, the script's lang texts and its current data. */
 export interface AdminPanelSnapshot {
@@ -273,11 +294,29 @@ export interface UpdateInfo {
   url: string;
 }
 
+/** A script ai-core recommends on the dashboard while its condition holds and the owner has not dismissed it. */
+export interface Recommendation {
+  id: string;
+  /** ai-core lang keys: the script's name and one line why. */
+  title: string;
+  desc: string;
+  url: string;
+  /** Free to get: the card shows a "Free" chip. */
+  free: boolean;
+}
+
+/** A recommendation that starts showing (`value`) or stops (`null`). */
+export interface RecommendationDelta {
+  id: string;
+  value: Recommendation | null;
+}
+
 export interface AdminOpenData {
   panels: AdminPanelSnapshot[];
   lookups: Lookups;
   external: ExternalPanel[];
   updates: UpdateInfo[];
+  recommendations: Recommendation[];
 }
 
 /** A changed record (records: `key`; settings: no key, `value` is the whole object); `null` = deleted. */
@@ -306,6 +345,8 @@ export const ADMIN = {
   showEvent: "ai-core:admin:show",
   /** Server -> admins with the panel open: (delta: AdminDelta). */
   deltaEvent: "ai-core:admin:delta",
+  /** Server -> admins with the panel open: (delta: RecommendationDelta). */
+  recommendationEvent: "ai-core:admin:recommendation",
   /** Server -> client of a world (`sync: "all"`) file: (file, key | null, value). Prefixed with the resource name. */
   worldEvent: (resource: string): string => `${resource}:admin:world`,
   /** Callback: () -> { [file]: { key: value } } world records changed since the resource started. */

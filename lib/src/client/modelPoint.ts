@@ -23,6 +23,12 @@ export interface ModelPointOptions {
   onPressed: (entity: number) => unknown;
 }
 
+/** A point on every vehicle (`Points.addVehicle`): ox_target's global vehicle option, or a prompt at the nearest one. */
+export type VehiclePointOptions = Omit<
+  ModelPointOptions,
+  "models" | "vehicles"
+>;
+
 const SCAN_MS = 500;
 const scanning = new Set<ModelPoint>();
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -51,6 +57,8 @@ export class ModelPoint {
   private entity = 0;
   private shown: string | null = null;
   private attached = false;
+  /** Every networked vehicle, whatever its model (`Points.addVehicle`). */
+  private readonly global: boolean;
 
   constructor(
     readonly promptId: string,
@@ -60,30 +68,31 @@ export class ModelPoint {
       typeof m === "number" ? m : GetHashKey(m),
     );
     this.hashSet = new Set(this.hashes);
+    this.global = options.vehicles === true && options.models.length === 0;
   }
 
   attach(mode: Style): void {
     if (mode === "target") {
-      target("addModel", this.options.models, [
-        {
-          name: this.promptId,
-          label: readLabel(this.options.label),
-          icon: this.options.icon,
-          distance: this.options.radius ?? 1.5,
-          canInteract: (entity: unknown) =>
-            readAllowed(
-              this.options.canShow,
-              typeof entity === "number" ? entity : 0,
-            ),
-          onSelect: (data: unknown) => {
-            const entity =
-              typeof data === "object" && data !== null
-                ? Reflect.get(data, "entity")
-                : 0;
-            this.run(typeof entity === "number" ? entity : 0);
-          },
+      const option = {
+        name: this.promptId,
+        label: readLabel(this.options.label),
+        icon: this.options.icon,
+        distance: this.options.radius ?? 1.5,
+        canInteract: (entity: unknown) =>
+          readAllowed(
+            this.options.canShow,
+            typeof entity === "number" ? entity : 0,
+          ),
+        onSelect: (data: unknown) => {
+          const entity =
+            typeof data === "object" && data !== null
+              ? Reflect.get(data, "entity")
+              : 0;
+          this.run(typeof entity === "number" ? entity : 0);
         },
-      ]);
+      };
+      if (this.global) target("addGlobalVehicle", [option]);
+      else target("addModel", this.options.models, [option]);
       this.attached = true;
       return;
     }
@@ -92,8 +101,10 @@ export class ModelPoint {
   }
 
   detach(targetRunning: boolean): void {
-    if (this.attached && targetRunning)
-      target("removeModel", this.options.models, this.promptId);
+    if (this.attached && targetRunning) {
+      if (this.global) target("removeGlobalVehicle", this.promptId);
+      else target("removeModel", this.options.models, this.promptId);
+    }
     this.attached = false;
     scanning.delete(this);
     schedule();
@@ -103,21 +114,23 @@ export class ModelPoint {
 
   check(x: number, y: number, z: number): void {
     const radius = this.options.radius ?? 1.5;
-    let found = this.options.vehicles ? this.nearestVehicle(x, y, z, radius) : 0;
+    let found = this.options.vehicles
+      ? this.nearestVehicle(x, y, z, radius)
+      : 0;
     if (!this.options.vehicles)
       for (const hash of this.hashes) {
-      found = GetClosestObjectOfType(
-        x,
-        y,
-        z,
-        radius,
-        hash,
-        false,
-        false,
-        false,
-      );
-      if (found) break;
-    }
+        found = GetClosestObjectOfType(
+          x,
+          y,
+          z,
+          radius,
+          hash,
+          false,
+          false,
+          false,
+        );
+        if (found) break;
+      }
     this.entity = found;
     this.show(
       found && readAllowed(this.options.canShow, found)
@@ -130,12 +143,17 @@ export class ModelPoint {
     if (this.entity) this.run(this.entity);
   }
 
-  /** The nearest vehicle of the models within `radius` (the vehicle pool is small). */
+  /** The nearest vehicle of the models (any networked one for a global point) within `radius` (the vehicle pool is small). */
   private nearestVehicle(x: number, y: number, z: number, radius: number) {
     let found = 0;
     let best = radius;
     for (const vehicle of GetGamePool("CVehicle") as number[]) {
-      if (!this.hashSet.has(GetEntityModel(vehicle))) continue;
+      if (
+        this.global
+          ? !NetworkGetEntityIsNetworked(vehicle)
+          : !this.hashSet.has(GetEntityModel(vehicle))
+      )
+        continue;
       const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle, false);
       const dist = Math.hypot(vx - x, vy - y, vz - z);
       if (dist < best) [found, best] = [vehicle, dist];

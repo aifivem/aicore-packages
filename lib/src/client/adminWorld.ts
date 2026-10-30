@@ -1,5 +1,6 @@
 import { ADMIN } from "@aicore-fivem/shared";
 import { createLogger, isRecord, withoutSchemaKey } from "../shared";
+import { FileViews, type RecordReader } from "../shared/records";
 import { triggerServerCallback } from "./callback";
 import { onServerEvent } from "./netEvent";
 
@@ -15,6 +16,7 @@ export class AdminWorld {
   private readonly data = new Map<string, Data>();
   private readonly handlers = new Map<string, ChangeHandler[]>();
   private readonly resource = GetCurrentResourceName();
+  private readonly views = new FileViews((file) => this.get(file));
   /** Resolves once the changes since start are applied (or could not be loaded): the data is current from then on. */
   readonly ready: Promise<void>;
 
@@ -70,6 +72,16 @@ export class AdminWorld {
     this.handlers.set(file, [...(this.handlers.get(file) ?? []), handler]);
   }
 
+  /** A file parsed by `read`, kept current on every change (settings files; parsed before `onChange` handlers run). */
+  view<T>(file: string, read: (raw: unknown) => T): { readonly value: T } {
+    return this.views.view(file, read);
+  }
+
+  /** A records file parsed per record through `readOne` (null leaves a record out); a change re-reads only that record. */
+  records<T>(file: string, readOne: RecordReader<T>): ReadonlyMap<string, T> {
+    return this.views.records(file, readOne);
+  }
+
   private put(file: string, key: string | undefined, value: unknown): void {
     const data = this.data.get(file);
     if (!data) return;
@@ -77,6 +89,7 @@ export class AdminWorld {
       if (isRecord(value)) this.data.set(file, value);
     } else if (value === null) delete data[key];
     else data[key] = value;
+    this.views.changed(file, key, value);
     for (const handler of this.handlers.get(file) ?? []) handler(key, value);
   }
 }
