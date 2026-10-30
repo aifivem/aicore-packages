@@ -108,3 +108,4 @@ export {
   type StateParse,
 } from "../fivem/state";
 export { world } from "./world";
+export { phone } from "./phone";

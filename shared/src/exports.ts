@@ -15,6 +15,7 @@ import type {
   InventoryServerExports,
 } from "./inventory";
 import type { VehicleKeysServerExports } from "./vehicleKeys";
+import type { PhoneServerExports } from "./phone";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -168,7 +169,8 @@ export type AiCoreServerExports = {
     reason?: string,
   ): boolean;
 } & InventoryServerExports &
-  VehicleKeysServerExports;
+  VehicleKeysServerExports &
+  PhoneServerExports;
 
 /** ai-core's client exports. */
 export type AiCoreClientExports = {

@@ -5,6 +5,7 @@ export type * from "./logs";
 export type * from "./exports";
 export type * from "./inventory";
 export * from "./vehicleKeys";
+export * from "./phone";
 export * from "./admin";
 export * from "./vehicles";
 export * from "./menu";
