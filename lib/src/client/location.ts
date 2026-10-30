@@ -5,7 +5,7 @@ export interface LocationName {
   street: string;
   /** The crossing street, when there is one. */
   crossing?: string;
-  /** The area's label (`Vinewood Hills`). */
+  /** The area's label (`Vinewood Hills`), "" where the game has none. */
   zone: string;
 }
 
@@ -15,10 +15,11 @@ export function locationName(coords?: Vec3): LocationName {
   const [streetHash, crossingHash] = GetStreetNameAtCoord(at.x, at.y, at.z);
   const crossing =
     crossingHash !== 0 ? GetStreetNameFromHashKey(crossingHash) : "";
+  const zone = GetLabelText(GetNameOfZone(at.x, at.y, at.z));
   return {
-    street: GetStreetNameFromHashKey(streetHash),
+    street: streetHash !== 0 ? GetStreetNameFromHashKey(streetHash) : "",
     crossing: crossing || undefined,
-    zone: GetLabelText(GetNameOfZone(at.x, at.y, at.z)),
+    zone: zone !== "NULL" ? zone : "",
   };
 }
 
