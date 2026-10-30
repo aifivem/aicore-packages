@@ -5,10 +5,10 @@ import {
   type ItemDefinition,
   type ItemMetadata,
   type UsableItemHandler,
-} from "@aicore-fivem/shared"
-import { resourceExport } from "../fivem/exports"
+} from "@aicore-fivem/shared";
+import { resourceExport } from "../fivem/exports";
 
-const core = resourceExport(CORE.resource)
+const core = resourceExport(CORE.resource);
 
 /**
  * Items through ai-core's inventory layer: the active inventory (ai-inventory, or another the panel picks) answers.
@@ -22,7 +22,7 @@ export const inventory = {
     item: string,
     count = 1,
     metadata?: ItemMetadata,
-    slot?: number
+    slot?: number,
   ): boolean => core.AddItem(inv, item, count, metadata, slot),
   /** Takes items; false when there are not enough. */
   removeItem: (
@@ -30,13 +30,13 @@ export const inventory = {
     item: string,
     count = 1,
     metadata?: ItemMetadata,
-    slot?: number
+    slot?: number,
   ): boolean => core.RemoveItem(inv, item, count, metadata, slot),
   /** How many of an item an inventory holds (stacks with matching metadata only when given). */
   getItemCount: (
     inv: InventoryRef,
     item: string,
-    metadata?: ItemMetadata
+    metadata?: ItemMetadata,
   ): number => core.GetItemCount(inv, item, metadata),
   /** Whether an inventory holds at least `count` of an item. */
   hasItem: (inv: InventoryRef, item: string, count = 1): boolean =>
@@ -46,7 +46,7 @@ export const inventory = {
     inv: InventoryRef,
     item: string,
     count = 1,
-    metadata?: ItemMetadata
+    metadata?: ItemMetadata,
   ): boolean => core.CanCarryItem(inv, item, count, metadata),
   /** Every stack of an inventory with its item label. */
   getItems: (inv: InventoryRef): InventoryStack[] => core.GetItems(inv),
@@ -58,7 +58,7 @@ export const inventory = {
     label: string,
     slots: number,
     maxWeight: number,
-    jobs: string[] = []
+    jobs: string[] = [],
   ): void => core.RegisterStash(name, label, slots, maxWeight, jobs),
   /** Opens a stash or another player's inventory on the player's screen, without range checks (check before). */
   openInventory: (source: number, inv: InventoryRef): boolean =>
@@ -69,4 +69,4 @@ export const inventory = {
   /** An item's label, weight and flags; null when the inventory does not know it. */
   getItemDefinition: (name: string): ItemDefinition | null =>
     core.GetItemDefinition(name),
-}
+};

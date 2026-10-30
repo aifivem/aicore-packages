@@ -7,5 +7,5 @@ export {
   provideExport,
   registerExport,
   resourceExport,
-} from "./exports"
-export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "./locale"
+} from "./exports";
+export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "./locale";

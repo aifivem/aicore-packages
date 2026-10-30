@@ -3,26 +3,26 @@
  * scripts written for oxmysql, mysql-async and ghmattimysql run unchanged. Signatures, callback rules and the
  * legacy aliases follow oxmysql (https://github.com/overextended/oxmysql, LGPL-3.0, Overextended).
  */
-import type { Params } from "./args"
+import type { Params } from "./args";
 import {
   runExecute,
   runQuery,
   runStartTransaction,
   runTransaction,
   type TransactionQuery,
-} from "./engine"
-import { emitError, errorText } from "./log"
-import { recordError } from "./stats"
-import { getPool, isReady } from "./pool"
-import type { QueryType } from "./result"
+} from "./engine";
+import { emitError, errorText } from "./log";
+import { recordError } from "./stats";
+import { getPool, isReady } from "./pool";
+import type { QueryType } from "./result";
 
-type Callback = (result: unknown, error?: string) => void
+type Callback = (result: unknown, error?: string) => void;
 
 /** `params` may be the callback (`MySQL.query(sql, cb)`). */
 function split(params: unknown, cb: unknown): [Params, Callback | undefined] {
-  if (typeof cb === "function") return [params as Params, cb as Callback]
-  if (typeof params === "function") return [undefined, params as Callback]
-  return [params as Params, undefined]
+  if (typeof cb === "function") return [params as Params, cb as Callback];
+  if (typeof params === "function") return [undefined, params as Callback];
+  return [params as Params, undefined];
 }
 
 function callSafely(
@@ -31,11 +31,11 @@ function callSafely(
   ...args: [unknown, string?]
 ): void {
   try {
-    cb(...args)
+    cb(...args);
   } catch (error) {
     console.log(
-      `^1SCRIPT ERROR in invoking resource ${resource}: ${String(error)}^0`
-    )
+      `^1SCRIPT ERROR in invoking resource ${resource}: ${String(error)}^0`,
+    );
   }
 }
 
@@ -48,7 +48,7 @@ function settle(
   cb: Callback | undefined,
   isPromise: boolean | undefined,
   work: Promise<unknown>,
-  sql?: unknown
+  sql?: unknown,
 ): void {
   work.then(
     (result) => cb && callSafely(resource, cb, result),
@@ -56,13 +56,13 @@ function settle(
       const text = errorText(
         resource,
         error,
-        typeof sql === "string" ? sql : undefined
-      )
-      emitError(resource, error, typeof sql === "string" ? sql : undefined)
-      if (cb && isPromise) return callSafely(resource, cb, null, text)
-      console.error(text)
-    }
-  )
+        typeof sql === "string" ? sql : undefined,
+      );
+      emitError(resource, error, typeof sql === "string" ? sql : undefined);
+      if (cb && isPromise) return callSafely(resource, cb, null, text);
+      console.error(text);
+    },
+  );
 }
 
 const queryExport =
@@ -72,17 +72,17 @@ const queryExport =
     params: unknown,
     cb: unknown,
     resource = GetInvokingResource() || "unknown",
-    isPromise?: boolean
+    isPromise?: boolean,
   ): void => {
-    const [values, callback] = split(params, cb)
+    const [values, callback] = split(params, cb);
     settle(
       resource,
       callback,
       isPromise,
       runQuery(resource, type, query, values),
-      query
-    )
-  }
+      query,
+    );
+  };
 
 const executeExport =
   (unpack: boolean) =>
@@ -91,50 +91,50 @@ const executeExport =
     params: unknown,
     cb: unknown,
     resource = GetInvokingResource() || "unknown",
-    isPromise?: boolean
+    isPromise?: boolean,
   ): void => {
-    const [values, callback] = split(params, cb)
+    const [values, callback] = split(params, cb);
     settle(
       resource,
       callback,
       isPromise,
       runExecute(resource, query, values, unpack),
-      query
-    )
-  }
+      query,
+    );
+  };
 
 /** Transactions always answer through the callback: true when committed, false after a rollback. */
 function transactionExport(
   queries: unknown,
   params: unknown,
   cb: unknown,
-  resource = GetInvokingResource() || "unknown"
+  resource = GetInvokingResource() || "unknown",
 ): void {
-  const [values, callback] = split(params, cb)
+  const [values, callback] = split(params, cb);
   runTransaction(resource, queries, values).then(
     () => callback && callSafely(resource, callback, true),
     (error: unknown) => {
-      recordError()
+      recordError();
       console.error(
-        `${resource} was unable to complete a transaction!\n${error instanceof Error ? error.message : String(error)}`
-      )
+        `${resource} was unable to complete a transaction!\n${error instanceof Error ? error.message : String(error)}`,
+      );
       emit("oxmysql:transaction-error", {
         message: error instanceof Error ? error.message : String(error),
         resource,
-      })
-      if (callback) callSafely(resource, callback, false)
-    }
-  )
+      });
+      if (callback) callSafely(resource, callback, false);
+    },
+  );
 }
 
 function startTransactionExport(
   work: (query: TransactionQuery) => Promise<boolean | void>,
-  resource = GetInvokingResource() || "unknown"
+  resource = GetInvokingResource() || "unknown",
 ) {
   return runStartTransaction(work).catch((error: unknown) => {
-    console.error(errorText(resource, error))
-    return false
-  })
+    console.error(errorText(resource, error));
+    return false;
+  });
 }
 
 /** Every oxmysql export by name (`execute` and `fetch` are its deprecated aliases of `query`). */
@@ -153,19 +153,19 @@ export const OXMYSQL_EXPORTS: Record<string, (...args: never[]) => unknown> = {
   store: (query: string, cb: Callback) => cb(query),
   execute: queryExport(null),
   fetch: queryExport(null),
-}
+};
 
 /** The `<name>_async` / `<name>Sync` form: (query, params, resource?) → Promise. */
 export function promiseForm(
-  name: string
+  name: string,
 ): (query: unknown, params?: unknown, resource?: string) => Promise<unknown> {
   const fn = OXMYSQL_EXPORTS[name] as unknown as (
     q: unknown,
     p: unknown,
     cb: Callback,
     r: string,
-    promise: boolean
-  ) => unknown
+    promise: boolean,
+  ) => unknown;
   return (query, params = [], resource = GetInvokingResource() || "unknown") =>
     new Promise((resolve, reject) => {
       fn(
@@ -173,9 +173,9 @@ export function promiseForm(
         params,
         (result, error) => (error ? reject(new Error(error)) : resolve(result)),
         resource,
-        true
-      )
-    })
+        true,
+      );
+    });
 }
 
 /** Names the legacy resources used for the same functions. */
@@ -184,7 +184,7 @@ export const GHMATTIMYSQL_ALIASES: Record<string, string> = {
   scalar: "scalar",
   transaction: "transaction",
   store: "store",
-}
+};
 export const MYSQL_ASYNC_ALIASES: Record<string, string> = {
   update: "mysql_execute",
   insert: "mysql_insert",
@@ -192,4 +192,4 @@ export const MYSQL_ASYNC_ALIASES: Record<string, string> = {
   scalar: "mysql_fetch_scalar",
   transaction: "mysql_transaction",
   store: "mysql_store",
-}
+};
