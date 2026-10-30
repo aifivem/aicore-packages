@@ -21,6 +21,8 @@ export interface MenuRequest {
 /** ai-core's item picker (admin tools): every item of the active inventory with its picture, search and a count. */
 export interface ItemPickerRequest {
   title: string;
+  /** Whose inventory the items go to (server id): its free weight caps the list. The picking admin when absent. */
+  target?: number;
 }
 
 /** One item the picker shows. */
@@ -28,9 +30,23 @@ export interface PickerItem {
   name: string;
   label: string;
   image?: string;
+  /** Weight of one, in the inventory's unit (grams for ai-inventory and ox_inventory). */
+  weight: number;
 }
 
-/** Callback (admins only): () -> PickerItem[], the active inventory's items for the picker. */
+/** One row of the picker's list: what the player asked for. */
+export interface PickedItem {
+  name: string;
+  count: number;
+}
+
+/** What the picker gets from the server: the items, and the target's weight when the inventory can tell it. */
+export interface ItemPickerData {
+  items: PickerItem[];
+  room: { weight: number; maxWeight: number } | null;
+}
+
+/** Callback (admins only): (target: number | null) -> ItemPickerData. */
 export const ITEM_PICKER_CALLBACK = "ai-core:admin:items";
 
 /** What `menu()` resolves with when the player goes back from a sub menu (`back: true`). */
@@ -73,8 +89,6 @@ export const MENU_EVENTS = {
   menuHover: "ai-core:client:menuHover",
   /** Client local: (resource, requestId, itemId, checked) the player flipped a switch row; the menu stays open. */
   menuToggle: "ai-core:client:menuToggle",
-  /** Client local: (resource, requestId, name, count) the player picked an item in the item picker (it stays open). */
-  itemPicked: "ai-core:client:itemPicked",
   /** Client local: (resource, requestId, values | null) the player confirmed or closed the input dialog. */
   inputResult: "ai-core:client:inputResult",
 } as const;

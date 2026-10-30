@@ -41,6 +41,8 @@ export interface KeybindInfo {
   hint?: KeyHintWhen;
   /** Font Awesome solid icon name (without `fa-`) next to the hint. */
   icon?: string;
+  /** A short text for the hint (one or two words); the description when absent. */
+  hintLabel?: string;
 }
 
 /** When a key hint shows: on foot, in a vehicle, or always. */

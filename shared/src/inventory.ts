@@ -91,6 +91,8 @@ export interface InventoryAdapter {
   openInventory(source: number, inv: InventoryRef): boolean;
   getItemDefinition(name: string): ItemDefinition | null;
   getItemDefinitions(): Record<string, ItemDefinition>;
+  /** A player's carried weight and limit, when the inventory tells them. */
+  getWeight?(source: number): { weight: number; maxWeight: number } | null;
   /**
    * Inventories with their own usable item list get every handler here. The others call the framework's use
    * functions (`ESX.UseItem`, QB `CanUseItem`), which ai-core's bridge answers from the layer.

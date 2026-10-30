@@ -4,6 +4,7 @@ import {
   type InputRequest,
   type ItemPickerRequest,
   type MenuRequest,
+  type PickedItem,
 } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 
@@ -20,10 +21,7 @@ export interface MenuListeners {
 class Requests {
   private readonly resource = GetCurrentResourceName();
   private readonly waiting = new Map<number, (value: unknown) => void>();
-  private readonly hovers = new Map<
-    number,
-    MenuListeners & { onPick?: (name: string, count: number) => void }
-  >();
+  private readonly hovers = new Map<number, MenuListeners>();
   private nextId = 0;
 
   constructor() {
@@ -53,18 +51,6 @@ class Requests {
           this.hovers.get(id)?.onToggle?.(item, checked);
       },
     );
-    on(
-      MENU_EVENTS.itemPicked,
-      (owner: unknown, id: unknown, name: unknown, count: unknown) => {
-        if (
-          owner === this.resource &&
-          typeof id === "number" &&
-          typeof name === "string" &&
-          typeof count === "number"
-        )
-          this.hovers.get(id)?.onPick?.(name, count);
-      },
-    );
     on(MENU_EVENTS.menuResult, answer);
     on(MENU_EVENTS.inputResult, answer);
   }
@@ -72,9 +58,7 @@ class Requests {
   ask(
     open: (id: number) => void,
     read: (value: unknown) => void,
-    listeners?: MenuListeners & {
-      onPick?: (name: string, count: number) => void;
-    },
+    listeners?: MenuListeners,
   ): void {
     const id = ++this.nextId;
     this.waiting.set(id, read);
@@ -124,18 +108,33 @@ export function input(
 
 /**
  * Shows ai-core's item picker (admin tools; the item list is only sent to admins): every item of the active inventory
- * with its picture, a search and a count. `onPick(name, count)` runs for every pick while it stays open; resolves
- * when the player closes it.
+ * with its picture and a search; clicks fill a list on the right (1, Ctrl 10, Shift 100) that stops at `target`'s
+ * weight limit. Resolves with the list when the player takes it, null when closed. The caller's server gives the
+ * items and checks every one.
  */
 export function itemPicker(
   request: ItemPickerRequest,
-  onPick: (name: string, count: number) => void,
-): Promise<void> {
+): Promise<PickedItem[] | null> {
   return new Promise((resolve) =>
     requests.ask(
       (id) => core.OpenItemPicker(id, request),
-      () => resolve(),
-      { onPick },
+      (value) => {
+        if (!Array.isArray(value)) return resolve(null);
+        resolve(
+          value.flatMap((v: unknown) =>
+            typeof v === "object" &&
+            v !== null &&
+            "name" in v &&
+            "count" in v &&
+            typeof v.name === "string" &&
+            typeof v.count === "number" &&
+            Number.isInteger(v.count) &&
+            v.count > 0
+              ? [{ name: v.name, count: v.count }]
+              : [],
+          ),
+        );
+      },
     ),
   );
 }

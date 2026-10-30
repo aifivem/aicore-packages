@@ -199,7 +199,7 @@ export type AiCoreClientExports = {
   OpenMenu(requestId: number, request: MenuRequest): void;
   /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */
   OpenInput(requestId: number, request: InputRequest): void;
-  /** Opens the item picker; picks arrive as `MENU_EVENTS.itemPicked`, closing as `menuResult` (null). */
+  /** Opens the item picker; the list (`PickedItem[]`) or null arrives as `MENU_EVENTS.menuResult`. */
   OpenItemPicker(requestId: number, request: ItemPickerRequest): void;
   /** The key a lib `Keybind` was registered with (mapping command `+<name>_<key>`); null until it is registered. */
   GetKeybindKey(name: string): string | null;
@@ -293,6 +293,8 @@ export type AiInventoryServerExports = {
   ClearInventory(inv: number | string): void;
   /** One item definition (ox shape), or every one by name when `name` is left out. */
   Items(name?: string): unknown;
+  /** An inventory's carried weight and limit (grams), null when it is not loaded. */
+  GetWeight(inv: number | string): { weight: number; maxWeight: number } | null;
 };
 
 /** ai-inventory's own client exports (ai-core's inventory adapter uses them). */

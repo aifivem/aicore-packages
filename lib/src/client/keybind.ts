@@ -23,6 +23,8 @@ export interface KeybindOptions {
   hint?: KeyHintWhen;
   /** Font Awesome solid icon name (without `fa-`) HUDs draw next to the hint. */
   icon?: string;
+  /** A short hint text (a lang text, one or two words); `description` when absent. */
+  hintLabel?: string;
 }
 
 const resource = GetCurrentResourceName();
@@ -83,6 +85,7 @@ export class Keybind {
       mapper: options.defaultMapper ?? "keyboard",
       hint: options.hint,
       icon: options.icon,
+      hintLabel: options.hintLabel,
     };
     requestKey(info, (key) => this.register(key.toUpperCase()));
   }
