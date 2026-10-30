@@ -80,9 +80,11 @@ export interface TabSpec {
   cards: CardSpec[];
   /** records: a second line in list rows (path of a value). */
   listSub?: string;
-  /** records: lang keys of the create button and delete confirmation. */
+  /** records: lang keys of the create button and of the delete button (a short verb, also the dialog's action). */
   createLabel?: string;
   deleteLabel?: string;
+  /** records: lang key of what deleting a record leaves behind, shown in the delete dialog (default: the generic text). */
+  deleteDesc?: string;
 }
 
 export interface PanelSchema {
