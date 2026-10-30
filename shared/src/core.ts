@@ -67,6 +67,10 @@ export const CORE = {
 
   /** Server -> client: (spawn: SpawnPoint) puts the loaded character into the world. */
   spawnEvent: "ai-core:client:spawn",
+  /** Server -> client: (options: { id, label, last }[]) the character is loaded; the player picks where to appear. */
+  chooseSpawnEvent: "ai-core:client:chooseSpawn",
+  /** Callback: (id) -> { ok } the picked spawn option (from `chooseSpawnEvent`); `spawnEvent` follows. */
+  spawnChoiceCallback: "ai-core:spawnChoice",
   /** Server -> client: () the character was let go (switch); show the character screen again. */
   openCharactersEvent: "ai-core:client:openCharacters",
 } as const;
