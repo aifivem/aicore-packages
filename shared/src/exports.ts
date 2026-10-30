@@ -86,8 +86,8 @@ export type AiCoreServerExports = {
 
   /** Adds a check every connecting player passes: return a refusal text, or null to let the player through. */
   AddConnectionCheck(id: string, check: (source: number, identifiers: Record<string, string>) => string | null | undefined): void;
-  /** Declares that `keep` makes the `remove` resources unneeded (console warning, refused joins while both run). */
-  RegisterReplacement(keep: string, remove: string | string[]): void;
+  /** Declares that `keep` (default: the calling resource) makes the `remove` resources unneeded (console warning, refused joins while both run). */
+  RegisterReplacement(remove: string | string[], keep?: string): void;
   /** Scripts installed next to the one that replaces them; `running` = both started. */
   GetConflicts(): { keep: string; remove: string; running: boolean; from: string }[];
 
