@@ -1,4 +1,5 @@
-import type { DataSpec } from "@aicore-fivem/shared";
+import { CORE, type DataSpec, type LookupSource } from "@aicore-fivem/shared";
+import { resourceExport } from "../../fivem/exports";
 import { isRecord } from "../../shared";
 
 /** Lang keys of the generic refusals (ai-core's locales). */
@@ -8,7 +9,30 @@ export const ERR = {
   length: "ADMIN_ERR_LENGTH",
   pattern: "ADMIN_ERR_PATTERN",
   required: "ADMIN_ERR_REQUIRED",
+  lookup: "ADMIN_ERR_LOOKUP",
 } as const;
+
+/** Values of a lookup list from ai-core (items, jobs, gangs, accounts), cached for 2 s; null = not known (accepted). */
+class LookupCache {
+  private readonly lists = new Map<LookupSource, { at: number; values: Set<string> }>();
+
+  values(source: LookupSource): Set<string> | null {
+    const cached = this.lists.get(source);
+    if (cached && Date.now() - cached.at < 2000) return cached.values.size > 0 ? cached.values : null;
+    let list: unknown = [];
+    try {
+      list = resourceExport(CORE.resource).GetLookupValues(source);
+    } catch {
+      // ai-core restarting: the value is checked again on the next edit.
+    }
+    const values = new Set(Array.isArray(list) ? list.filter((v): v is string => typeof v === "string") : []);
+    this.lists.set(source, { at: Date.now(), values });
+    // An empty list (no inventory running yet) refuses nothing.
+    return values.size > 0 ? values : null;
+  }
+}
+
+const lookups = new LookupCache();
 
 export interface Refusal {
   error: string;
@@ -28,6 +52,7 @@ export function validate(spec: DataSpec, value: unknown, path: string): Refusal 
       if (typeof value !== "string") return fail(ERR.type);
       if (value.length < (spec.min ?? 1) || value.length > (spec.max ?? 120)) return fail(ERR.length);
       if (spec.pattern && !new RegExp(spec.pattern).test(value)) return fail(ERR.pattern);
+      if (spec.lookup && value !== "" && lookups.values(spec.lookup)?.has(value) === false) return fail(ERR.lookup);
       return null;
     }
     case "number": {
@@ -47,6 +72,7 @@ export function validate(spec: DataSpec, value: unknown, path: string): Refusal 
       for (const name of value) {
         if (typeof name !== "string" || name.length > (spec.itemMax ?? 64) || seen.has(name)) return fail(ERR.type);
         if (!pattern.test(name)) return fail(ERR.pattern);
+        if (spec.lookup && lookups.values(spec.lookup)?.has(name) === false) return fail(ERR.lookup);
         seen.add(name);
       }
       return null;

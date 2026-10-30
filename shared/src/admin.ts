@@ -3,13 +3,28 @@
  * panel, the resource keeps, validates and saves its own `data/*.json` (the lib's `AdminPanel`).
  */
 
+/**
+ * Values a field picks from what exists in the game: items of the active inventory, jobs, gangs, money accounts.
+ * A `lookup` on a text or names spec makes the server refuse anything else and the panel offer the list.
+ */
+export type LookupSource = "item" | "job" | "gang" | "account";
+
+/** One choice of a lookup list. */
+export interface LookupOption {
+  value: string;
+  label: string;
+}
+
+/** Every lookup list, sent with the panel when it opens. */
+export type Lookups = Record<LookupSource, LookupOption[]>;
+
 /** Data model of one value (server validation). Every spec may be `optional` (absent allowed). */
 export type DataSpec =
-  | { type: "text"; min?: number; max?: number; pattern?: string; optional?: boolean }
+  | { type: "text"; min?: number; max?: number; pattern?: string; lookup?: LookupSource; optional?: boolean }
   | { type: "number"; min?: number; max?: number; integer?: boolean; optional?: boolean }
   | { type: "bool"; optional?: boolean }
   | { type: "enum"; values: Array<string | number>; optional?: boolean }
-  | { type: "names"; max?: number; itemMax?: number; pattern?: string; optional?: boolean }
+  | { type: "names"; max?: number; itemMax?: number; pattern?: string; lookup?: LookupSource; optional?: boolean }
   | { type: "vec3"; optional?: boolean }
   | { type: "vec4"; optional?: boolean }
   | { type: "object"; fields: Record<string, DataSpec>; optional?: boolean }
@@ -40,11 +55,18 @@ export interface FileSpec {
 /** Controls of the panel; `path` is dotted from the record (or the settings object), a write replaces its section. */
 export type WidgetSpec = WidgetBase &
   (
-    | { widget: "text"; placeholder?: string }
+    | {
+        widget: "text";
+        placeholder?: string;
+        /** Pick from a lookup list (autocomplete; the data spec carries the same lookup). */
+        lookup?: LookupSource;
+        /** Name suggestions as buttons: street and zone names at the point at `from` (a path in the same record), else at the admin. */
+        suggest?: { from?: string };
+      }
     | { widget: "number"; min?: number; max?: number; step?: number; unit?: string }
     | { widget: "switch" }
     | { widget: "select"; options: Array<{ value: string | number; label: string }> }
-    | { widget: "tags"; placeholder?: string }
+    | { widget: "tags"; placeholder?: string; lookup?: LookupSource }
     | {
         widget: "point";
         heading?: boolean;
@@ -139,6 +161,27 @@ export interface AdminPanelSnapshot {
   schema: PanelSchema;
   texts: Record<string, string>;
   data: Record<string, unknown>;
+}
+
+/**
+ * Another script's own settings screen listed on ai-core's dashboard: opened by its command (`command`, run on the
+ * admin's client after ai-core's panel closes) or embedded as a page (`url`, e.g. `https://cfx-nui-<resource>/ui/index.html`).
+ */
+export interface ExternalPanel {
+  id: string;
+  resource: string;
+  label: string;
+  icon?: string;
+  description?: string;
+  command?: string;
+  url?: string;
+}
+
+/** What ai-core answers when an admin opens the panel. */
+export interface AdminOpenData {
+  panels: AdminPanelSnapshot[];
+  lookups: Lookups;
+  external: ExternalPanel[];
 }
 
 /** A changed record (records: `key`; settings: no key, `value` is the whole object); `null` = deleted. */

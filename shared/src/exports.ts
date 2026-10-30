@@ -84,6 +84,10 @@ export type AiCoreServerExports = {
   /** The lib's `addCommand` announces a resource's commands for the panel's Commands tab (dropped when it stops). */
   RegisterCommands(resource: string, commands: CommandInfo[]): void;
 
+  /** Values of a lookup list (items of the active inventory, jobs, gangs, accounts) for the admin panel's validation. */
+  GetLookupValues(source: "item" | "job" | "gang" | "account"): string[];
+  /** Lists another script's own settings screen on the dashboard (opened by `command` or embedded `url`). */
+  RegisterExternalPanel(panel: { id?: string; label: string; icon?: string; description?: string; command?: string; url?: string }): void;
   /** Adds a check every connecting player passes: return a refusal text, or null to let the player through. */
   AddConnectionCheck(id: string, check: (source: number, identifiers: Record<string, string>) => string | null | undefined): void;
   /** Declares that `keep` (default: the calling resource) makes the `remove` resources unneeded (console warning, refused joins while both run). */
