@@ -22,6 +22,25 @@ export function formatText(template: string, args: ReadonlyArray<string | number
   });
 }
 
+/** GTA vehicle class (`GetVehicleClassFromName`) -> the type `CreateVehicleServerSetter` wants. */
+export function vehicleTypeOfClass(vehicleClass: number): string {
+  switch (vehicleClass) {
+    case 8:
+    case 13:
+      return "bike";
+    case 14:
+      return "boat";
+    case 15:
+      return "heli";
+    case 16:
+      return "plane";
+    case 21:
+      return "train";
+    default:
+      return "automobile";
+  }
+}
+
 /** One parsed value as an `args` result: `[value]`, or null to refuse the call. */
 export const asArgs = <T>(value: T | null): [T] | null => (value === null ? null : [value]);
 

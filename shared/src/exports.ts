@@ -159,6 +159,15 @@ export type AiVehicleKeysServerExports = {
   RemoveKeys(source: number, vehicle: number | string): void;
 };
 
+/** ai-death's server exports. */
+export type AiDeathServerExports = {
+  /** Gets a downed player up where they lie; false when they are not down. */
+  Revive(source: number): boolean;
+  IsDead(source: number): boolean;
+  /** Full health for a player who is not down. */
+  Heal(source: number): void;
+};
+
 /** ai-police's server exports. */
 export type AiPoliceServerExports = {
   /** A translated alert text at a place, to on-duty officers (blip + notification). */
@@ -181,6 +190,7 @@ declare global {
     "ai-appearance": AiAppearanceClientExports;
     "ai-vehicles": AiVehiclesServerExports;
     "ai-vehiclekeys": AiVehicleKeysServerExports;
+    "ai-death": AiDeathServerExports;
     "ai-radialmenu": AiRadialClientExports;
     "ai-police": AiPoliceServerExports;
     "ai-doorlock": AiDoorlockServerExports;
