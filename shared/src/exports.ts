@@ -3,6 +3,7 @@ import type { CommandInfo, KeyHintRequest, KeyHintView } from "./commands";
 import type { LogChannel, LogOptions } from "./logs";
 import type {
   AiPlayerData,
+  Branding,
   CharacterInfo,
   GangMembership,
   JobMembership,
@@ -113,6 +114,8 @@ export type AiCoreServerExports = {
   GetMeta(src: number, key: string): unknown;
   SetMeta(src: number, key: string, value: unknown): boolean;
 
+  /** The server's brand (name, subtitle, taglines, background) from the panel's General settings. */
+  GetBranding(): Branding;
   /** Every job definition (a copy of the whole map: for rare reads; one job is `GetJobDefinition`). */
   GetJobDefinitions(): Record<string, JobDefinition>;
   GetGangDefinitions(): Record<string, GangDefinition>;
