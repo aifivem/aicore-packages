@@ -41,6 +41,8 @@ export const CORE = {
   clientCacheEvent: "ai-core:client:cache",
   /** Client local event: (visible: boolean) HUDs show or hide (a full-screen UI opened or closed; lib `hud`). */
   clientHudVisibleEvent: "ai-core:client:hudVisible",
+  /** Client local: (paused: boolean) the weather and time sync is paused (interiors, scenes) or runs again. */
+  clientWorldSyncEvent: "ai-core:client:worldSync",
   /** Server -> client callback: (model: string) the `CreateVehicleServerSetter` type of a model, null when the game has no such vehicle (ai-core's client answers for every resource, lib `spawnVehicle`). */
   vehicleTypeCallback: "ai-core:vehicleType",
   /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */

@@ -256,6 +256,8 @@ export type AiCoreClientExports = {
   /** Pauses the weather and time sync while any reason holds (interiors, scenes). */
   PauseWorldSync(reason: string): void;
   ResumeWorldSync(reason: string): void;
+  /** Whether the weather and time sync is paused now (for a weather script that starts later). */
+  IsWorldSyncPaused(): boolean;
   Notify(notification: Notification): void;
   /** Shows the progress bar for `duration` ms (the calling resource runs the action and its animation). */
   ShowProgress(label: string, duration: number): void;
