@@ -57,19 +57,19 @@ export const CORE = {
   spawnEvent: "ai-core:client:spawn",
   /** Server -> client: () the character was let go (switch); show the character screen again. */
   openCharactersEvent: "ai-core:client:openCharacters",
-} as const;
+} as const
 
 /** GlobalState key holding how many players are on duty in a job (counts only, never member lists). */
-export const dutyCountKey = (job: string): string => `ai:duty:${job}`;
+export const dutyCountKey = (job: string): string => `ai:duty:${job}`
 
 /** GlobalState key holding the resource name of the active inventory (null while none runs). */
-export const INVENTORY_STATE_KEY = "ai:inventory";
+export const INVENTORY_STATE_KEY = "ai:inventory"
 
 /** GlobalState key: true when the server reports player deaths itself (FXServer 38039+ `onPedDeath`), so clients need not watch their health. */
-export const PED_DEATH_STATE_KEY = "ai:pedDeath";
+export const PED_DEATH_STATE_KEY = "ai:pedDeath"
 
 /** The first FXServer build known to fire `onPedDeath` / `onPedHealthChanged` (citizenfx/fivem 1424ad0). */
-export const PED_EVENTS_MIN_BUILD = 38039;
+export const PED_EVENTS_MIN_BUILD = 38039
 
 /** Why a character is let go: the player left, or went back to the character screen. */
-export type UnloadReason = "dropped" | "switch";
+export type UnloadReason = "dropped" | "switch"
