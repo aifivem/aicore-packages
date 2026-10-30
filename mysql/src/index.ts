@@ -10,6 +10,7 @@ import type { Params } from "./args";
 import { runExecute, runQuery, runStartTransaction, runTransaction, type TransactionQuery } from "./engine";
 import { emitError, errorText } from "./log";
 import { closePool, getPool, isReady, setPoolSize } from "./pool";
+import { typedDb } from "./typed";
 import { recordError } from "./stats";
 
 const resource = GetCurrentResourceName();
@@ -61,5 +62,12 @@ export const mysql = {
   close: closePool,
 };
 
+/**
+ * Typed table access on the resource's generated `resource/server/tables.ts`:
+ * `const db = tables<Tables, TableInserts>(); await db.select("ai_core_users", ["id"], { fivem })`.
+ */
+export const tables = <T extends Record<string, Record<string, unknown>>, I extends { [K in keyof T]: Record<string, unknown> }>() => typedDb<T, I>(mysql);
+
 export type { Params, TransactionQuery };
+export type { SelectOptions } from "./typed";
 export { collectQueryStats, type QueryRecord, type QueryStatsSnapshot } from "./stats";
