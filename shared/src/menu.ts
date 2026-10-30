@@ -34,6 +34,12 @@ export type InputField =
       type: "text";
       maxLength?: number;
       placeholder?: string;
+      /** A several-line text box (notes, descriptions). */
+      multiline?: boolean;
+      /** The text the field starts with. */
+      value?: string;
+      /** Shown, not edited (reading a note); an empty read-only field does not block the confirm. */
+      readOnly?: boolean;
     };
 
 export interface InputRequest {

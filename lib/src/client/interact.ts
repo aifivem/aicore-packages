@@ -51,9 +51,12 @@ export function readLabel(label: string | (() => string)): string {
 }
 
 /** A `canShow`, read safely (absent = allowed). */
-export function readAllowed(canShow: (() => boolean) | undefined): boolean {
+export function readAllowed(
+  canShow: ((entity: number) => boolean) | undefined,
+  entity = 0,
+): boolean {
   try {
-    return canShow?.() ?? true;
+    return canShow?.(entity) ?? true;
   } catch (error) {
     log.error("point canShow failed", error);
     return false;
