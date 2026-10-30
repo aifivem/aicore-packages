@@ -83,6 +83,16 @@ async function seatPlayer(
   }, 2000, 150).catch(() => false);
 }
 
+const PLATE_LETTERS = "ABCDEFGHJKLMNPRSTUVWXYZ";
+
+/** A plate like the game's own: two digits, three letters, three digits. */
+function randomPlate(): string {
+  const digit = () => String(Math.floor(Math.random() * 10));
+  const letter = () =>
+    PLATE_LETTERS[Math.floor(Math.random() * PLATE_LETTERS.length)] ?? "A";
+  return `${digit()}${digit()}${letter()}${letter()}${letter()}${digit()}${digit()}${digit()}`;
+}
+
 /**
  * Creates a networked vehicle on the server (strict entity lockdown) and sets it up in one step: plate, fuel, state
  * bags, look (props / setup), lock, bucket, keys for its purpose, a driver and passengers. Resolves the entity, or null when the model does not exist or creation failed.
@@ -111,8 +121,10 @@ export async function spawnVehicle(
   )
     return null;
   if (options.persistent !== false) SetEntityOrphanMode(vehicle, 2);
-  if (options.plate)
-    SetVehicleNumberPlateText(vehicle, options.plate.slice(0, 8));
+  // The server reads the plate only after the owner client's first sync: the plate is always set here (a random one
+  // when none is given), so keys never go to an empty plate.
+  const plate = (options.plate ?? randomPlate()).slice(0, 8);
+  SetVehicleNumberPlateText(vehicle, plate);
   if (options.bucket !== undefined)
     SetEntityRoutingBucket(vehicle, options.bucket);
   if (options.locked) SetVehicleDoorsLocked(vehicle, 2);
@@ -123,8 +135,20 @@ export async function spawnVehicle(
   if (options.setup) state.set(VEHICLE_BAGS.setup, options.setup, true);
   for (const [key, value] of Object.entries(options.bags ?? {}))
     state.set(key, value, true);
-  if (options.keysTo !== undefined)
-    vehicleKeys.give(options.keysTo, vehicle, options.purpose ?? "temporary");
+  if (options.keysTo !== undefined) {
+    const synced = await waitFor(
+      () =>
+        !DoesEntityExist(vehicle) ||
+        GetVehicleNumberPlateText(vehicle).trim() === plate.trim() ||
+        undefined,
+      3000,
+    ).catch(() => false);
+    vehicleKeys.give(
+      options.keysTo,
+      synced && DoesEntityExist(vehicle) ? vehicle : plate.trim(),
+      options.purpose ?? "temporary",
+    );
+  }
   const riders = [
     ...(options.driver !== undefined
       ? [{ source: options.driver, seat: -1 }]

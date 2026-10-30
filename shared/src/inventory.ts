@@ -40,6 +40,8 @@ export interface ItemDefinition {
   /** Using it closes the inventory screen. */
   close: boolean;
   description: string;
+  /** A picture url (`nui://`, `https://`) when the inventory has one. */
+  image?: string;
 }
 
 export interface StashDefinition {

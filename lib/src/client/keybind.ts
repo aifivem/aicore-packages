@@ -21,6 +21,8 @@ export interface KeybindOptions {
   onReleased?: () => void;
   /** HUDs list the key in their key hints: on foot, in a vehicle or always (the owner can change it in the panel). */
   hint?: KeyHintWhen;
+  /** Font Awesome solid icon name (without `fa-`) HUDs draw next to the hint. */
+  icon?: string;
 }
 
 const resource = GetCurrentResourceName();
@@ -80,6 +82,7 @@ export class Keybind {
       defaultKey: options.defaultKey ?? "",
       mapper: options.defaultMapper ?? "keyboard",
       hint: options.hint,
+      icon: options.icon,
     };
     requestKey(info, (key) => this.register(key.toUpperCase()));
   }

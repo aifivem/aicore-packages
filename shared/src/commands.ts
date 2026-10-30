@@ -39,6 +39,8 @@ export interface KeybindInfo {
   mapper: string;
   /** When HUDs list it in their key hints (the owner can change it in the panel); absent = never. */
   hint?: KeyHintWhen;
+  /** Font Awesome solid icon name (without `fa-`) next to the hint. */
+  icon?: string;
 }
 
 /** When a key hint shows: on foot, in a vehicle, or always. */
@@ -49,6 +51,8 @@ export interface KeyHintView {
   id: string;
   key: string;
   label: string;
+  /** Font Awesome solid icon name without `fa-`; HUDs draw a key icon when they do not know it. */
+  icon?: string;
 }
 
 /** A hint a script shows for a while (admin noclip keys): a keybind's current key, or a literal key text. */
@@ -56,6 +60,8 @@ export interface KeyHintRequest {
   label: string;
   keybind?: string;
   key?: string;
+  /** Font Awesome solid icon name without `fa-`. */
+  icon?: string;
 }
 
 export const KEY_HINTS = {

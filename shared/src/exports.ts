@@ -9,7 +9,7 @@ import type {
   Notification,
 } from "./player";
 import type { AiVehiclesServerExports } from "./vehicles";
-import type { InputRequest, MenuRequest } from "./menu";
+import type { InputRequest, ItemPickerRequest, MenuRequest } from "./menu";
 import type {
   InventoryClientExports,
   InventoryServerExports,
@@ -186,6 +186,8 @@ export type AiCoreClientExports = {
   /** Opens the running HUD's own settings (ai-hud's /hud, tgiann-lumihud's /hud); false without one. */
   OpenHudSettings(): boolean;
   HasHudSettings(): boolean;
+  /** Opens the keys screen: a keyboard with every key that has an action, and what each does. */
+  OpenKeyboard(): void;
   /** Pauses the weather and time sync while any reason holds (interiors, scenes). */
   PauseWorldSync(reason: string): void;
   ResumeWorldSync(reason: string): void;
@@ -197,6 +199,8 @@ export type AiCoreClientExports = {
   OpenMenu(requestId: number, request: MenuRequest): void;
   /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */
   OpenInput(requestId: number, request: InputRequest): void;
+  /** Opens the item picker; picks arrive as `MENU_EVENTS.itemPicked`, closing as `menuResult` (null). */
+  OpenItemPicker(requestId: number, request: ItemPickerRequest): void;
   /** The key a lib `Keybind` was registered with (mapping command `+<name>_<key>`); null until it is registered. */
   GetKeybindKey(name: string): string | null;
   /** Shows a key hint of the calling resource until `HideKeyHint` (dropped when that resource stops). */

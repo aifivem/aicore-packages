@@ -18,7 +18,7 @@ export {
   type TeleportOptions,
 } from "./player";
 export { notify, progress, type ProgressOptions } from "./notify";
-export { input, menu } from "./menu";
+export { input, itemPicker, menu, type MenuListeners } from "./menu";
 export { inventory } from "./inventory";
 export {
   getVehicleProps,

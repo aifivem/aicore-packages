@@ -7,6 +7,8 @@ export interface MenuItem {
   icon?: string;
   description?: string;
   disabled?: boolean;
+  /** A switch row: picking it flips the switch in place and the menu stays open (`menu`'s `onToggle` hears it). */
+  checked?: boolean;
 }
 
 export interface MenuRequest {
@@ -15,6 +17,21 @@ export interface MenuRequest {
   /** A sub menu: a short Escape answers `MENU_BACK` (the caller opens the menu before), holding Escape closes. */
   back?: boolean;
 }
+
+/** ai-core's item picker (admin tools): every item of the active inventory with its picture, search and a count. */
+export interface ItemPickerRequest {
+  title: string;
+}
+
+/** One item the picker shows. */
+export interface PickerItem {
+  name: string;
+  label: string;
+  image?: string;
+}
+
+/** Callback (admins only): () -> PickerItem[], the active inventory's items for the picker. */
+export const ITEM_PICKER_CALLBACK = "ai-core:admin:items";
 
 /** What `menu()` resolves with when the player goes back from a sub menu (`back: true`). */
 export const MENU_BACK = "__back";
@@ -54,6 +71,10 @@ export const MENU_EVENTS = {
   menuResult: "ai-core:client:menuResult",
   /** Client local: (resource, requestId, itemId) the pointer or focus is on an item (previews). */
   menuHover: "ai-core:client:menuHover",
+  /** Client local: (resource, requestId, itemId, checked) the player flipped a switch row; the menu stays open. */
+  menuToggle: "ai-core:client:menuToggle",
+  /** Client local: (resource, requestId, name, count) the player picked an item in the item picker (it stays open). */
+  itemPicked: "ai-core:client:itemPicked",
   /** Client local: (resource, requestId, values | null) the player confirmed or closed the input dialog. */
   inputResult: "ai-core:client:inputResult",
 } as const;
