@@ -20,12 +20,9 @@ export interface BlipOptions {
   display?: number;
 }
 
-/** A blip's style as the panel's `blip` widget stores it. */
-export interface BlipStyle {
-  sprite: number;
-  color: number;
-  scale: number;
-}
+import type { BlipStyle } from "../shared/blipStyle";
+
+export type { BlipStyle };
 
 const LABEL = `AI_BLIP_${GetCurrentResourceName()}`;
 AddTextEntry(LABEL, "~a~");

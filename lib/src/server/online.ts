@@ -146,6 +146,13 @@ class OnlinePlayers {
     return this.players.get(source)?.character ?? null;
   }
 
+  /** The character's "Firstname Lastname", else the FiveM player name ("" with `fallback: false`). */
+  name(source: number, options: { fallback?: boolean } = {}): string {
+    const c = this.character(source);
+    if (c) return `${c.firstname} ${c.lastname}`;
+    return options.fallback === false ? "" : GetPlayerName(String(source));
+  }
+
   /** Job names of a player (every membership, on duty or not). */
   jobs(source: number): readonly string[] {
     this.start();

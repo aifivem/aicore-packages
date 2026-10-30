@@ -39,3 +39,32 @@ export const oneArg =
     const parsed = read(value);
     return parsed === null ? null : [parsed];
   };
+
+/** The x, y, z (and w) of `{ x, y, z }` or a Lua vector that arrived as `[x, y, z, w?]`. */
+function parts(value: unknown): unknown[] | null {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "object" || value === null) return null;
+  const v = value as Record<string, unknown>;
+  return [v.x, v.y, v.z, v.heading ?? v.w];
+}
+
+/** A point from client or export input: `{ x, y, z }` or a Lua vector `[x, y, z]`, every value finite; else null. */
+export function readVec3(
+  value: unknown,
+): { x: number; y: number; z: number } | null {
+  const p = parts(value);
+  if (!p) return null;
+  const [x, y, z] = [readFinite(p[0]), readFinite(p[1]), readFinite(p[2])];
+  return x !== null && y !== null && z !== null ? { x, y, z } : null;
+}
+
+/** A point with a heading: `{ x, y, z, heading | w }` or a Lua vector4; a missing heading reads 0; else null. */
+export function readVec4(
+  value: unknown,
+): { x: number; y: number; z: number; heading: number } | null {
+  const point = readVec3(value);
+  if (!point) return null;
+  const raw = parts(value)?.[3];
+  const heading = raw === undefined || raw === null ? 0 : readFinite(raw);
+  return heading === null ? null : { ...point, heading };
+}

@@ -2,10 +2,23 @@
 
 export { sleep, waitFor } from "./wait";
 export { bool, int, num, record, str, vec4, type Vec4 } from "./read";
-export { oneArg, readFinite, readId, readInt, readText } from "./strict";
+export {
+  oneArg,
+  readFinite,
+  readId,
+  readInt,
+  readText,
+  readVec3,
+  readVec4,
+} from "./strict";
 export { fail, isActionOk, replyError, type ActionResult } from "./action";
 export { distance, headingTo, type Vec3 } from "./vec";
 export { groupDigits, round, stripGameText } from "./format";
+export {
+  BLIP_STYLE_FIELDS,
+  readBlipStyle,
+  type BlipStyle,
+} from "./blipStyle";
 export {
   polyFromCorners,
   zoneBounds,
