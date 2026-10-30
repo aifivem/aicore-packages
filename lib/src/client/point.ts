@@ -1,12 +1,11 @@
-import { CORE } from "@aicore-fivem/shared";
-import { callExport, isResourceStarted } from "../fivem/exports";
-import { createLogger } from "../shared";
+import { isResourceStarted } from "../fivem/exports";
+import { onStyleChange, readAllowed, readLabel, runPress, style, target, TARGET, type Style } from "./interact";
 import { Blips, type BlipOptions } from "./blip";
 import { LocalPed, type LocalPedOptions } from "./localPed";
+import { ModelPoint, type ModelPointOptions } from "./modelPoint";
 import { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 import { Zones } from "./zones";
 
-const log = createLogger(GetCurrentResourceName());
 
 interface Vec3 {
   x: number;
@@ -45,20 +44,8 @@ export interface PointOptions {
   blip?: Omit<BlipOptions, "coords"> & { coords?: Vec3 };
 }
 
-type Style = "prompt" | "target";
-const TARGET = "ox_target";
-const target = (name: string, ...args: unknown[]) =>
-  callExport(TARGET, name, ...args);
-/** Prompt mode, or target mode when the owner picked it and a resource answers the ox_target API (ai-target does). */
-const style = (): Style =>
-  GlobalState[CORE.interactionStateKey] === "target" &&
-  isResourceStarted(TARGET)
-    ? "target"
-    : "prompt";
-
 const groups = new Set<Points>();
-const byPrompt = new Map<string, Point>();
-let busy = false;
+const byPrompt = new Map<string, { press(): void }>();
 let nextGroup = 0;
 
 class Point {
@@ -76,38 +63,15 @@ class Point {
   ) {}
 
   text(): string {
-    const { label } = this.options;
-    if (typeof label === "string") return label;
-    try {
-      return label();
-    } catch (error) {
-      log.error("point label failed", error);
-      return "";
-    }
+    return readLabel(this.options.label);
   }
 
   allowed(): boolean {
-    try {
-      return this.options.canShow?.() ?? true;
-    } catch (error) {
-      log.error("point canShow failed", error);
-      return false;
-    }
+    return readAllowed(this.options.canShow);
   }
 
   press(): void {
-    if (busy || !this.allowed()) return;
-    let result: unknown;
-    try {
-      result = this.options.onPressed();
-    } catch (error) {
-      return log.error("point onPressed failed", error);
-    }
-    if (!(result instanceof Promise)) return;
-    busy = true;
-    result
-      .catch((error: unknown) => log.error("point onPressed failed", error))
-      .finally(() => (busy = false));
+    runPress(() => this.allowed(), this.options.onPressed);
   }
 
   /** The prompt follows inside + canShow + the current label (prompt mode only). */
@@ -146,6 +110,7 @@ export class Points {
   private readonly zones = new Zones();
   private readonly blips = new Blips();
   private readonly points = new Map<string, Point>();
+  private readonly modelPoints = new Map<string, ModelPoint>();
   private readonly prefix = `pt${++nextGroup}:`;
 
   constructor() {
@@ -207,7 +172,22 @@ export class Points {
     this.attach(point, style());
   }
 
+  /** Adds (or replaces) a point on every world object of some models (ATMs, vending machines). */
+  addModel(id: string, options: ModelPointOptions): void {
+    this.remove(id);
+    const point = new ModelPoint(this.prefix + id, options);
+    this.modelPoints.set(id, point);
+    byPrompt.set(point.promptId, point);
+    point.attach(style());
+  }
+
   remove(id: string): void {
+    const model = this.modelPoints.get(id);
+    if (model) {
+      model.detach(isResourceStarted(TARGET));
+      byPrompt.delete(model.promptId);
+      this.modelPoints.delete(id);
+    }
     const point = this.points.get(id);
     if (!point) return;
     this.zones.remove(id);
@@ -220,12 +200,12 @@ export class Points {
   }
 
   clear(): void {
-    for (const id of [...this.points.keys()]) this.remove(id);
+    for (const id of [...this.points.keys(), ...this.modelPoints.keys()]) this.remove(id);
   }
 
   /**
    * Checks `canShow` and a function `label` again (prompt mode; targets ask `canShow` when opened and get a changed
-   * label re-registered). Inside a state bag change handler the new value is not readable yet: call it in a `setTimeout`.
+   * label re-registered). Call it from a lib state class's `onChange` (the new value is readable there).
    */
   refresh(id?: string): void {
     const mode = style();
@@ -260,6 +240,10 @@ export class Points {
       this.attach(point, mode);
       point.sync(mode);
     }
+    for (const model of this.modelPoints.values()) {
+      model.detach(isResourceStarted(TARGET));
+      model.attach(mode);
+    }
   }
 
   private attach(point: Point, mode: Style): void {
@@ -290,9 +274,7 @@ onPromptPressed((id) => byPrompt.get(id)?.press());
 const restyleAll = () => {
   for (const group of groups) group.restyle();
 };
-AddStateBagChangeHandler(CORE.interactionStateKey, "global", () =>
-  setTimeout(restyleAll, 0),
-);
+onStyleChange(restyleAll);
 for (const event of ["onClientResourceStart", "onClientResourceStop"])
   on(event, (resource: string) => {
     if (resource === TARGET || resource === "ai-target")

@@ -95,3 +95,5 @@ export {
   resourceExport,
 } from "../fivem/exports";
 export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "../fivem/locale";
+export { EntityState, GlobalGroup, GlobalKey, PlayerState } from "./state";
+export { stateBoolean, stateNumber, stateString, type StateParse } from "../fivem/state";

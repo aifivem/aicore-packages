@@ -60,13 +60,23 @@ export const CORE = {
 } as const;
 
 /** GlobalState key holding how many players are on duty in a job (counts only, never member lists). */
-export const dutyCountKey = (job: string): string => `ai:duty:${job}`;
+export const DUTY_COUNT_PREFIX = "ai:duty:";
+export const dutyCountKey = (job: string): string => `${DUTY_COUNT_PREFIX}${job}`;
 
 /** GlobalState key holding the resource name of the active inventory (null while none runs). */
 export const INVENTORY_STATE_KEY = "ai:inventory";
 
 /** GlobalState key: true when the server reports player deaths itself (FXServer 38039+ `onPedDeath`), so clients need not watch their health. */
 export const PED_DEATH_STATE_KEY = "ai:pedDeath";
+/** Client local event: (worn: boolean | null) the local player's seat belt changed (ai-smallresources, read by HUDs). */
+export const SEATBELT_EVENT = "ai-smallresources:seatbelt";
+/** Player state bag keys several resources read (written by one server resource each). */
+export const PLAYER_BAGS = {
+  /** true while downed (ai-death). */
+  dead: "dead",
+  /** true while handcuffed (ai-police). */
+  cuffed: "cuffed",
+} as const;
 
 /** The first FXServer build known to fire `onPedDeath` / `onPedHealthChanged` (citizenfx/fivem 1424ad0). */
 export const PED_EVENTS_MIN_BUILD = 38039;

@@ -26,6 +26,7 @@ export { Zones, type ZoneOptions, type ZoneShape } from "./zones";
 export { cache, onCache, readPlayerState, readWeapon } from "./cache";
 export { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 export { Points, type PointOptions } from "./point";
+export type { ModelPointOptions } from "./modelPoint";
 export { LocalPed, type LocalPedOptions } from "./localPed";
 export { Blips, createBlip, type BlipOptions, type BlipStyle } from "./blip";
 export {
@@ -50,3 +51,4 @@ export {
   resourceExport,
 } from "../fivem/exports";
 export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "../fivem/locale";
+export { EntityState, GlobalGroup, GlobalKey, PlayerState, stateBoolean, stateNumber, stateString, type StateParse } from "../fivem/state";

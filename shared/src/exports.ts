@@ -315,6 +315,12 @@ export type AiDoorlockServerExports = {
   IsLocked(id: string): boolean;
 };
 
+/** ai-smallresources' client exports; the seat belt changes arrive as the local event `SEATBELT_EVENT`. */
+export type AiSmallResourcesClientExports = {
+  /** Whether the local player wears a seat belt; null while seat belts are off or not in a vehicle with one. */
+  GetSeatbelt(): boolean | null;
+};
+
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
@@ -330,5 +336,6 @@ declare global {
     "ai-police": AiPoliceServerExports;
     "ai-doorlock": AiDoorlockServerExports;
     "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
+    "ai-smallresources": AiSmallResourcesClientExports;
   }
 }
