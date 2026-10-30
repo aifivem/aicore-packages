@@ -15,6 +15,8 @@ export class AdminWorld {
   private readonly data = new Map<string, Data>();
   private readonly handlers = new Map<string, ChangeHandler[]>();
   private readonly resource = GetCurrentResourceName();
+  /** Resolves once the changes since start are applied (or could not be loaded): the data is current from then on. */
+  readonly ready: Promise<void>;
 
   /** `files`: the world files this client mirrors (each must be in the resource's `files`). */
   constructor(files: string[]) {
@@ -34,7 +36,7 @@ export class AdminWorld {
       { args: ([file, key, value]) => (typeof file === "string" ? [file, typeof key === "string" && key !== "" ? key : undefined, value] : null) },
       (file, key, value) => this.put(file, key, value),
     );
-    triggerServerCallback(ADMIN.worldChangesCallback(this.resource)).then(
+    this.ready = triggerServerCallback(ADMIN.worldChangesCallback(this.resource)).then(
       (changes) => {
         if (!isRecord(changes)) return;
         for (const [file, records] of Object.entries(changes)) {

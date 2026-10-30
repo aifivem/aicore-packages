@@ -21,12 +21,18 @@ export const CORE = {
   activeGangChangedEvent: "ai-core:activeGangChanged",
   /** (src, charIds: number[]) each time a player's character screen loads; an appearance resource answers with portraits. */
   characterScreenEvent: "ai-core:characterScreen",
+  /** (resource: string | null) the inventory behind ai-core's inventory layer changed (the bridge drops its item cache). */
+  inventoryChangedEvent: "ai-core:inventoryChanged",
+  /** (src, name: string, status: Record<string, number> | null) a player used an item; status = the needs it gives, from inventories that define them. */
+  itemUsedEvent: "ai-core:itemUsed",
 
   // Client local events (same payloads, for client scripts and bridges).
   clientPlayerLoadedEvent: "ai-core:client:playerLoaded",
   clientPlayerUnloadedEvent: "ai-core:client:playerUnloaded",
   /** (charId: number, url: string) a portrait image of a character on the character screen (e.g. `https://nui-img/<txd>/<txd>`). */
   clientCharacterPortraitEvent: "ai-core:client:characterPortrait",
+  /** (charId: number) ai-appearance holds this character's look: ai-core dresses its scene ped with `ApplyCharacterAppearance`. */
+  clientCharacterLookEvent: "ai-core:client:characterLook",
   /** (resource: string, id: string) the interaction key was pressed while that resource's prompt was on top. */
   clientPromptPressedEvent: "ai-core:client:promptPressed",
   /** (key: keyof PlayerCache, value) a cached value of the local player changed (one watcher in ai-core for every resource). */
@@ -49,6 +55,9 @@ export const CORE = {
 
 /** GlobalState key holding how many players are on duty in a job (counts only, never member lists). */
 export const dutyCountKey = (job: string): string => `ai:duty:${job}`;
+
+/** GlobalState key holding the resource name of the active inventory (null while none runs). */
+export const INVENTORY_STATE_KEY = "ai:inventory";
 
 /** Why a character is let go: the player left, or went back to the character screen. */
 export type UnloadReason = "dropped" | "switch";

@@ -33,6 +33,8 @@ export interface FileSpec {
   locked?: string[];
   /** settings: sections a file is missing are filled from here at load (a setting added in an update). */
   defaults?: Record<string, unknown>;
+  /** Runtime state the script fills with `commit` (a live list the panel shows): never read from or saved to disk, never edited in the panel. */
+  memory?: boolean;
 }
 
 /** Controls of the panel; `path` is dotted from the record (or the settings object), a write replaces its section. */
@@ -52,7 +54,33 @@ export type WidgetSpec = WidgetBase &
         ground?: boolean;
       }
     | { widget: "list"; rows: WidgetSpec[]; newRow: Record<string, unknown>; addLabel: string; rowLabel?: string; max?: number }
+    /** Read only: shows the value (state the script fills in, e.g. a default it reports). */
+    | ({ widget: "info"; mono?: boolean } & ValueLabels)
   );
+
+/** How a read-only value is shown: stored values with a lang key show that text; an empty value shows `empty`. */
+export interface ValueLabels {
+  /** Lang keys of stored values (a value without an entry shows as it is). */
+  values?: Record<string, string>;
+  /** Lang key shown for an empty value. */
+  empty?: string;
+}
+
+/** A column of a read-only table tab: the value at `path` of each record. */
+export interface TableColumn extends ValueLabels {
+  path: string;
+  /** Lang key of the header. */
+  label: string;
+  /** Relative width (default 1). */
+  width?: number;
+  mono?: boolean;
+}
+
+export interface TableSpec {
+  columns: TableColumn[];
+  /** Path the rows are sorted by (default the record key). */
+  sort?: string;
+}
 
 interface WidgetBase {
   path: string;
@@ -85,6 +113,8 @@ export interface TabSpec {
   deleteLabel?: string;
   /** records: lang key of what deleting a record leaves behind, shown in the delete dialog (default: the generic text). */
   deleteDesc?: string;
+  /** records: show the file as one read-only, searchable table (a row per record) instead of list + editor; `cards` stays empty. */
+  table?: TableSpec;
 }
 
 export interface PanelSchema {
@@ -129,9 +159,12 @@ export type AdminPanelResourceExports = {
 export const ADMIN = {
   /** ACE every panel action checks: `add_ace group.admin ai.admin allow`. */
   ace: "ai.admin",
+  /** Callback: (keybinds: KeybindInfo[] the admin's client knows) -> AdminPanelSnapshot[]. */
   openCallback: "ai-core:admin:open",
   applyCallback: "ai-core:admin:apply",
   closeEvent: "ai-core:admin:close",
+  /** Server -> client: () open the panel (the `aiadmin` command, checked on the server). */
+  showEvent: "ai-core:admin:show",
   /** Server -> admins with the panel open: (delta: AdminDelta). */
   deltaEvent: "ai-core:admin:delta",
   /** Server -> client of a world (`sync: "all"`) file: (file, key | null, value). Prefixed with the resource name. */

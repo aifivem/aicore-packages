@@ -60,7 +60,7 @@ export class AdminPanel {
   apply(admin: number, raw: unknown): AdminResult {
     const patch = toPatch(raw);
     const spec = patch ? this.schema.files[patch.file] : undefined;
-    if (!patch || !spec) return { ok: false, error: ERR.type };
+    if (!patch || !spec || spec.memory) return { ok: false, error: ERR.type };
     const error = this.check(patch, spec);
     if (error) {
       this.log.warn(`admin ${admin} edit refused (${error}): ${JSON.stringify(patch).slice(0, 300)}`);
@@ -70,7 +70,7 @@ export class AdminPanel {
     return { ok: true };
   }
 
-  /** A change made by the resource itself (game state the panel shows), stored without validation. */
+  /** A change made by the resource itself (game state the panel shows), stored without validation (a `memory` file only in memory). */
   commit(file: string, key: string | undefined, value: unknown): void {
     const data = this.data.get(file);
     if (!data) return;
@@ -136,6 +136,10 @@ export class AdminPanel {
   }
 
   private load(name: string, spec: FileSpec): void {
+    if (spec.memory) {
+      this.data.set(name, {});
+      return;
+    }
     const file = new DataFile(this.resource, name, this.log);
     this.dataFiles.set(name, file);
     const raw = file.read();

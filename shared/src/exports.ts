@@ -1,8 +1,10 @@
 import type { AdminDelta } from "./admin";
+import type { CommandInfo } from "./commands";
 import type { LogChannel, LogOptions } from "./logs";
 import type { AiPlayerData, CharacterInfo, GangMembership, JobMembership, Notification } from "./player";
 import type { AiVehiclesServerExports } from "./vehicles";
 import type { InputRequest, MenuRequest } from "./menu";
+import type { InventoryClientExports, InventoryServerExports } from "./inventory";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -78,11 +80,13 @@ export type AiCoreServerExports = {
   RegisterAdminPanel(resource: string): void;
   /** A panel resource changed a record: ai-core forwards it to the admins with the panel open. */
   AdminPanelChanged(delta: AdminDelta): void;
+  /** The lib's `addCommand` announces a resource's commands for the panel's Commands tab (dropped when it stops). */
+  RegisterCommands(resource: string, commands: CommandInfo[]): void;
 
   GetSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string): number | null;
   AddSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string, amount: number, reason?: string): boolean;
   RemoveSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string, amount: number, reason?: string): boolean;
-};
+} & InventoryServerExports;
 
 /** ai-core's client exports. */
 export type AiCoreClientExports = {
@@ -99,7 +103,9 @@ export type AiCoreClientExports = {
   OpenMenu(requestId: number, request: MenuRequest): void;
   /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */
   OpenInput(requestId: number, request: InputRequest): void;
-};
+  /** The key a lib `Keybind` was registered with (mapping command `+<name>_<key>`); null until it is registered. */
+  GetKeybindKey(name: string): string | null;
+} & InventoryClientExports;
 
 /** ai-target's client exports that ai-core uses. */
 export type AiTargetClientExports = {
@@ -110,7 +116,7 @@ export type AiTargetClientExports = {
   removeModel(models: Array<string | number>, names?: string[]): void;
 };
 
-/** ai-inventory's server exports other ai-* resources use (ox / qb names are answered too, see its compat notes). */
+/** ai-inventory's own server exports (ai-core's inventory adapter uses them; ox / qb names are answered too). */
 export type AiInventoryServerExports = {
   AddItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>, slot?: number): boolean;
   RemoveItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>, slot?: number): boolean;
@@ -123,12 +129,21 @@ export type AiInventoryServerExports = {
   RegisterStash(name: string, label: string, slots: number, maxWeight: number, jobs?: string[], personal?: boolean): void;
   OpenInventory(source: number, inv: number | string): boolean;
   ClearInventory(inv: number | string): void;
+  /** One item definition (ox shape), or every one by name when `name` is left out. */
+  Items(name?: string): unknown;
 };
 
-/** ai-inventory's client exports other ai-* resources use. */
+/** ai-inventory's own client exports (ai-core's inventory adapter uses them). */
 export type AiInventoryClientExports = {
   /** Opens the player's own inventory screen (with the ground / trunk / glovebox around). */
   OpenSelf(): void;
+  HasItem(items: string | string[] | Record<string, number>, amount?: number): boolean;
+};
+
+/** ai-appearance's client exports ai-core uses. */
+export type AiAppearanceClientExports = {
+  /** Puts a character's saved look (from the character screen) on a local freemode ped of its sex; false when the look is unknown. */
+  ApplyCharacterAppearance(ped: number, charId: number): boolean;
 };
 
 /** ai-radialmenu's client exports: items on the wheel (removed when the adding resource stops). */
@@ -163,6 +178,7 @@ declare global {
   interface CitizenExports {
     "ai-core": AiCoreExports;
     "ai-target": AiTargetClientExports;
+    "ai-appearance": AiAppearanceClientExports;
     "ai-vehicles": AiVehiclesServerExports;
     "ai-vehiclekeys": AiVehicleKeysServerExports;
     "ai-radialmenu": AiRadialClientExports;

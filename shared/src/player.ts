@@ -31,13 +31,47 @@ export interface ScenePoint {
   heading: number;
 }
 
+/** One place in the character screen scene: a character stands there, the camera frames it when it is picked. */
+export interface SceneSpot {
+  /** The ped's position (its root, as `GetEntityCoords` reads it) and heading. */
+  ped: ScenePoint;
+  /** Idle animation dictionary and clip ("" = none). */
+  anim: string;
+  clip: string;
+  /** Metres from the look-at point to the camera. */
+  camDistance: number;
+  /** Camera height as a slope (0 = level with the look-at point, 0.5 = up by half the distance). */
+  camHeight: number;
+  /** Degrees around the ped from its front (0 = straight in front). */
+  camAngle: number;
+  /** Metres above the ped's root the camera looks at. */
+  targetHeight: number;
+  /** Degrees the camera slowly swings left and right (0 = still). */
+  sway: number;
+  /** Background blur (depth of field): in focus from `blurNear` to `blurFar` metres, strength 0-100. */
+  blur: boolean;
+  blurNear: number;
+  blurFar: number;
+  blurStrength: number;
+}
+
+/** The in-world scene behind the character screen (panel setting). */
+export interface CharacterScene {
+  /** Camera field of view in degrees. */
+  fov: number;
+  /** Local time and weather while the screen is open (`enabled: false` keeps the server's). */
+  time: { enabled: boolean; hour: number; minute: number; weather: string };
+  /** Spot N holds the character of slot N. */
+  spots: SceneSpot[];
+}
+
 /** The server's name and look on full-screen menus (panel setting). */
 export interface Branding {
   name: string;
   subtitle: string;
   tagline: string;
   taglineSub: string;
-  /** Background image of full-screen menus (files in ai-core's web/public/backgrounds). */
+  /** Background image of full-screen menus (files in ai-core's web/public/backgrounds); the character screen shows it only when its scene cannot be built. */
   background: "skyline" | "wet-drive";
 }
 
@@ -46,8 +80,8 @@ export interface CharacterScreen {
   slots: number;
   characters: CharacterCard[];
   canDelete: boolean;
-  /** Where the preview ped stands and the camera looks from (panel setting). */
-  scene: { ped: ScenePoint; camera: ScenePoint; fov: number };
+  /** Where the characters stand and how the camera frames them (panel setting). */
+  scene: CharacterScene;
 }
 
 export interface CreateCharacterInput {
