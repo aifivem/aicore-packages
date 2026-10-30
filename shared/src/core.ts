@@ -47,6 +47,8 @@ export const CORE = {
   clientHudVisibleEvent: "ai-core:client:hudVisible",
   /** Client local: (paused: boolean) the weather and time sync is paused (interiors, scenes) or runs again. */
   clientWorldSyncEvent: "ai-core:client:worldSync",
+  /** Client local: the player pressed ai-core's cancel key while a progress bar shows (lib `progress` with `canCancel`). */
+  clientCancelProgressEvent: "ai-core:client:cancelProgress",
   /** Client local: (file: "jobs" | "gangs", name, definition | null) a job or gang definition changed. */
   clientDefinitionsEvent: "ai-core:client:definitions",
   /** Server -> client callback: (model: string) the `CreateVehicleServerSetter` type of a model, null when the game has no such vehicle (ai-core's client answers for every resource, lib `spawnVehicle`). */

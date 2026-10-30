@@ -19,7 +19,13 @@ export {
   type AnimOptions,
   type TeleportOptions,
 } from "./player";
-export { notify, progress, type ProgressOptions } from "./notify";
+export { notify } from "./notify";
+export {
+  cancelProgress,
+  isProgressRunning,
+  progress,
+  type ProgressOptions,
+} from "./progress";
 export { input, itemPicker, menu, type MenuListeners } from "./menu";
 export { inventory } from "./inventory";
 export {
@@ -34,7 +40,16 @@ export {
   requestAnimSet,
   requestModel,
   requestPtfxAsset,
+  requestTextureDict,
+  requestWeaponAsset,
 } from "./streaming";
+export {
+  groundZ,
+  locationName,
+  vehicleLabel,
+  type LocationName,
+} from "./location";
+export { pedHeadshot } from "./headshot";
 export {
   callExport,
   isResourceStarted,

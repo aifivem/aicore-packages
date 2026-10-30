@@ -46,3 +46,27 @@ export async function requestAnimSet(
   await waitFor(() => HasAnimSetLoaded(set) || undefined, timeoutMs);
   return set;
 }
+
+/** Loads a streamed texture dictionary. Call `SetStreamedTextureDictAsNoLongerNeeded(dict)` when done. */
+export async function requestTextureDict(
+  dict: string,
+  timeoutMs = 10_000,
+): Promise<string> {
+  RequestStreamedTextureDict(dict, false);
+  await waitFor(
+    () => HasStreamedTextureDictLoaded(dict) || undefined,
+    timeoutMs,
+  );
+  return dict;
+}
+
+/** Loads a weapon's model and assets and resolves with its hash. Call `RemoveWeaponAsset(hash)` when done. */
+export async function requestWeaponAsset(
+  weapon: string | number,
+  timeoutMs = 10_000,
+): Promise<number> {
+  const hash = typeof weapon === "number" ? weapon : GetHashKey(weapon);
+  RequestWeaponAsset(hash, 31, 0);
+  await waitFor(() => HasWeaponAssetLoaded(hash) || undefined, timeoutMs);
+  return hash;
+}
