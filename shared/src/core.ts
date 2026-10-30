@@ -19,6 +19,10 @@ export const CORE = {
   gangsChangedEvent: "ai-core:gangsChanged",
   /** (src, gang: string | null) */
   activeGangChangedEvent: "ai-core:activeGangChanged",
+  /** Server local: (src, key, value | null) a character metadata value changed. */
+  metaChangedEvent: "ai-core:metaChanged",
+  /** Server local: (file: "jobs" | "gangs", name) a job or gang definition changed in the panel. */
+  definitionsChangedEvent: "ai-core:definitionsChanged",
   /** (src, charIds: number[]) each time a player's character screen loads; ai-core sends the looks, a clothing script may answer with portraits. */
   characterScreenEvent: "ai-core:characterScreen",
   /** (resource: string | null) the inventory behind ai-core's inventory layer changed (the bridge drops its item cache). */
@@ -43,6 +47,8 @@ export const CORE = {
   clientHudVisibleEvent: "ai-core:client:hudVisible",
   /** Client local: (paused: boolean) the weather and time sync is paused (interiors, scenes) or runs again. */
   clientWorldSyncEvent: "ai-core:client:worldSync",
+  /** Client local: (file: "jobs" | "gangs", name, definition | null) a job or gang definition changed. */
+  clientDefinitionsEvent: "ai-core:client:definitions",
   /** Server -> client callback: (model: string) the `CreateVehicleServerSetter` type of a model, null when the game has no such vehicle (ai-core's client answers for every resource, lib `spawnVehicle`). */
   vehicleTypeCallback: "ai-core:vehicleType",
   /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */

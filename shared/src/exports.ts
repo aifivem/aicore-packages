@@ -258,6 +258,8 @@ export type AiCoreClientExports = {
   ResumeWorldSync(reason: string): void;
   /** Whether the weather and time sync is paused now (for a weather script that starts later). */
   IsWorldSyncPaused(): boolean;
+  /** Job or gang definitions as the panel file holds them (bridges; follow `CORE.clientDefinitionsEvent`). */
+  GetDefinitions(file: "jobs" | "gangs"): Record<string, unknown> | null;
   Notify(notification: Notification): void;
   /** Shows the progress bar for `duration` ms (the calling resource runs the action and its animation). */
   ShowProgress(label: string, duration: number): void;

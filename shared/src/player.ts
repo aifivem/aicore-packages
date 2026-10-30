@@ -137,8 +137,12 @@ export interface AiPlayerData {
   money: Record<string, number>;
   jobs: JobMembership[];
   duty: string | null;
+  /** The job other scripts see as "the" job: on duty, else last on duty, else the first, else unemployed. */
+  job: JobMembership;
   gangs: GangMembership[];
   activeGang: string | null;
+  /** The character's free-form metadata bag (framework bridges keep QB / ESX metadata here); patched per key. */
+  metadata: Record<string, unknown>;
 }
 
 export type NotificationKind = "success" | "error" | "info" | "warning";
