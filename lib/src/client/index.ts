@@ -20,7 +20,11 @@ export {
 export { notify, progress, type ProgressOptions } from "./notify";
 export { input, menu } from "./menu";
 export { inventory } from "./inventory";
-export { getVehicleProps, setVehicleProps } from "./vehicleProps";
+export {
+  getVehicleProps,
+  setVehicleProps,
+  setVehicleSetup,
+} from "./vehicleProps";
 export { getPlayerData, onPlayerData, seedPlayerData } from "./playerData";
 export { Keybind, type KeybindOptions } from "./keybind";
 export { requestAnimDict, requestModel, requestPtfxAsset } from "./streaming";

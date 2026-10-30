@@ -1,4 +1,4 @@
-import type { VehicleProps } from "../shared/vehicleProps";
+import type { VehicleProps, VehicleSetup } from "../shared/vehicleProps";
 
 const MOD_TYPES = Array.from({ length: 50 }, (_, i) => i);
 const TOGGLE_MODS = [17, 18, 19, 20, 21, 22];
@@ -81,4 +81,26 @@ export function setVehicleProps(vehicle: number, props: VehicleProps): void {
   SetVehicleDirtLevel(vehicle, props.dirt);
   SetVehicleEngineHealth(vehicle, props.engineHealth);
   SetVehicleBodyHealth(vehicle, props.bodyHealth);
+}
+
+/** Engine, brakes, transmission, suspension, armour: the mods `maxed` sets to their top level. */
+const PERFORMANCE_MODS = [11, 12, 13, 15, 16];
+
+/** Applies a spawn setup (only to a vehicle this client controls). */
+export function setVehicleSetup(vehicle: number, setup: VehicleSetup): void {
+  SetVehicleModKit(vehicle, 0);
+  if (setup.maxed) {
+    for (const mod of PERFORMANCE_MODS)
+      SetVehicleMod(vehicle, mod, GetNumVehicleMods(vehicle, mod) - 1, false);
+    ToggleVehicleMod(vehicle, 18, true);
+    ToggleVehicleMod(vehicle, 22, true);
+  }
+  if (setup.primary) SetVehicleCustomPrimaryColour(vehicle, ...setup.primary);
+  if (setup.secondary)
+    SetVehicleCustomSecondaryColour(vehicle, ...setup.secondary);
+  if (setup.livery !== undefined) SetVehicleLivery(vehicle, setup.livery);
+  if (setup.windowTint !== undefined)
+    SetVehicleWindowTint(vehicle, setup.windowTint);
+  if (setup.dirt !== undefined) SetVehicleDirtLevel(vehicle, setup.dirt);
+  if (setup.engineOn) SetVehicleEngineOn(vehicle, true, true, false);
 }

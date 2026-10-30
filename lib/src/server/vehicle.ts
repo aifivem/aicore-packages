@@ -1,5 +1,5 @@
 import { CORE, VEHICLE_BAGS, type KeyPurpose } from "@aicore-fivem/shared";
-import { waitFor } from "../shared";
+import { waitFor, type VehicleProps, type VehicleSetup } from "../shared";
 import { triggerClientCallback } from "./callback";
 import { vehicleKeys } from "./vehicleKeys";
 
@@ -19,6 +19,16 @@ export interface SpawnVehicleOptions {
   purpose?: KeyPurpose;
   /** A player put into the driver seat. */
   driver?: number;
+  /** Players put into other seats (0 front passenger, 1 and 2 the back...). */
+  seats?: Array<{ source: number; seat: number }>;
+  /** Stored look and tuning (a garage vehicle); the owner client applies them. */
+  props?: VehicleProps;
+  /** Fresh-vehicle extras: full tuning, colours, livery, tint, dirt, engine running. */
+  setup?: VehicleSetup;
+  /** Doors locked for everyone (keys unlock them). */
+  locked?: boolean;
+  /** Routing bucket the vehicle lives in (players put in it should be in the same one). */
+  bucket?: number;
   /** Orphan mode 2: the vehicle stays when its owner leaves (default true). */
   persistent?: boolean;
   /** Replicated state bag values set right after creation. */
@@ -57,9 +67,25 @@ export async function vehicleType(
   return answer;
 }
 
+/** Puts a player into a seat, trying again while the new entity is not ready for it (up to 2 s). */
+async function seatPlayer(
+  vehicle: number,
+  source: number,
+  seat: number,
+): Promise<boolean> {
+  const ped = GetPlayerPed(String(source));
+  if (!ped) return false;
+  return waitFor(() => {
+    if (!DoesEntityExist(vehicle)) return false;
+    if (GetPedInVehicleSeat(vehicle, seat) === ped) return true;
+    SetPedIntoVehicle(ped, vehicle, seat);
+    return undefined;
+  }, 2000, 150).catch(() => false);
+}
+
 /**
  * Creates a networked vehicle on the server (strict entity lockdown) and sets it up in one step: plate, fuel, state
- * bags, keys for its purpose, a driver. Resolves the entity, or null when the model does not exist or creation failed.
+ * bags, look (props / setup), lock, bucket, keys for its purpose, a driver and passengers. Resolves the entity, or null when the model does not exist or creation failed.
  */
 export async function spawnVehicle(
   options: SpawnVehicleOptions,
@@ -87,15 +113,25 @@ export async function spawnVehicle(
   if (options.persistent !== false) SetEntityOrphanMode(vehicle, 2);
   if (options.plate)
     SetVehicleNumberPlateText(vehicle, options.plate.slice(0, 8));
+  if (options.bucket !== undefined)
+    SetEntityRoutingBucket(vehicle, options.bucket);
+  if (options.locked) SetVehicleDoorsLocked(vehicle, 2);
   const state = Entity(vehicle).state;
   if (options.fuel !== undefined)
     state.set(VEHICLE_BAGS.fuel, options.fuel, true);
+  if (options.props) state.set(VEHICLE_BAGS.props, options.props, true);
+  if (options.setup) state.set(VEHICLE_BAGS.setup, options.setup, true);
   for (const [key, value] of Object.entries(options.bags ?? {}))
     state.set(key, value, true);
-  if (options.driver !== undefined)
-    SetPedIntoVehicle(GetPlayerPed(String(options.driver)), vehicle, -1);
   if (options.keysTo !== undefined)
     vehicleKeys.give(options.keysTo, vehicle, options.purpose ?? "temporary");
+  const riders = [
+    ...(options.driver !== undefined
+      ? [{ source: options.driver, seat: -1 }]
+      : []),
+    ...(options.seats ?? []),
+  ];
+  await Promise.all(riders.map((r) => seatPlayer(vehicle, r.source, r.seat)));
   return vehicle;
 }
 

@@ -30,8 +30,10 @@ export const VEHICLE_BAGS = {
   owned: "ai:owned",
   /** Its id in ai-vehicles. */
   id: "ai:vid",
-  /** VehicleProps; the entity's owner client applies them. */
+  /** VehicleProps; the entity's owner client applies them (ai-core). */
   props: "ai:props",
+  /** VehicleSetup (lib `spawnVehicle`'s `setup`): the owner client applies it once (ai-core). */
+  setup: "ai:setup",
   /** 0-100, kept by a fuel resource. */
   fuel: "fuel",
 } as const;

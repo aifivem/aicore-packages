@@ -89,3 +89,41 @@ export function toVehicleProps(v: unknown): VehicleProps | null {
     bodyHealth: n(v.bodyHealth, 1000),
   };
 }
+
+/** What a freshly spawned vehicle gets on top of the model's defaults (lib `spawnVehicle`'s `setup`). */
+export interface VehicleSetup {
+  /** Every performance mod at its top level, turbo and xenons on. */
+  maxed?: boolean;
+  primary?: [number, number, number];
+  secondary?: [number, number, number];
+  livery?: number;
+  windowTint?: number;
+  /** 0 (clean) - 15. */
+  dirt?: number;
+  engineOn?: boolean;
+}
+
+const rgbOf = (v: unknown): [number, number, number] | undefined =>
+  Array.isArray(v) &&
+  v.length === 3 &&
+  v.every((x) => typeof x === "number" && x >= 0 && x <= 255)
+    ? [v[0], v[1], v[2]]
+    : undefined;
+const intOf = (v: unknown, min: number, max: number): number | undefined =>
+  typeof v === "number" && Number.isInteger(v) && v >= min && v <= max
+    ? v
+    : undefined;
+
+/** A received setup, checked field by field (wrong fields drop); null when it is not an object. */
+export function toVehicleSetup(v: unknown): VehicleSetup | null {
+  if (!isObj(v)) return null;
+  return {
+    maxed: v.maxed === true || undefined,
+    primary: rgbOf(v.primary),
+    secondary: rgbOf(v.secondary),
+    livery: intOf(v.livery, 0, 100),
+    windowTint: intOf(v.windowTint, 0, 6),
+    dirt: intOf(v.dirt, 0, 15),
+    engineOn: v.engineOn === true || undefined,
+  };
+}
