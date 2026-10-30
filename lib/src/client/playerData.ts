@@ -5,7 +5,11 @@ import {
   PLAYER_DATA_PATCH_EVENT,
   type PlayerDataKey,
 } from "../fivem/playerData";
+import { CORE } from "@aicore-fivem/shared";
+import { resourceExport } from "../fivem/exports";
 import { onServerEvent } from "./netEvent";
+
+const core = resourceExport(CORE.resource);
 
 type Handler = (value: unknown) => void;
 
@@ -21,6 +25,15 @@ function deliver(key: string, value: unknown): void {
 function listen(): void {
   if (listening) return;
   listening = true;
+  // A resource started after the player loaded: the values pushed before come once from ai-core's export.
+  try {
+    const data: unknown = core.GetPlayerData();
+    if (isRecord(data))
+      for (const [key, value] of Object.entries(data))
+        if (!values.has(key)) values.set(key, value);
+  } catch {
+    // ai-core's client is not up yet: its pushes fill the values.
+  }
   onServerEvent(
     PLAYER_DATA_EVENT,
     { args: ([key, value]) => (typeof key === "string" ? [key, value] : null) },
@@ -41,7 +54,7 @@ function listen(): void {
 
 /**
  * Calls `handler` every time ai-core pushes `key` for this player. Returns an unsubscribe function. Values pushed
- * before this resource started are not replayed: read the current state once from ai-core's `GetPlayerData` export.
+ * before this resource started are read once from ai-core (`getPlayerData` has them), not replayed to `handler`.
  */
 export function onPlayerData<K extends PlayerDataKey>(
   key: K,
@@ -62,7 +75,7 @@ export function getPlayerData<K extends PlayerDataKey>(
   return values.get(key) as AiPlayerData[K] | undefined;
 }
 
-/** Seeds the values (from ai-core's `GetPlayerData` export) when this resource starts after the player loaded. */
+/** Seeds the values by hand (the lib already seeds itself from ai-core's `GetPlayerData` on first use). */
 export function seedPlayerData(data: Partial<AiPlayerData>): void {
   listen();
   for (const [key, value] of Object.entries(data))

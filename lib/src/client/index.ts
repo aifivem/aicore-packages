@@ -34,6 +34,12 @@ export {
   setVehicleSetup,
 } from "./vehicleProps";
 export { getPlayerData, onPlayerData, seedPlayerData } from "./playerData";
+export {
+  hasJob,
+  inGang,
+  onDutyIn,
+  onMembershipChange,
+} from "./membership";
 export { Keybind, type KeybindOptions } from "./keybind";
 export {
   requestAnimDict,

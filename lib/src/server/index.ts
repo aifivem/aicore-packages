@@ -71,6 +71,8 @@ export {
   nearestVehicleTo,
   randomPlate,
   spawnVehicle,
+  entityFromNet,
+  pedFromNet,
   vehicleFromNet,
   vehicleNearPlayer,
   vehicleType,
