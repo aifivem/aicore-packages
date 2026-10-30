@@ -101,7 +101,11 @@ class Group {
     return this.dues[this.head] ?? 0;
   }
 
+  /** Queue size that triggers dropping stale entries (doubles with the live entries kept). */
+  private compactAt = 64;
+
   push(job: ScheduledJob, due: number): void {
+    if (this.count >= this.compactAt) this.compact();
     if (this.count > this.mask) this.grow();
     const i = (this.head + this.count) & this.mask;
     this.jobs[i] = job;
@@ -128,6 +132,28 @@ class Group {
       this.push(job, next);
       job.call();
     }
+  }
+
+  /**
+   * Drops entries of jobs switched off (or on again) since they were queued: a job toggled faster than its interval
+   * leaves one per toggle. Order and due times of the live entries stay.
+   */
+  private compact(): void {
+    let kept = 0;
+    for (let n = 0; n < this.count; n++) {
+      const i = (this.head + n) & this.mask;
+      const job = this.jobs[i];
+      if (!job || job.gen !== this.gens[i]) continue;
+      const k = (this.head + kept) & this.mask;
+      this.jobs[k] = job;
+      this.gens[k] = this.gens[i] ?? 0;
+      this.dues[k] = this.dues[i] ?? 0;
+      kept++;
+    }
+    for (let n = kept; n < this.count; n++)
+      this.jobs[(this.head + n) & this.mask] = undefined;
+    this.count = kept;
+    this.compactAt = Math.max(64, kept * 2);
   }
 
   private grow(): void {

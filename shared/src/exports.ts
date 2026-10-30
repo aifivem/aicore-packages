@@ -113,8 +113,11 @@ export type AiCoreServerExports = {
   GetMeta(src: number, key: string): unknown;
   SetMeta(src: number, key: string, value: unknown): boolean;
 
+  /** Every job definition (a copy of the whole map: for rare reads; one job is `GetJobDefinition`). */
   GetJobDefinitions(): Record<string, JobDefinition>;
   GetGangDefinitions(): Record<string, GangDefinition>;
+  GetJobDefinition(job: string): JobDefinition | null;
+  GetGangDefinition(gang: string): GangDefinition | null;
   GetAccountTypes(): Record<string, AccountTypeDefinition>;
 
   /** Sends a log of the calling resource to every provider turned on (Discord, Fivemanage, FiveM Stats, console). */
