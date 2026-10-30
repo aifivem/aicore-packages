@@ -1,3 +1,4 @@
+import { CORE } from "@aicore-fivem/shared";
 import { PlayerMap } from "./players";
 
 interface Pending<T> {
@@ -10,7 +11,8 @@ interface Pending<T> {
 /**
  * Actions waiting for a player's client (progress bar, dialog), one per player: `start` hands out a token the client
  * sends back, `take` ends the action when the token matches and enough of the time passed. Freed when the player
- * drops. Create once at module level.
+ * drops or lets the character go (a switch never pays an action of the old character to the new one). Create once at
+ * module level.
  */
 export class PendingActions<T> {
   private readonly actions = new PlayerMap<Pending<T>>();
@@ -20,6 +22,9 @@ export class PendingActions<T> {
   /** `take` refuses an answer that comes before `minRatio` (default 0.8) of the action's duration. */
   constructor(options: { minRatio?: number } = {}) {
     this.minRatio = options.minRatio ?? 0.8;
+    on(CORE.playerUnloadedEvent, (source: number) =>
+      this.actions.delete(source),
+    );
   }
 
   /** Starts the player's action (replacing a running one) and answers its token (1 to 2^31-1, `readId` parses it). */

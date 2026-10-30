@@ -47,12 +47,15 @@ const TYPES = new Set([
   "trailer",
   "train",
 ]);
-/** Model -> spawn type, learned from clients once per model (the server cannot read a vehicle class). */
+/** Model -> spawn type two different players' clients agreed on (the server cannot read a vehicle class). */
 const types = new Map<string, string>();
+/** Model -> type -> the first player whose client answered it, until a second player confirms one. */
+const votes = new Map<string, Map<string, number>>();
 
 /**
  * The `CreateVehicleServerSetter` type of a model asked from a player's client (ai-core answers); null: no such
- * vehicle. Only a valid type is cached: "no such model" is asked again, so one modified client cannot block a model.
+ * vehicle. An answer serves only that player's spawn until a second player's client gives the same one, then it is
+ * kept for everyone: one modified client can break only its own spawns, never a model for the server.
  */
 export async function vehicleType(
   model: string,
@@ -64,7 +67,15 @@ export async function vehicleType(
     model,
   ]).catch(() => null);
   if (typeof answer !== "string" || !TYPES.has(answer)) return null;
-  types.set(model, answer);
+  const seen = votes.get(model) ?? new Map<string, number>();
+  const first = seen.get(answer);
+  if (first !== undefined && first !== asker) {
+    types.set(model, answer);
+    votes.delete(model);
+  } else {
+    seen.set(answer, asker);
+    votes.set(model, seen);
+  }
   return answer;
 }
 

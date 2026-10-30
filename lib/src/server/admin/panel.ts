@@ -59,8 +59,12 @@ export class AdminPanel {
     registerExport("AdminPanelApply", (admin: number, patch: unknown) =>
       this.apply(admin, patch),
     );
-    onClientCallback(ADMIN.worldChangesCallback(this.resource), () =>
-      Object.fromEntries(this.worldChanges),
+    // Each client mirror asks once at its start (a resource may hold a few mirrors): a hostile client cannot pull the
+    // whole change set over and over.
+    onClientCallback(
+      ADMIN.worldChangesCallback(this.resource),
+      () => Object.fromEntries(this.worldChanges),
+      { rate: { count: 4, windowMs: 10_000 } },
     );
     // After every resource's exports exist (ai-core registers its own panel too).
     setImmediate(() => core.RegisterAdminPanel(this.resource));
