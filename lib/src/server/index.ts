@@ -107,3 +107,4 @@ export {
   stateString,
   type StateParse,
 } from "../fivem/state";
+export { world } from "./world";

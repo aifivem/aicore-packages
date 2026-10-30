@@ -46,3 +46,4 @@ export {
 export { controls } from "./controls";
 export { nearestVehicle } from "./vehicles";
 export { hud } from "./hud";
+export { world } from "./world";

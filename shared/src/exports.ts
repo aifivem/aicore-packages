@@ -140,6 +140,13 @@ export type AiCoreServerExports = {
   GetPlayersInScope(source: number): number[];
   /** Scripts with a newer GitHub release than the running version (ai-core's update check). */
   GetUpdates(): import("./admin").UpdateInfo[];
+  /** Time and weather of whatever weather script runs (the qb-weathersync contract); null / false while none runs. */
+  GetWeather(): string | null;
+  SetWeather(type: string): boolean;
+  GetTime(): { hour: number; minute: number } | null;
+  SetTime(hour: number, minute?: number): boolean;
+  SetBlackout(on: boolean): boolean;
+  FreezeTime(on: boolean): boolean;
 
   GetSharedMoney(
     ownerType: "job" | "gang",
@@ -174,6 +181,9 @@ export type AiCoreClientExports = {
   HideHud(reason: string): void;
   ShowHud(reason: string): void;
   IsHudVisible(): boolean;
+  /** Pauses the weather and time sync while any reason holds (interiors, scenes). */
+  PauseWorldSync(reason: string): void;
+  ResumeWorldSync(reason: string): void;
   Notify(notification: Notification): void;
   /** Shows the progress bar for `duration` ms (the calling resource runs the action and its animation). */
   ShowProgress(label: string, duration: number): void;
