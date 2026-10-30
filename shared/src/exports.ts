@@ -117,6 +117,10 @@ export type AiCoreServerExports = {
   GetJobDefinitions(): Record<string, JobDefinition>;
   GetGangDefinitions(): Record<string, GangDefinition>;
   GetJobDefinition(job: string): JobDefinition | null;
+  /** Prison layer (lib `prison`): the first running prison script answers. */
+  JailPlayer(source: number, minutes: number, by?: number): boolean;
+  ReleasePlayer(source: number): boolean;
+  GetJailTime(source: number): number;
   GetGangDefinition(gang: string): GangDefinition | null;
   GetAccountTypes(): Record<string, AccountTypeDefinition>;
 

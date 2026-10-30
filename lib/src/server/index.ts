@@ -124,6 +124,7 @@ export {
   type StateParse,
 } from "../fivem/state";
 export { world } from "./world";
+export { prison } from "./prison";
 export { phone } from "./phone";
 export { dispatch } from "./dispatch";
 export { money } from "./money";
