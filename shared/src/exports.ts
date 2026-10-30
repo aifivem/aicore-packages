@@ -5,6 +5,7 @@ import type { AiPlayerData, CharacterInfo, GangMembership, JobMembership, Notifi
 import type { AiVehiclesServerExports } from "./vehicles";
 import type { InputRequest, MenuRequest } from "./menu";
 import type { InventoryClientExports, InventoryServerExports } from "./inventory";
+import type { VehicleKeysServerExports } from "./vehicleKeys";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -86,7 +87,8 @@ export type AiCoreServerExports = {
   GetSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string): number | null;
   AddSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string, amount: number, reason?: string): boolean;
   RemoveSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string, amount: number, reason?: string): boolean;
-} & InventoryServerExports;
+} & InventoryServerExports &
+  VehicleKeysServerExports;
 
 /** ai-core's client exports. */
 export type AiCoreClientExports = {

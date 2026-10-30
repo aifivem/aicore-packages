@@ -51,6 +51,7 @@ export { aiLog, aiLogChannels } from "./log";
 export { notify } from "./notify";
 export { inventory } from "./inventory";
 export { online } from "./online";
+export { vehicleKeys } from "./vehicleKeys";
 export { playersNear, playersNearEntity } from "./proximity";
 export { addCommand, type CommandArgs, type CommandHandler, type CommandOptions } from "./command";
 export { onClientCallback, triggerClientCallback } from "./callback";
