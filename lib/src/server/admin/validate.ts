@@ -2,6 +2,8 @@ import { CORE, type DataSpec, type LookupSource } from "@aicore-fivem/shared";
 import { resourceExport } from "../../fivem/exports";
 import { isRecord } from "../../shared";
 
+const core = resourceExport(CORE.resource);
+
 /** Lang keys of the generic refusals (ai-core's locales). */
 export const ERR = {
   type: "ADMIN_ERR_TYPE",
@@ -21,7 +23,7 @@ class LookupCache {
     if (cached && Date.now() - cached.at < 2000) return cached.values.size > 0 ? cached.values : null;
     let list: unknown = [];
     try {
-      list = resourceExport(CORE.resource).GetLookupValues(source);
+      list = core.GetLookupValues(source);
     } catch {
       // ai-core restarting: the value is checked again on the next edit.
     }

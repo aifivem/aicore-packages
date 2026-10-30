@@ -3,6 +3,12 @@ import { CORE, type PlayerCache } from "@aicore-fivem/shared";
 /** The unarmed "weapon" hash: cached as `false`. */
 const UNARMED = GetHashKey("WEAPON_UNARMED") | 0;
 
+/** The weapon in a ped's hand, `false` when unarmed. */
+export function readWeapon(ped: number): number | false {
+  const weapon = GetSelectedPedWeapon(ped) | 0;
+  return weapon === UNARMED ? false : weapon;
+}
+
 /** The vehicle, seat and weapon of a ped right now (also ai-core's watcher). */
 export function readPlayerState(ped: number): Pick<PlayerCache, "vehicle" | "seat" | "weapon"> {
   const vehicle = GetVehiclePedIsIn(ped, false);
@@ -14,8 +20,7 @@ export function readPlayerState(ped: number): Pick<PlayerCache, "vehicle" | "sea
       break;
     }
   }
-  const weapon = GetSelectedPedWeapon(ped) | 0;
-  return { vehicle: vehicle || false, seat, weapon: weapon === UNARMED ? false : weapon };
+  return { vehicle: vehicle || false, seat, weapon: readWeapon(ped) };
 }
 
 /**

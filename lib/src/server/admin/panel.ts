@@ -7,6 +7,8 @@ import { DataFile } from "../dataFile";
 import { clone, toPatch } from "./patch";
 import { ERR, validate } from "./validate";
 
+const core = resourceExport(CORE.resource);
+
 type Data = Record<string, unknown>;
 /** A record changed (records: its key; settings: no key); `null` = deleted. */
 type ChangeHandler = (key: string | undefined, value: unknown) => void;
@@ -36,7 +38,7 @@ export class AdminPanel {
     registerExport("AdminPanelApply", (admin: number, patch: unknown) => this.apply(admin, patch));
     onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges));
     // After every resource's exports exist (ai-core registers its own panel too).
-    setImmediate(() => resourceExport(CORE.resource).RegisterAdminPanel(this.resource));
+    setImmediate(() => core.RegisterAdminPanel(this.resource));
   }
 
   /** The current content of a file: the settings object, or `{ key: record }`. Read only. */
@@ -127,7 +129,7 @@ export class AdminPanel {
     const value = key === undefined ? data : (data[key] ?? null);
     this.dataFiles.get(file)?.write(data);
     for (const handler of this.handlers.get(file) ?? []) handler(key, value);
-    resourceExport(CORE.resource).AdminPanelChanged({ resource: this.resource, file, key, value: clone(value) });
+    core.AdminPanelChanged({ resource: this.resource, file, key, value: clone(value) });
     if (spec?.sync !== "all") return;
     const changes = this.worldChanges.get(file) ?? {};
     changes[key ?? ""] = clone(value);

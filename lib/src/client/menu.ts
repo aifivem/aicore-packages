@@ -1,6 +1,8 @@
 import { CORE, MENU_EVENTS, type InputRequest, type MenuRequest } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 
+const core = resourceExport(CORE.resource);
+
 /** Menus and input dialogs this resource asked ai-core for, waiting for the player's answer. */
 class Requests {
   private readonly resource = GetCurrentResourceName();
@@ -39,7 +41,7 @@ const requests = new Requests();
 export function menu(request: MenuRequest, onHover?: (item: string) => void): Promise<string | null> {
   return new Promise((resolve) =>
     requests.ask(
-      (id) => resourceExport(CORE.resource).OpenMenu(id, request),
+      (id) => core.OpenMenu(id, request),
       (value) => resolve(typeof value === "string" ? value : null),
       onHover,
     ),
@@ -50,7 +52,7 @@ export function menu(request: MenuRequest, onHover?: (item: string) => void): Pr
 export function input(request: InputRequest): Promise<Record<string, string | number> | null> {
   return new Promise((resolve) =>
     requests.ask(
-      (id) => resourceExport(CORE.resource).OpenInput(id, request),
+      (id) => core.OpenInput(id, request),
       (value) => {
         if (typeof value !== "object" || value === null) return resolve(null);
         const out: Record<string, string | number> = {};

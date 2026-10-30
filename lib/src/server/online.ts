@@ -1,6 +1,8 @@
 import { CORE, type CharacterInfo, type GangMembership, type JobMembership } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 
+const core = resourceExport(CORE.resource);
+
 /** What a resource keeps of one loaded player. */
 interface OnlinePlayer {
   character: CharacterInfo;
@@ -22,7 +24,6 @@ class OnlinePlayers {
   private start(): void {
     if (this.started) return;
     this.started = true;
-    const core = resourceExport(CORE.resource);
     // Memberships and duty of a loaded character are read once from ai-core (one player, at load), then follow its deltas.
     const load = (source: number, character: CharacterInfo): void => {
       this.put(source, character, (core.GetJobs(source) ?? []).map((m) => m.job), (core.GetGangs(source) ?? []).map((m) => m.gang));

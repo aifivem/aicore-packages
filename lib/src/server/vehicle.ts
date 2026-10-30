@@ -1,0 +1,60 @@
+import { CORE, VEHICLE_BAGS, type KeyPurpose } from "@aicore-fivem/shared";
+import { waitFor } from "../shared";
+import { triggerClientCallback } from "./callback";
+import { vehicleKeys } from "./vehicleKeys";
+
+export interface SpawnVehicleOptions {
+  model: string;
+  coords: { x: number; y: number; z: number; heading: number };
+  /** A player whose client tells the spawn type (and whether the model exists); without it `type` or "automobile". */
+  asker?: number;
+  /** `CreateVehicleServerSetter` type when no `asker` is given ("automobile", "bike", "boat", "heli", "plane"...). */
+  type?: string;
+  /** Up to 8 characters. */
+  plate?: string;
+  /** 0-100 into the `fuel` state bag. */
+  fuel?: number;
+  /** A player who gets the keys through ai-core's key layer, for `purpose` (default `temporary`). */
+  keysTo?: number;
+  purpose?: KeyPurpose;
+  /** A player put into the driver seat. */
+  driver?: number;
+  /** Orphan mode 2: the vehicle stays when its owner leaves (default true). */
+  persistent?: boolean;
+  /** Replicated state bag values set right after creation. */
+  bags?: Record<string, unknown>;
+}
+
+/** Model -> spawn type, learned from clients once per model (the server cannot read a vehicle class). */
+const types = new Map<string, string | null>();
+
+/** The `CreateVehicleServerSetter` type of a model asked from a player's client (ai-core answers); null: no such vehicle. */
+export async function vehicleType(model: string, asker: number): Promise<string | null> {
+  const known = types.get(model);
+  if (known !== undefined) return known;
+  const answer = await triggerClientCallback(CORE.vehicleTypeCallback, asker, [model]).catch(() => undefined);
+  if (answer === undefined) return null;
+  const type = typeof answer === "string" ? answer : null;
+  types.set(model, type);
+  return type;
+}
+
+/**
+ * Creates a networked vehicle on the server (strict entity lockdown) and sets it up in one step: plate, fuel, state
+ * bags, keys for its purpose, a driver. Resolves the entity, or null when the model does not exist or creation failed.
+ */
+export async function spawnVehicle(options: SpawnVehicleOptions): Promise<number | null> {
+  const type = options.asker !== undefined ? await vehicleType(options.model, options.asker) : (options.type ?? "automobile");
+  if (!type) return null;
+  const { x, y, z, heading } = options.coords;
+  const vehicle = CreateVehicleServerSetter(GetHashKey(options.model), type, x, y, z, heading);
+  if (!(await waitFor(() => DoesEntityExist(vehicle) || undefined, 5000).catch(() => false))) return null;
+  if (options.persistent !== false) SetEntityOrphanMode(vehicle, 2);
+  if (options.plate) SetVehicleNumberPlateText(vehicle, options.plate.slice(0, 8));
+  const state = Entity(vehicle).state;
+  if (options.fuel !== undefined) state.set(VEHICLE_BAGS.fuel, options.fuel, true);
+  for (const [key, value] of Object.entries(options.bags ?? {})) state.set(key, value, true);
+  if (options.driver !== undefined) SetPedIntoVehicle(GetPlayerPed(String(options.driver)), vehicle, -1);
+  if (options.keysTo !== undefined) vehicleKeys.give(options.keysTo, vehicle, options.purpose ?? "temporary");
+  return vehicle;
+}

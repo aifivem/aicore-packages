@@ -3,9 +3,11 @@ import { resourceExport } from "../fivem/exports";
 import { cache } from "./cache";
 import { requestAnimDict } from "./streaming";
 
+const core = resourceExport(CORE.resource);
+
 /** Shows a notification card on this player's screen (ai-core draws it); `text` is already translated. */
 export function notify(text: string, kind: NotificationKind = "info", duration?: number): void {
-  resourceExport(CORE.resource).Notify({ text, kind, duration });
+  core.Notify({ text, kind, duration });
 }
 
 export interface ProgressOptions {
@@ -22,7 +24,6 @@ export interface ProgressOptions {
  * when cancelled (death, getting into a vehicle). Checks ten times a second, nothing per frame.
  */
 export async function progress(options: ProgressOptions): Promise<boolean> {
-  const core = resourceExport(CORE.resource);
   const ped = cache.ped;
   if (options.anim) {
     await requestAnimDict(options.anim.dict);

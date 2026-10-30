@@ -3,6 +3,8 @@ import { createLogger, logSafe } from "../shared";
 import { resourceExport } from "../fivem/exports";
 import { RateLimit, SourceLock } from "./rateLimit";
 
+const core = resourceExport(CORE.resource);
+
 const log = createLogger(GetCurrentResourceName());
 
 /**
@@ -33,7 +35,7 @@ export const isAdmin =
     Boolean(IsPlayerAceAllowed(String(source), ace)) || `not allowed (${ace})`;
 
 /** The player has a character in the world (not on the character screen). */
-export const hasCharacter = (): Guard => (source) => resourceExport(CORE.resource).GetCharacter(source) !== null || "no character loaded";
+export const hasCharacter = (): Guard => (source) => core.GetCharacter(source) !== null || "no character loaded";
 
 interface Point {
   x: number;

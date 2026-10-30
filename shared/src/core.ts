@@ -39,6 +39,10 @@ export const CORE = {
   clientPromptPressedEvent: "ai-core:client:promptPressed",
   /** (key: keyof PlayerCache, value) a cached value of the local player changed (one watcher in ai-core for every resource). */
   clientCacheEvent: "ai-core:client:cache",
+  /** Server -> client callback: (model: string) the `CreateVehicleServerSetter` type of a model, null when the game has no such vehicle (ai-core's client answers for every resource, lib `spawnVehicle`). */
+  vehicleTypeCallback: "ai-core:vehicleType",
+  /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */
+  interactionStateKey: "ai:interaction",
 
   // Callbacks (character screen).
   charactersCallback: "ai-core:characters",

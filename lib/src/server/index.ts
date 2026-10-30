@@ -52,6 +52,7 @@ export { notify } from "./notify";
 export { inventory } from "./inventory";
 export { online } from "./online";
 export { vehicleKeys } from "./vehicleKeys";
+export { spawnVehicle, vehicleType, type SpawnVehicleOptions } from "./vehicle";
 export { playersNear, playersNearEntity } from "./proximity";
 export { addCommand, type CommandArgs, type CommandHandler, type CommandOptions } from "./command";
 export { onClientCallback, triggerClientCallback } from "./callback";

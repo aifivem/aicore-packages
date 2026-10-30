@@ -94,6 +94,8 @@ export type AiCoreServerExports = {
   RegisterReplacement(remove: string | string[], keep?: string): void;
   /** Scripts installed next to the one that replaces them; `running` = both started. */
   GetConflicts(): { keep: string; remove: string; running: boolean; from: string }[];
+  /** The players in a player's OneSync scope (~424 m), kept from ai-core's one set of scope handlers (lib `playersNear`). */
+  GetPlayersInScope(source: number): number[];
 
   GetSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string): number | null;
   AddSharedMoney(ownerType: "job" | "gang", ownerId: string, account: string, amount: number, reason?: string): boolean;

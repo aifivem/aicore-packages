@@ -1,3 +1,4 @@
+import type { KeyPurpose } from "./vehicleKeys";
 /** Owned vehicle contract (ai-vehicles keeps them; garages, shops, keys and fuel use them). */
 
 export type VehicleOwnerType = "character" | "job" | "gang";
@@ -49,5 +50,5 @@ export type AiVehiclesServerExports = {
   SetOwner(id: number, owner: VehicleOwner): void;
   DeleteVehicle(id: number): void;
   /** Creates the entity; `cb` gets its net id (null when it failed). `asker` is a player whose client answers the model type. */
-  SpawnVehicle(id: number, at: { x: number; y: number; z: number; heading: number }, asker: number, cb: (netId: number | null) => void): void;
+  SpawnVehicle(id: number, at: { x: number; y: number; z: number; heading: number }, asker: number, cb: (netId: number | null) => void, purpose?: KeyPurpose): void;
 };
