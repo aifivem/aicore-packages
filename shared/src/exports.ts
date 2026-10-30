@@ -1,5 +1,5 @@
 import type { AdminDelta } from "./admin";
-import type { CommandInfo } from "./commands";
+import type { CommandInfo, KeyHintRequest, KeyHintView } from "./commands";
 import type { LogChannel, LogOptions } from "./logs";
 import type {
   AiPlayerData,
@@ -183,6 +183,9 @@ export type AiCoreClientExports = {
   HideHud(reason: string): void;
   ShowHud(reason: string): void;
   IsHudVisible(): boolean;
+  /** Opens the running HUD's own settings (ai-hud's /hud, tgiann-lumihud's /hud); false without one. */
+  OpenHudSettings(): boolean;
+  HasHudSettings(): boolean;
   /** Pauses the weather and time sync while any reason holds (interiors, scenes). */
   PauseWorldSync(reason: string): void;
   ResumeWorldSync(reason: string): void;
@@ -196,6 +199,11 @@ export type AiCoreClientExports = {
   OpenInput(requestId: number, request: InputRequest): void;
   /** The key a lib `Keybind` was registered with (mapping command `+<name>_<key>`); null until it is registered. */
   GetKeybindKey(name: string): string | null;
+  /** Shows a key hint of the calling resource until `HideKeyHint` (dropped when that resource stops). */
+  ShowKeyHint(id: string, hint: KeyHintRequest): void;
+  HideKeyHint(id: string): void;
+  /** The key hints HUDs show now (also sent as `KEY_HINTS.changedEvent`). */
+  GetKeyHints(): KeyHintView[];
   /** The emote script answering hands up / pointing (tgiann-emotes, ai-smallresources), or null. */
   GetGestureProvider(): string | null;
   /** The local player has the hands up / points, in whichever emote script runs. */
@@ -344,6 +352,13 @@ export type AiSmallResourcesClientExports = {
   GetSeatbelt(): boolean | null;
 };
 
+/** ai-hud's client exports (ai-core opens its settings; ai-admin's minimap toggle). */
+export type AiHudClientExports = {
+  OpenSettings(): void;
+  SetMinimapAlways(on: boolean): void;
+  GetMinimapAlways(): boolean;
+};
+
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
@@ -360,5 +375,6 @@ declare global {
     "ai-doorlock": AiDoorlockServerExports;
     "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
     "ai-smallresources": AiSmallResourcesClientExports;
+    "ai-hud": AiHudClientExports;
   }
 }

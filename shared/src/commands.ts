@@ -37,7 +37,31 @@ export interface KeybindInfo {
   defaultKey: string;
   /** RegisterKeyMapping input mapper ("keyboard", "MOUSE_BUTTON", "PAD_DIGITALBUTTON"). */
   mapper: string;
+  /** When HUDs list it in their key hints (the owner can change it in the panel); absent = never. */
+  hint?: KeyHintWhen;
 }
+
+/** When a key hint shows: on foot, in a vehicle, or always. */
+export type KeyHintWhen = "foot" | "vehicle" | "always";
+
+/** One row of the key hints HUDs show: the key as the player has it bound, and what it does (translated). */
+export interface KeyHintView {
+  id: string;
+  key: string;
+  label: string;
+}
+
+/** A hint a script shows for a while (admin noclip keys): a keybind's current key, or a literal key text. */
+export interface KeyHintRequest {
+  label: string;
+  keybind?: string;
+  key?: string;
+}
+
+export const KEY_HINTS = {
+  /** ai-core client -> HUDs (local): (KeyHintView[]) the hints to show now, after every change. */
+  changedEvent: "ai-core:client:keyHints",
+} as const;
 
 /** Client local events between the lib's `Keybind` and ai-core's client. */
 export const KEYBIND = {

@@ -1,4 +1,9 @@
-import { CORE, KEYBIND, type KeybindInfo } from "@aicore-fivem/shared";
+import {
+  CORE,
+  KEYBIND,
+  type KeybindInfo,
+  type KeyHintWhen,
+} from "@aicore-fivem/shared";
 import { isResourceStarted } from "../fivem/exports";
 
 export interface KeybindOptions {
@@ -14,6 +19,8 @@ export interface KeybindOptions {
   disabled?: boolean;
   onPressed?: () => void;
   onReleased?: () => void;
+  /** HUDs list the key in their key hints: on foot, in a vehicle or always (the owner can change it in the panel). */
+  hint?: KeyHintWhen;
 }
 
 const resource = GetCurrentResourceName();
@@ -72,6 +79,7 @@ export class Keybind {
       description: options.description,
       defaultKey: options.defaultKey ?? "",
       mapper: options.defaultMapper ?? "keyboard",
+      hint: options.hint,
     };
     requestKey(info, (key) => this.register(key.toUpperCase()));
   }
