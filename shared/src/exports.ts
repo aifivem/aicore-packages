@@ -115,6 +115,8 @@ export type AiInventoryServerExports = {
   AddItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>, slot?: number): boolean;
   RemoveItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>, slot?: number): boolean;
   GetItemCount(inv: number | string, item: string, metadata?: Record<string, unknown>): number;
+  /** Every stack of an inventory with its item label. */
+  GetItems(inv: number | string): Array<{ name: string; label: string; count: number; slot: number; metadata: Record<string, unknown> }>;
   CanCarryItem(inv: number | string, item: string, count: number, metadata?: Record<string, unknown>): boolean;
   /** `handler` returning false keeps the item (otherwise the item's "consume" amount is taken). */
   RegisterUsableItem(name: string, handler: (source: number, item: { name: string; slot: number; count: number; metadata: Record<string, unknown> }) => unknown): void;
