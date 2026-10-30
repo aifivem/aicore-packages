@@ -16,12 +16,18 @@ interface Vec3 {
 
 export interface PointOptions {
   coords: Vec3;
-  /** The prompt text or target option label (already translated). */
-  label: string;
+  /** The prompt text or target option label (already translated); a function is read again on enter and `refresh()` (text that follows a state). */
+  label: string | (() => string);
   /** Font Awesome name of the target option (`fa-solid fa-store` or `store`). */
   icon?: string;
   /** How close the player must be, in metres (default 2). */
   radius?: number;
+  /** A cylinder instead of a ball: metres up and down from `coords` (rooms, stations, floors above). */
+  height?: number;
+  /** Target mode: size of the spot players aim at, in metres (default 1; a room-sized point wants more). */
+  targetRadius?: number;
+  /** Always a prompt, whatever the owner picked: actions done from a vehicle (fuel pumps, car washes, drive-ins). */
+  promptOnly?: boolean;
   /** Zone check interval in ms (default 500). */
   interval?: number;
   /** Whether the point is offered now (job, duty, in a vehicle...). Prompts re-check it on `refresh()`. */
@@ -33,8 +39,8 @@ export interface PointOptions {
   onExit?: () => void;
   /** A ped standing at the point (at `coords` unless it has its own); targets go on the ped. */
   ped?: Omit<LocalPedOptions, "coords" | "onSpawn" | "onDespawn"> & { coords?: LocalPedOptions["coords"] };
-  /** A map blip at the point, named after `label` unless it has its own. */
-  blip?: Omit<BlipOptions, "coords" | "label"> & { label?: string };
+  /** A map blip at the point (or at its own `coords`); its `label` is the map name (the place's name, not the prompt text). */
+  blip?: Omit<BlipOptions, "coords"> & { coords?: Vec3 };
 }
 
 type Style = "prompt" | "target";
@@ -52,12 +58,26 @@ class Point {
   inside = false;
   ped: LocalPed | null = null;
   targetZone: unknown = null;
-  shown = false;
+  /** The prompt text on screen, null while hidden. */
+  shown: string | null = null;
+  /** The label the target option was registered with. */
+  targetLabel: string | null = null;
 
   constructor(
     readonly promptId: string,
     readonly options: PointOptions,
   ) {}
+
+  text(): string {
+    const { label } = this.options;
+    if (typeof label === "string") return label;
+    try {
+      return label();
+    } catch (error) {
+      log.error("point label failed", error);
+      return "";
+    }
+  }
 
   allowed(): boolean {
     try {
@@ -81,20 +101,22 @@ class Point {
     result.catch((error: unknown) => log.error("point onPressed failed", error)).finally(() => (busy = false));
   }
 
-  /** The prompt follows inside + canShow (prompt mode only). */
-  sync(mode: Style): void {
-    const show = mode === "prompt" && this.inside && this.allowed();
-    if (show === this.shown) return;
-    this.shown = show;
-    if (show) showPrompt(this.promptId, this.options.label);
+  /** The prompt follows inside + canShow + the current label (prompt mode only). */
+  sync(group: Style): void {
+    const mode = this.options.promptOnly ? "prompt" : group;
+    const text = mode === "prompt" && this.inside && this.allowed() ? this.text() : null;
+    if (text === this.shown) return;
+    this.shown = text;
+    if (text !== null) showPrompt(this.promptId, text);
     else hidePrompt(this.promptId);
   }
 
   targetOption() {
+    this.targetLabel = this.text();
     return [
       {
         name: this.promptId,
-        label: this.options.label,
+        label: this.targetLabel,
         icon: this.options.icon,
         distance: this.options.radius ?? 2,
         canInteract: () => this.allowed(),
@@ -131,13 +153,16 @@ export class Points {
       point.ped = new LocalPed({
         ...ped,
         coords: ped.coords ?? { ...options.coords, heading: 0 },
-        onSpawn: (entity) => style() === "target" && target("addLocalEntity", entity, point.targetOption()),
-        onDespawn: (entity) => style() === "target" && target("removeLocalEntity", entity, point.promptId),
+        onSpawn: (entity) => style() === "target" && !options.promptOnly && target("addLocalEntity", entity, point.targetOption()),
+        onDespawn: (entity) => style() === "target" && !options.promptOnly && target("removeLocalEntity", entity, point.promptId),
       });
     }
-    if (options.blip) this.blips.add(id, { ...options.blip, coords: options.coords, label: options.blip.label ?? options.label });
+    if (options.blip) this.blips.add(id, { ...options.blip, coords: options.blip.coords ?? options.coords });
     this.zones.add(id, {
-      shape: { type: "sphere", center: options.coords, radius: options.radius ?? 2 },
+      shape:
+        options.height !== undefined
+          ? { type: "cylinder", center: options.coords, radius: options.radius ?? 2, height: options.height }
+          : { type: "sphere", center: options.coords, radius: options.radius ?? 2 },
       interval: options.interval,
       onEnter: () => {
         point.inside = true;
@@ -169,11 +194,20 @@ export class Points {
     for (const id of [...this.points.keys()]) this.remove(id);
   }
 
-  /** Checks `canShow` again for the points the player is at (prompt mode; targets ask when opened). */
+  /**
+   * Checks `canShow` and a function `label` again (prompt mode; targets ask `canShow` when opened and get a changed
+   * label re-registered). Inside a state bag change handler the new value is not readable yet: call it in a `setTimeout`.
+   */
   refresh(id?: string): void {
     const mode = style();
-    if (id !== undefined) this.points.get(id)?.sync(mode);
-    else for (const point of this.points.values()) point.sync(mode);
+    const one = id !== undefined ? this.points.get(id) : undefined;
+    for (const point of one ? [one] : id === undefined ? this.points.values() : []) {
+      point.sync(mode);
+      if (mode === "target" && !point.options.promptOnly && typeof point.options.label === "function" && point.targetLabel !== point.text()) {
+        this.detach(point);
+        this.attach(point, mode);
+      }
+    }
   }
 
   isInside(id: string): boolean {
@@ -191,13 +225,14 @@ export class Points {
   }
 
   private attach(point: Point, mode: Style): void {
-    if (mode !== "target") return;
+    if (mode !== "target" || point.options.promptOnly) return;
     const ped = point.ped?.entity;
     if (point.ped) {
       if (ped) target("addLocalEntity", ped, point.targetOption());
       return;
     }
-    point.targetZone = target("addSphereZone", { coords: point.options.coords, radius: 1, options: point.targetOption() });
+    // Far points get their target zone too: ai-target only scans zones near the player.
+    point.targetZone = target("addSphereZone", { coords: point.options.coords, radius: point.options.targetRadius ?? 1, options: point.targetOption() });
   }
 
   private detach(point: Point): void {

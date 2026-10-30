@@ -34,8 +34,8 @@ export async function fadeOut(ms = 300): Promise<void> {
 }
 
 /**
- * The local player's ped, like ox_core's player object: position, moves and animations in one place, reading
- * `cache.ped` (never `PlayerPedId()` in a loop).
+ * The local player's ped, like ox_core's player object: position, moves and animations in one place. Reads use
+ * `cache.ped` (loops); one-off actions read the ped fresh, so they also work right after a model change.
  */
 export const player = {
   get ped(): number {
@@ -58,14 +58,14 @@ export const player = {
   },
 
   freeze(state: boolean): void {
-    FreezeEntityPosition(cache.ped, state);
+    FreezeEntityPosition(PlayerPedId(), state);
   },
 
   /** Moves the player and waits for the collision there, behind a fade unless `fade: false`. */
   async teleport(to: Vec3, options: TeleportOptions = {}): Promise<void> {
     const fade = options.fade !== false;
     if (fade) await fadeOut();
-    const ped = cache.ped;
+    const ped = PlayerPedId();
     RequestCollisionAtCoord(to.x, to.y, to.z);
     if (options.keepVehicle) SetPedCoordsKeepVehicle(ped, to.x, to.y, to.z);
     else if (options.ground === false) SetEntityCoordsNoOffset(ped, to.x, to.y, to.z, false, false, false);
@@ -81,11 +81,11 @@ export const player = {
   /** Plays an animation on the ped (loads and frees the dictionary); resolves when it started. */
   async playAnim(dict: string, clip: string, options: AnimOptions = {}): Promise<void> {
     await requestAnimDict(dict);
-    TaskPlayAnim(cache.ped, dict, clip, options.blendIn ?? 8, options.blendOut ?? -8, options.duration ?? -1, options.flag ?? 49, 0, false, false, false);
+    TaskPlayAnim(PlayerPedId(), dict, clip, options.blendIn ?? 8, options.blendOut ?? -8, options.duration ?? -1, options.flag ?? 49, 0, false, false, false);
     RemoveAnimDict(dict);
   },
 
   stopAnim(): void {
-    ClearPedTasks(cache.ped);
+    ClearPedTasks(PlayerPedId());
   },
 };

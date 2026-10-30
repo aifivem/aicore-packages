@@ -8,8 +8,8 @@ interface Vec3 {
 
 export interface BlipOptions {
   coords: Vec3;
-  /** Shown in the map legend (already translated). */
-  label: string;
+  /** Shown in the map legend (already translated); without it the game's default name for the sprite. */
+  label?: string;
   sprite: number;
   color: number;
   /** Default 0.8. */
@@ -39,9 +39,11 @@ export function createBlip(options: BlipOptions): number {
   SetBlipScale(blip, options.scale ?? 0.8);
   SetBlipDisplay(blip, options.display ?? 4);
   SetBlipAsShortRange(blip, options.shortRange ?? true);
-  BeginTextCommandSetBlipName(LABEL);
-  AddTextComponentSubstringPlayerName(options.label);
-  EndTextCommandSetBlipName(blip);
+  if (options.label !== undefined) {
+    BeginTextCommandSetBlipName(LABEL);
+    AddTextComponentSubstringPlayerName(options.label);
+    EndTextCommandSetBlipName(blip);
+  }
   return blip;
 }
 

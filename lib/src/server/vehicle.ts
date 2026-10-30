@@ -25,18 +25,22 @@ export interface SpawnVehicleOptions {
   bags?: Record<string, unknown>;
 }
 
+/** Every type `CreateVehicleServerSetter` takes; a client answering anything else is ignored. */
+const TYPES = new Set(["automobile", "bike", "boat", "heli", "plane", "submarine", "trailer", "train"]);
 /** Model -> spawn type, learned from clients once per model (the server cannot read a vehicle class). */
-const types = new Map<string, string | null>();
+const types = new Map<string, string>();
 
-/** The `CreateVehicleServerSetter` type of a model asked from a player's client (ai-core answers); null: no such vehicle. */
+/**
+ * The `CreateVehicleServerSetter` type of a model asked from a player's client (ai-core answers); null: no such
+ * vehicle. Only a valid type is cached: "no such model" is asked again, so one modified client cannot block a model.
+ */
 export async function vehicleType(model: string, asker: number): Promise<string | null> {
   const known = types.get(model);
   if (known !== undefined) return known;
-  const answer = await triggerClientCallback(CORE.vehicleTypeCallback, asker, [model]).catch(() => undefined);
-  if (answer === undefined) return null;
-  const type = typeof answer === "string" ? answer : null;
-  types.set(model, type);
-  return type;
+  const answer = await triggerClientCallback(CORE.vehicleTypeCallback, asker, [model]).catch(() => null);
+  if (typeof answer !== "string" || !TYPES.has(answer)) return null;
+  types.set(model, answer);
+  return answer;
 }
 
 /**
