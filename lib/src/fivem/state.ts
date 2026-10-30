@@ -1,3 +1,5 @@
+import { every } from "./scheduler";
+
 /**
  * State bags read from memory. Reading a bag (`Entity(e).state.x`, `GlobalState.x`) builds two proxies, calls up to
  * three natives, copies the value twice under two locks in the engine and decodes msgpack every time; on a busy server
@@ -70,7 +72,7 @@ export class EntityState<T> extends Mirror<number, T> {
       on("entityRemoved", (entity: number) =>
         this.forget(NetworkGetNetworkIdFromEntity(entity)),
       );
-    else setInterval(() => this.prune(), PRUNE_MS);
+    else every(PRUNE_MS, () => this.prune(), { name: `state ${key}` });
   }
 
   /** The value on an entity (undefined: none or not networked). */

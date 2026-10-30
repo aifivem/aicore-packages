@@ -1,3 +1,4 @@
+import { every, type Job } from "../fivem/scheduler";
 import { createLogger } from "../shared";
 import { zoneBounds, zoneContains, type ZoneShape } from "../shared/zone";
 import { cache } from "./cache";
@@ -39,8 +40,8 @@ class Zone {
 }
 
 /**
- * The zones of one resource. One timer serves them all at the shortest interval any zone asks for; each zone is
- * checked only when its own interval has passed. With no zones the timer stops (an active JS timer costs every frame).
+ * The zones of one resource. One scheduler job serves them all at the shortest interval any zone asks for; each zone
+ * is checked only when its own interval has passed. With no zones the job stops.
  */
 export class Zones {
   private readonly zones = new Map<string, Zone>();
@@ -49,7 +50,7 @@ export class Zones {
   private readonly insideNow = new Set<Zone>();
   /** How many zones use each interval, so the shortest one is found without walking every zone. */
   private readonly intervals = new Map<number, number>();
-  private timer: ReturnType<typeof setInterval> | null = null;
+  private job: Job | null = null;
   private period = 0;
 
   /** Adds (or replaces) a zone. A replaced zone the player was in fires its onExit first. */
@@ -123,8 +124,10 @@ export class Zones {
     for (const interval of this.intervals.keys())
       period = period === 0 ? interval : Math.min(period, interval);
     if (period === this.period) return;
-    if (this.timer) clearInterval(this.timer);
-    this.timer = period ? setInterval(() => this.check(), period) : null;
+    this.job?.stop();
+    this.job = period
+      ? every(period, () => this.check(), { name: "zones" })
+      : null;
     this.period = period;
   }
 

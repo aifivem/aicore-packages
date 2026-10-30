@@ -95,6 +95,7 @@ export function setVehicleSetup(vehicle: number, setup: VehicleSetup): void {
     ToggleVehicleMod(vehicle, 18, true);
     ToggleVehicleMod(vehicle, 22, true);
   }
+  if (setup.colors) SetVehicleColours(vehicle, ...setup.colors);
   if (setup.primary) SetVehicleCustomPrimaryColour(vehicle, ...setup.primary);
   if (setup.secondary)
     SetVehicleCustomSecondaryColour(vehicle, ...setup.secondary);

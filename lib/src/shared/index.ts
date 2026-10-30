@@ -12,6 +12,8 @@ export {
   type ZoneShape,
 } from "./zone";
 export { LiveRecords, readRecords, type RecordReader } from "./records";
+export { formatText, LangTexts } from "./lang";
+export { spec } from "./spec";
 export {
   toVehicleProps,
   toVehicleSetup,
@@ -75,17 +77,6 @@ export function previewJson(value: unknown, max: number): string {
   };
   walk(value, 0);
   return out.slice(0, max);
-}
-
-/** Fills `{0}`, `{1}`... with the arguments by position (a translation may reorder or repeat them). */
-export function formatText(
-  template: string,
-  args: ReadonlyArray<string | number>,
-): string {
-  return template.replace(/\{(\d+)\}/g, (match, index: string) => {
-    const value = args[Number(index)];
-    return value === undefined ? match : String(value);
-  });
 }
 
 /** GTA vehicle class (`GetVehicleClassFromName`) -> the type `CreateVehicleServerSetter` wants. */

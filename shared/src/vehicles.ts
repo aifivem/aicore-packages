@@ -17,6 +17,8 @@ export interface OwnedVehicle {
   model: string;
   /** VehicleProps (`@aicore-fivem/lib/shared`) or null before the first save. */
   props: unknown;
+  /** VehicleSetup (lib `spawnVehicle`'s `setup`) the vehicle spawns with while it has no props (a shop's colour). */
+  setup: unknown;
   state: VehicleState;
   garage: string | null;
   fuel: number;
@@ -52,6 +54,10 @@ export type AiVehiclesServerExports = {
   IsOwnedPlate(plate: string): boolean;
   GetVehicleIdByEntity(entity: number): number | null;
   GetEntity(id: number): number | null;
+  /**
+   * Saves condition and look: fuel, damage, state, garage and `props` (colours, extras, dirt, ...). The stored tuning
+   * (`mods`, `neon`) stays: a client-read look never changes it (a mod menu cannot persist mods). Tuning: `SaveTuning`.
+   */
   SaveVehicle(
     id: number,
     change: {
@@ -63,15 +69,22 @@ export type AiVehiclesServerExports = {
       garage?: string | null;
     },
   ): void;
+  /** Saves full props including the tuning (`mods`, `neon`). Only a tuning shop (ai-mechanic) calls it. */
+  SaveTuning(id: number, props: unknown): void;
   StoreVehicle(id: number, garage: string | null, state?: VehicleState): void;
   SetOwner(id: number, owner: VehicleOwner): void;
   DeleteVehicle(id: number): void;
-  /** Creates the entity; `cb` gets its net id (null when it failed). `asker` is a player whose client answers the model type. */
+  /**
+   * Creates the entity; `cb` gets its net id (null when it failed). `asker` is a player whose client answers the model
+   * type. `setup` (lib VehicleSetup, e.g. `{ colors }`) is kept with a vehicle that has no props yet and applied on every
+   * spawn until its first props save, so a bought colour survives a vehicle that was never parked.
+   */
   SpawnVehicle(
     id: number,
     at: { x: number; y: number; z: number; heading: number },
     asker: number,
     cb: (netId: number | null) => void,
     purpose?: KeyPurpose,
+    setup?: unknown,
   ): void;
 };

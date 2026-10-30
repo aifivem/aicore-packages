@@ -11,6 +11,8 @@ export interface CharacterInfo {
   lastname: string;
   birthdate: string;
   sex: Sex;
+  /** Free text ("American"); "" for characters made before the field existed. QB `charinfo.nationality`. */
+  nationality: string;
 }
 
 /** A card on the character screen. */
@@ -91,6 +93,7 @@ export interface CreateCharacterInput {
   /** YYYY-MM-DD */
   birthdate: string;
   sex: Sex;
+  nationality: string;
 }
 
 /** Answer of the character screen actions: `ok`, or a lang key telling why not. */
@@ -112,6 +115,8 @@ export interface SpawnPoint {
   z: number;
   heading: number;
   model: string;
+  /** Body armour 0-100 saved with the character (metadata `armor`). */
+  armour: number;
 }
 
 /** The local player's often read values, kept by ai-core's one watcher (lib `cache`); `false` = none. */

@@ -60,6 +60,14 @@ export async function fadeOut(ms = 300): Promise<void> {
   );
 }
 
+/** Fades the screen back in and resolves when it is clear (or after `ms` + 2 s); the pair of `fadeOut`. */
+export async function fadeIn(ms = 400): Promise<void> {
+  DoScreenFadeIn(ms);
+  await waitFor(() => IsScreenFadedIn() || undefined, ms + 2000).catch(
+    () => undefined,
+  );
+}
+
 /**
  * The local player's ped, like ox_core's player object: position, moves and animations in one place. Reads use
  * `cache.ped` (loops); one-off actions read the ped fresh, so they also work right after a model change.

@@ -80,6 +80,7 @@ export { nearestPlayerTo, playersNear, playersNearEntity } from "./proximity";
 export { coordsOf, entityCoords, isNear } from "./position";
 export {
   Cooldowns,
+  KeyedCooldowns,
   onCharacter,
   PlayerMap,
   type CharacterHandlers,
@@ -112,6 +113,7 @@ export {
   resourceExport,
 } from "../fivem/exports";
 export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "../fivem/locale";
+export { every, type EveryOptions, type Job } from "../fivem/scheduler";
 export { EntityState, GlobalGroup, GlobalKey, PlayerState } from "./state";
 export {
   stateBoolean,

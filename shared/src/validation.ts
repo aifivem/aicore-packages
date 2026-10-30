@@ -45,6 +45,15 @@ export function toSex(value: unknown): Sex | null {
   return value === "male" || value === "female" ? value : null;
 }
 
+const NATIONALITY = /^[A-Za-zÀ-ɏ][A-Za-zÀ-ɏ' -]{1,31}$/;
+
+/** A nationality: 2-32 letters (Latin, accents), spaces, apostrophes, dashes; trimmed. Null when invalid. */
+export function toNationality(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const text = value.trim().replace(/\s+/g, " ");
+  return NATIONALITY.test(text) ? text : null;
+}
+
 /** The character creation form from the NUI, or the lang key of the first invalid field. */
 export function toCreateCharacter(
   value: unknown,
@@ -62,10 +71,12 @@ export function toCreateCharacter(
   const lastname = toName(input.lastname);
   const birthdate = toBirthdate(input.birthdate);
   const sex = toSex(input.sex);
+  const nationality = toNationality(input.nationality);
   if (slot === null) return { error: "CHAR_ERR_INVALID" };
   if (!firstname) return { error: "CHAR_ERR_FIRSTNAME" };
   if (!lastname) return { error: "CHAR_ERR_LASTNAME" };
   if (!birthdate) return { error: "CHAR_ERR_BIRTHDATE" };
   if (!sex) return { error: "CHAR_ERR_SEX" };
-  return { slot, firstname, lastname, birthdate, sex };
+  if (!nationality) return { error: "CHAR_ERR_NATIONALITY" };
+  return { slot, firstname, lastname, birthdate, sex, nationality };
 }

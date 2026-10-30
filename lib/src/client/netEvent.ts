@@ -4,9 +4,10 @@ const log = createLogger(GetCurrentResourceName());
 
 /**
  * Whether the net event being handled came from the server (read it before the first `await`). On a client only
- * events from the server carry a source (65535 in the docs); a local emit by any resource carries none.
+ * events from the server carry a numeric source: 65535 for a normal event, 0 for a latent one (the client
+ * registers the server as reassembly target 0); a local emit by any resource carries a string.
  */
-export const fromServer = (): boolean => Boolean(globalThis.source);
+export const fromServer = (): boolean => typeof globalThis.source === "number";
 
 /**
  * A net event the server sends: the only way an ai-* client listens to the server (never bare `onNet`). Calls that

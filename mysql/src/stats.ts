@@ -48,10 +48,16 @@ function readDebug(): void {
     debugList = [];
   }
 }
-readDebug();
-setInterval(readDebug, 10_000);
+/** The convar is read again on the first query after this many ms (no timer of its own). */
+const DEBUG_READ_MS = 10_000;
+let debugReadAt = 0;
 
 export function debugEnabled(): boolean {
+  const now = Date.now();
+  if (now - debugReadAt >= DEBUG_READ_MS) {
+    debugReadAt = now;
+    readDebug();
+  }
   return debugAll || debugList.includes(resource);
 }
 

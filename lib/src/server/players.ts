@@ -72,6 +72,60 @@ export class Cooldowns {
   }
 }
 
+/**
+ * Cooldowns by a key that outlives the connection, on the game clock: a character id (a reconnect keeps the
+ * cooldown) or an entity. Expired entries are swept when the map has doubled since the last sweep (amortized O(1)
+ * per `start`). Create once at module level.
+ */
+export class KeyedCooldowns<K = number> {
+  private readonly until = new Map<K, number>();
+  private sweepAt = 64;
+
+  /** No cooldown runs for the key. */
+  ready(key: K): boolean {
+    return this.left(key) === 0;
+  }
+
+  /** Starts (or restarts) the key's cooldown for `ms`; 0 or less ends it. */
+  start(key: K, ms: number): void {
+    if (ms <= 0) {
+      this.until.delete(key);
+      return;
+    }
+    if (this.until.size >= this.sweepAt) this.sweep();
+    this.until.set(key, GetGameTimer() + ms);
+  }
+
+  /** Starts the cooldown when it is ready and answers true; false while one still runs. */
+  take(key: K, ms: number): boolean {
+    if (!this.ready(key)) return false;
+    this.start(key, ms);
+    return true;
+  }
+
+  /** Milliseconds left, 0 when ready. */
+  left(key: K): number {
+    const until = this.until.get(key);
+    if (until === undefined) return 0;
+    const left = until - GetGameTimer();
+    if (left > 0) return left;
+    this.until.delete(key);
+    return 0;
+  }
+
+  /** Ends the key's cooldown. */
+  clear(key: K): void {
+    this.until.delete(key);
+  }
+
+  private sweep(): void {
+    const now = GetGameTimer();
+    for (const [key, until] of this.until)
+      if (until <= now) this.until.delete(key);
+    this.sweepAt = Math.max(64, this.until.size * 2);
+  }
+}
+
 export interface CharacterHandlers {
   /** A character entered the world; also once at start for every character loaded before this resource (re)started. */
   loaded?: (source: number, character: CharacterInfo) => void | Promise<void>;

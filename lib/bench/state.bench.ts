@@ -10,7 +10,6 @@ const handlers: Handler[] = [];
 const stored = new Map<string, string>();
 g.IsDuplicityVersion = () => true;
 g.on = () => undefined;
-g.setInterval = () => 0;
 g.AddStateBagChangeHandler = (_key: string, _bag: string, fn: Handler) =>
   handlers.push(fn);
 g.GetEntityFromStateBagName = (bag: string) => Number(bag.slice(7));

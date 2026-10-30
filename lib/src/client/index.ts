@@ -1,6 +1,7 @@
 /** Client-only helpers. Import from "@aicore-fivem/lib/client". */
 
 export { TickLoop } from "./tickLoop";
+export { every, type EveryOptions, type Job } from "../fivem/scheduler";
 export { onServerCallback, triggerServerCallback } from "./callback";
 export { fromServer, onServerEvent } from "./netEvent";
 export { AdminWorld } from "./adminWorld";
@@ -12,6 +13,7 @@ export type { ModelPointOptions, VehiclePointOptions } from "./modelPoint";
 export { LocalPed, type LocalPedOptions } from "./localPed";
 export { Blips, createBlip, type BlipOptions, type BlipStyle } from "./blip";
 export {
+  fadeIn,
   fadeOut,
   player,
   type AnimOptions,
@@ -54,6 +56,8 @@ export {
 } from "../fivem/state";
 export { controls } from "./controls";
 export { nearestVehicle } from "./vehicles";
+export { waitForEntity } from "./entity";
+export { raycast, type RaycastOptions, type RayHit } from "./raycast";
 export { nearestPlayer } from "./players";
 export { onShot } from "./shot";
 export { callAction, type CallActionOptions } from "./action";

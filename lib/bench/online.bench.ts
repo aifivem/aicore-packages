@@ -98,8 +98,25 @@ for (const count of [2048, 10_000]) {
     for (let i = 0; i < 1000; i++)
       for (const _ of online.onDutyFor("police")) found++;
   });
+  // A job channel message / boss menu: the job's members (old way: every online player's job names).
+  const members = time(() => {
+    for (let i = 0; i < 1000; i++)
+      for (const s of online.jobMembers("police"))
+        if (online.jobGrade(s, "police") !== null) found++;
+  });
+  const walkAll = time(() => {
+    for (let i = 0; i < 1000; i++)
+      for (const s of online.sources())
+        if (online.jobs(s).includes("police")) found++;
+  });
+  // A job change of one player moves it between member sets.
+  const jobsChanged = handlers.get("ai-core:jobsChanged")!;
+  const change = time(() => {
+    for (let i = 1; i <= 1000; i++)
+      jobsChanged(i, [{ job: jobs[(i + 1) % jobs.length], grade: 1 }]);
+  });
   console.log(
-    `${count.toLocaleString("en")} online (~${avgScope.toFixed(0)} in scope): mirror start ${fmt(start)}, playersNear ${fmt(near / 1000)}, nearestPlayerTo ${fmt(nearest / 1000)}, onDutyFor("police") walk ${fmt(duty / 1000)} (${online.onDutyFor("police").size} on duty)`,
+    `${count.toLocaleString("en")} online (~${avgScope.toFixed(0)} in scope): mirror start ${fmt(start)}, playersNear ${fmt(near / 1000)}, nearestPlayerTo ${fmt(nearest / 1000)}, onDutyFor("police") walk ${fmt(duty / 1000)} (${online.onDutyFor("police").size} on duty), jobMembers("police") + grades ${fmt(members / 1000)} vs walking everyone ${fmt(walkAll / 1000)} (${online.jobMembers("police").size} members), one jobsChanged ${fmt(change / 1000)}`,
   );
 }
 export {};

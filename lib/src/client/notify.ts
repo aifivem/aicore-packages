@@ -1,5 +1,6 @@
 import { CORE, type NotificationKind } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
+import { every } from "../fivem/scheduler";
 import { cache } from "./cache";
 import { requestAnimDict } from "./streaming";
 
@@ -48,14 +49,18 @@ export async function progress(options: ProgressOptions): Promise<boolean> {
   core.ShowProgress(options.label, options.duration);
   const end = GetGameTimer() + options.duration;
   const done = await new Promise<boolean>((resolve) => {
-    const timer = setInterval(() => {
-      const cancelled =
-        IsEntityDead(cache.ped) ||
-        (!options.allowVehicle && cache.vehicle !== false);
-      if (!cancelled && GetGameTimer() < end) return;
-      clearInterval(timer);
-      resolve(!cancelled);
-    }, 100);
+    const job = every(
+      100,
+      () => {
+        const cancelled =
+          IsEntityDead(cache.ped) ||
+          (!options.allowVehicle && cache.vehicle !== false);
+        if (!cancelled && GetGameTimer() < end) return;
+        job.stop();
+        resolve(!cancelled);
+      },
+      { name: "progress" },
+    );
   });
   if (options.anim) StopAnimTask(ped, options.anim.dict, options.anim.clip, 1);
   core.HideProgress();

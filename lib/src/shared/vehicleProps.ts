@@ -94,6 +94,8 @@ export function toVehicleProps(v: unknown): VehicleProps | null {
 export interface VehicleSetup {
   /** Every performance mod at its top level, turbo and xenons on. */
   maxed?: boolean;
+  /** GTA colour indexes (primary, secondary), as `VehicleProps.colors`. */
+  colors?: [number, number];
   primary?: [number, number, number];
   secondary?: [number, number, number];
   livery?: number;
@@ -114,11 +116,18 @@ const intOf = (v: unknown, min: number, max: number): number | undefined =>
     ? v
     : undefined;
 
+const colorsOf = (v: unknown): [number, number] | undefined => {
+  if (!Array.isArray(v) || v.length !== 2) return undefined;
+  const [a, b] = [intOf(v[0], 0, 255), intOf(v[1], 0, 255)];
+  return a === undefined || b === undefined ? undefined : [a, b];
+};
+
 /** A received setup, checked field by field (wrong fields drop); null when it is not an object. */
 export function toVehicleSetup(v: unknown): VehicleSetup | null {
   if (!isObj(v)) return null;
   return {
     maxed: v.maxed === true || undefined,
+    colors: colorsOf(v.colors),
     primary: rgbOf(v.primary),
     secondary: rgbOf(v.secondary),
     livery: intOf(v.livery, 0, 100),

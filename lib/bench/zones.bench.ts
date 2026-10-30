@@ -15,13 +15,13 @@ g.GetVehicleMaxNumberOfPassengers = () => 0;
 g.GetSelectedPedWeapon = () => 0;
 g.GetHashKey = () => 0;
 g.on = () => undefined;
-// The timer is driven by hand below.
+// The scheduler's tick is driven by hand below.
 const timer: { tick: (() => void) | null } = { tick: null };
-g.setInterval = (fn: () => void) => {
+g.setTick = (fn: () => void) => {
   timer.tick = fn;
   return 1;
 };
-g.clearInterval = () => {
+g.clearTick = () => {
   timer.tick = null;
 };
 

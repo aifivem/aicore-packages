@@ -1,18 +1,18 @@
-/** A per-frame job that can be switched on and off without leaking ticks (an idle tick still costs time). */
-export class TickLoop {
-  private id: number | null = null;
+import { every, type Job } from "../fivem/scheduler";
 
-  constructor(private readonly onFrame: () => void) {}
+/** A per-frame job (`every(0, fn)` on the resource's scheduler) switched on only while needed. */
+export class TickLoop {
+  private readonly job: Job;
+
+  constructor(onFrame: () => void, name?: string) {
+    this.job = every(0, onFrame, { active: false, name });
+  }
 
   get running(): boolean {
-    return this.id !== null;
+    return this.job.running;
   }
 
   set(active: boolean): void {
-    if (active && this.id === null) this.id = setTick(this.onFrame);
-    else if (!active && this.id !== null) {
-      clearTick(this.id);
-      this.id = null;
-    }
+    this.job.set(active);
   }
 }

@@ -28,7 +28,7 @@ g.exports = {
 };
 
 const { PendingActions } = await import("../src/server/pending");
-const { Cooldowns, onCharacter, PlayerMap } =
+const { Cooldowns, KeyedCooldowns, onCharacter, PlayerMap } =
   await import("../src/server/players");
 const { FileViews } = await import("../src/shared/records");
 const { previewJson } = await import("../src/shared");
@@ -76,6 +76,27 @@ for (const n of [100_000, 1_000_000]) {
   const oneDrop = time(() => drop(n));
   console.log(
     `${n.toLocaleString("en")} entries: PendingActions start ${fmt(start / n)} / take ${fmt(take / n)} each (${ok >= n ? "all taken" : "missing"}), PlayerMap+Cooldowns fill ${fmt(fill)}, Cooldowns.ready ${fmt(ready / n)} each, one playerDropped ${fmt(oneDrop)}`,
+  );
+}
+
+// KeyedCooldowns by character id: n characters start a cooldown, half expire, then n more start (the sweep runs
+// when the map doubles, so starts stay O(1) amortized and expired entries never pile up).
+for (const n of [100_000, 1_000_000]) {
+  const keyed = new KeyedCooldowns();
+  const first = time(() => {
+    for (let c = 1; c <= n; c++) keyed.start(c, c % 2 === 0 ? 1000 : 60_000);
+  });
+  clock += 2000;
+  const second = time(() => {
+    for (let c = n + 1; c <= 2 * n; c++) keyed.start(c, 60_000);
+  });
+  let readyCount = 0;
+  const ready = time(() => {
+    for (let c = 1; c <= n; c++) if (keyed.ready(c)) readyCount++;
+  });
+  const held = (keyed as unknown as { until: Map<number, number> }).until.size;
+  console.log(
+    `${n.toLocaleString("en")} characters: KeyedCooldowns start ${fmt(first / n)} / ${fmt(second / n)} each (sweeps included), ready ${fmt(ready / n)} each (${readyCount} expired), ${held.toLocaleString("en")} entries held after 2n starts`,
   );
 }
 

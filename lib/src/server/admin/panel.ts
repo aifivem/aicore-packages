@@ -4,7 +4,6 @@ import {
   type AdminPanelSnapshot,
   type AdminPatch,
   type AdminResult,
-  type DataSpec,
   type FileSpec,
   type PanelSchema,
 } from "@aicore-fivem/shared";
@@ -14,8 +13,9 @@ import { registerExport, resourceExport } from "../../fivem/exports";
 import { loadLocaleTexts } from "../../fivem/locale";
 import { onClientCallback } from "../callback";
 import { DataFile } from "../dataFile";
+import { applyEdit, checkEdit, type EditPatch, type Rule } from "./edit";
 import { clone, toPatch } from "./patch";
-import { ERR, validate } from "./validate";
+import { ERR } from "./validate";
 import { fileSchema, writeSchema } from "./jsonSchema";
 
 const core = resourceExport(CORE.resource);
@@ -23,32 +23,12 @@ const core = resourceExport(CORE.resource);
 type Data = Record<string, unknown>;
 /** A record changed (records: its key; settings: no key); `null` = deleted. */
 type ChangeHandler = (key: string | undefined, value: unknown) => void;
-/** Cross-field check on the value about to be stored: a lang key refuses it. */
-type Rule = (key: string | undefined, next: Data) => string | null;
 /** An `action` widget's handler: a lang key refuses (shown under the button), null succeeds. */
-/** A patch that edits data (every kind but an action button's `run`). */
-type EditPatch = Exclude<AdminPatch, { action: "run" }>;
 type ActionHandler = (
   admin: number,
   record: Data,
   key: string | undefined,
 ) => string | null;
-
-const DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
-
-/** An imported record: only the file's sections, a section it lacks taken from the new-record template. */
-function imported(
-  spec: FileSpec,
-  value: Record<string, unknown>,
-): Record<string, unknown> {
-  const base = clone(spec.newRecord ?? {});
-  const out: Record<string, unknown> = {};
-  for (const name of Object.keys(spec.sections)) {
-    const v = name in value ? value[name] : base[name];
-    if (v !== undefined) out[name] = clone(v);
-  }
-  return out;
-}
 
 /**
  * A resource's panel content: loads `data/<file>.json` once, keeps it in memory, validates every panel edit against
@@ -132,7 +112,10 @@ export class AdminPanel {
     try {
       if (patch.action === "run") return this.run(admin, patch, spec);
       if (spec.memory) return { ok: false, error: ERR.type };
-      const error = this.check(patch, spec);
+      const error = checkEdit(patch, spec, {
+        get: (file) => this.get(file),
+        rule: (file) => this.rules.get(file),
+      });
       if (error) {
         this.log.warn(
           `admin ${admin} edit refused (${error}): ${previewJson(patch, 300)}`,
@@ -181,89 +164,12 @@ export class AdminPanel {
     setImmediate(() => this.commit(file, key, value));
   }
 
-  /** A text section with `records` must name a record of that file of this panel (or be empty). */
-  private linked(spec: DataSpec, value: unknown): string | null {
-    return spec.type === "text" &&
-      spec.records &&
-      typeof value === "string" &&
-      value !== "" &&
-      !(value in this.get(spec.records))
-      ? "ADMIN_ERR_LOOKUP"
-      : null;
-  }
-
-  private check(patch: EditPatch, spec: FileSpec): string | null {
-    const data = this.get(patch.file);
-    if (patch.action === "create") {
-      if (
-        spec.kind !== "records" ||
-        !new RegExp(spec.keyPattern ?? DEFAULT_KEY).test(patch.key)
-      )
-        return ERR.pattern;
-      if (patch.key in data) return "ADMIN_ERR_EXISTS";
-      return null;
-    }
-    if (patch.action === "delete") {
-      if (spec.kind !== "records" || !(patch.key in data)) return ERR.type;
-      return spec.locked?.includes(patch.key) ? "ADMIN_ERR_LOCKED" : null;
-    }
-    if (patch.action === "import") {
-      if (spec.kind !== "records") return ERR.type;
-      const pattern = new RegExp(spec.keyPattern ?? DEFAULT_KEY);
-      for (const [key, value] of Object.entries(patch.records)) {
-        if (!pattern.test(key)) return ERR.pattern;
-        const record = imported(spec, value);
-        for (const [name, section] of Object.entries(spec.sections)) {
-          const refusal = validate(section, record[name], name);
-          if (refusal) return refusal.error;
-          const link = this.linked(section, record[name]);
-          if (link) return link;
-        }
-        const ruled = this.rules.get(patch.file)?.(key, record);
-        if (ruled) return ruled;
-      }
-      return null;
-    }
-    const section = spec.sections[patch.section];
-    if (!section) return ERR.type;
-    if (spec.kind === "records" && (!patch.key || !(patch.key in data)))
-      return ERR.type;
-    const refusal = validate(section, patch.value, patch.section);
-    if (refusal) return refusal.error;
-    const link = this.linked(section, patch.value);
-    if (link) return link;
-    const current = spec.kind === "records" ? data[patch.key ?? ""] : data;
-    const next = {
-      ...(isRecord(current) ? current : {}),
-      [patch.section]: patch.value,
-    };
-    return this.rules.get(patch.file)?.(patch.key, next) ?? null;
-  }
-
   private store(patch: EditPatch, spec: FileSpec): void {
     const data = this.data.get(patch.file) ?? {};
-    if (patch.action === "create") {
-      const record = clone(spec.newRecord ?? {});
-      if (spec.labelPath) record[spec.labelPath] = patch.label;
-      data[patch.key] = record;
-    } else if (patch.action === "delete") {
-      delete data[patch.key];
-    } else if (patch.action === "import") {
-      for (const [key, value] of Object.entries(patch.records))
-        data[key] = imported(spec, value);
-      this.data.set(patch.file, data);
-      for (const key of Object.keys(patch.records))
-        this.changed(patch.file, key);
-      return;
-    } else {
-      const target = spec.kind === "records" ? data[patch.key ?? ""] : data;
-      if (!isRecord(target)) return;
-      if (patch.value === undefined || patch.value === null)
-        delete target[patch.section];
-      else target[patch.section] = clone(patch.value);
-    }
+    const keys = applyEdit(data, patch, spec);
+    if (keys.length === 0) return;
     this.data.set(patch.file, data);
-    this.changed(patch.file, spec.kind === "records" ? patch.key : undefined);
+    for (const key of keys) this.changed(patch.file, key);
   }
 
   /** Save, then tell the resource's code, open panels and (world files) every client. */

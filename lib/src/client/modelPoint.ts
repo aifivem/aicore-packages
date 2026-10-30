@@ -1,3 +1,4 @@
+import { every } from "../fivem/scheduler";
 import { cache } from "./cache";
 import {
   readAllowed,
@@ -17,6 +18,8 @@ export interface ModelPointOptions {
   icon?: string;
   /** How close to the object, in metres (default 1.5). */
   radius?: number;
+  /** Object points are skipped while the player sits in a vehicle (no scan, no prompt) unless this is true. */
+  inVehicle?: boolean;
   /** Gets the object in question (0 when unknown). */
   canShow?: (entity: number) => boolean;
   /** Gets the object used. A returned promise blocks this resource's other points until it settles. */
@@ -30,26 +33,69 @@ export type VehiclePointOptions = Omit<
 >;
 
 const SCAN_MS = 500;
+/** Up to this many models a point asks GTA for the closest object of each; more models use the object index. */
+const DIRECT_MODELS = 6;
+/** Pool entries the object index reads per scan, so a big pool is spread over several scans. */
+const INDEX_CHUNK = 300;
 const scanning = new Set<ModelPoint>();
-let timer: ReturnType<typeof setInterval> | null = null;
 
 function schedule(): void {
-  if (scanning.size && !timer) timer = setInterval(scan, SCAN_MS);
-  else if (!scanning.size && timer) {
-    clearInterval(timer);
-    timer = null;
+  scanJob.set(scanning.size > 0);
+}
+
+/**
+ * The objects whose model a many-model point wants (364 chair models, say): one closest-object query per model and
+ * scan costs milliseconds, so the object pool is walked instead, a chunk per scan, and only matching objects are kept.
+ */
+class ObjectIndex {
+  /** Matching objects found by the last complete walk. */
+  candidates: number[] = [];
+  private pool: number[] = [];
+  private next = 0;
+  private found: number[] = [];
+
+  advance(wanted: Set<number>): void {
+    if (this.next >= this.pool.length) {
+      this.candidates = this.found;
+      this.found = [];
+      this.pool = GetGamePool("CObject") as number[];
+      this.next = 0;
+    }
+    const end = Math.min(this.pool.length, this.next + INDEX_CHUNK);
+    for (let i = this.next; i < end; i++) {
+      const entity = this.pool[i] ?? 0;
+      if (entity && wanted.has(GetEntityModel(entity))) this.found.push(entity);
+    }
+    this.next = end;
   }
 }
+
+const index = new ObjectIndex();
+const indexed = new Set<number>();
+/** While the player stands still (and stays in or out of a vehicle) a scan is skipped, but not more than this many in a row. */
+const IDLE_SCANS = 6;
+const last = { x: 0, y: 0, z: 0, inVehicle: false, idle: IDLE_SCANS };
 
 /** Prompt mode: the nearest object of each point's models within its radius, two times a second. */
 function scan(): void {
   const [x = 0, y = 0, z = 0] = GetEntityCoords(cache.ped, false);
-  for (const point of scanning) point.check(x, y, z);
+  const inVehicle = cache.vehicle !== false;
+  const still =
+    inVehicle === last.inVehicle &&
+    Math.hypot(x - last.x, y - last.y, z - last.z) < 1;
+  if (still && ++last.idle < IDLE_SCANS) return;
+  Object.assign(last, { x, y, z, inVehicle, idle: 0 });
+  indexed.clear();
+  for (const point of scanning) point.addIndexed(indexed, inVehicle);
+  if (indexed.size) index.advance(indexed);
+  for (const point of scanning) point.check(x, y, z, inVehicle);
 }
+
+const scanJob = every(SCAN_MS, scan, { active: false, name: "modelPoints" });
 
 /**
  * A point on every world object of some models: a target option on the models in target mode, otherwise a prompt
- * while the player is near one of them (one scan timer for the resource, only while such points exist).
+ * while the player is near one of them (one scan job for the resource, only while such points exist).
  */
 export class ModelPoint {
   private readonly hashes: number[];
@@ -112,12 +158,25 @@ export class ModelPoint {
     this.entity = 0;
   }
 
-  check(x: number, y: number, z: number): void {
+  /** Adds this point's models to the object index when it has too many to query one by one. */
+  addIndexed(into: Set<number>, inVehicle: boolean): void {
+    if (this.options.vehicles || this.hashes.length <= DIRECT_MODELS) return;
+    if (inVehicle && !this.options.inVehicle) return;
+    for (const hash of this.hashes) into.add(hash);
+  }
+
+  check(x: number, y: number, z: number, inVehicle: boolean): void {
+    if (!this.options.vehicles && inVehicle && !this.options.inVehicle) {
+      this.entity = 0;
+      return this.show(null);
+    }
     const radius = this.options.radius ?? 1.5;
     let found = this.options.vehicles
       ? this.nearestVehicle(x, y, z, radius)
-      : 0;
-    if (!this.options.vehicles)
+      : this.hashes.length > DIRECT_MODELS
+        ? this.nearestIndexed(x, y, z, radius)
+        : 0;
+    if (!this.options.vehicles && this.hashes.length <= DIRECT_MODELS)
       for (const hash of this.hashes) {
         found = GetClosestObjectOfType(
           x,
@@ -141,6 +200,20 @@ export class ModelPoint {
 
   press(): void {
     if (this.entity) this.run(this.entity);
+  }
+
+  /** The nearest indexed object of this point's models within `radius`. */
+  private nearestIndexed(x: number, y: number, z: number, radius: number) {
+    let found = 0;
+    let best = radius;
+    for (const entity of index.candidates) {
+      if (!DoesEntityExist(entity) || !this.hashSet.has(GetEntityModel(entity)))
+        continue;
+      const [ox = 0, oy = 0, oz = 0] = GetEntityCoords(entity, false);
+      const dist = Math.hypot(ox - x, oy - y, oz - z);
+      if (dist < best) [found, best] = [entity, dist];
+    }
+    return found;
   }
 
   /** The nearest vehicle of the models (any networked one for a global point) within `radius` (the vehicle pool is small). */
