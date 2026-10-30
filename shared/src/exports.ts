@@ -196,6 +196,11 @@ export type AiCoreClientExports = {
   OpenInput(requestId: number, request: InputRequest): void;
   /** The key a lib `Keybind` was registered with (mapping command `+<name>_<key>`); null until it is registered. */
   GetKeybindKey(name: string): string | null;
+  /** The emote script answering hands up / pointing (tgiann-emotes, ai-smallresources), or null. */
+  GetGestureProvider(): string | null;
+  /** The local player has the hands up / points, in whichever emote script runs. */
+  IsHandsUp(): boolean;
+  IsPointing(): boolean;
 } & InventoryClientExports;
 
 /** ai-target's client exports that ai-core uses. */
