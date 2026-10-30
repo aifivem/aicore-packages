@@ -76,6 +76,8 @@ export type WidgetSpec = WidgetBase &
         ground?: boolean;
       }
     | { widget: "list"; rows: WidgetSpec[]; newRow: Record<string, unknown>; addLabel: string; rowLabel?: string; max?: number }
+    /** A map blip `{ sprite, color, scale }` (data: an object of three numbers): picture grid, colour swatches, size. */
+    | { widget: "blip" }
     /** Read only: shows the value (state the script fills in, e.g. a default it reports). */
     | ({ widget: "info"; mono?: boolean } & ValueLabels)
   );
