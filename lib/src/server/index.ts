@@ -67,7 +67,9 @@ export { inventory } from "./inventory";
 export { online } from "./online";
 export { vehicleKeys } from "./vehicleKeys";
 export {
+  nearestVehicleAt,
   nearestVehicleTo,
+  randomPlate,
   spawnVehicle,
   vehicleFromNet,
   vehicleNearPlayer,
@@ -123,5 +125,6 @@ export { dispatch } from "./dispatch";
 export { money } from "./money";
 export { buckets } from "./buckets";
 export { medical } from "./medical";
+export { appearance } from "./appearance";
 export { characters } from "./characters";
 export { isPrimeTime } from "./primeTime";

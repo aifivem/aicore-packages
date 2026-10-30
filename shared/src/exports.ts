@@ -18,6 +18,7 @@ import type { VehicleKeysServerExports } from "./vehicleKeys";
 import type { PhoneServerExports } from "./phone";
 import type { DispatchAlert, DispatchServerExports } from "./dispatch";
 import type { RadialClientExports, RadialItem } from "./radial";
+import type { CharacterAppearance } from "./appearance";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -220,6 +221,17 @@ export type AiCoreServerExports = {
     charId: number,
     position: { x: number; y: number; z: number; heading?: number },
   ): boolean;
+
+  /** The clothing script ai-core's appearance layer reads looks from (ai-appearance, tgiann-clothing), or null. */
+  GetAppearanceSystem(): string | null;
+  /**
+   * Reads a character's stored look (loaded or not) from the active clothing script; `done` gets it, or null when the
+   * character has none or no clothing script runs. A callback, not a promise: no promise crosses a resource boundary.
+   */
+  GetCharacterAppearance(
+    charId: number,
+    done: (look: CharacterAppearance | null) => void,
+  ): void;
 } & InventoryServerExports &
   VehicleKeysServerExports &
   PhoneServerExports &
@@ -266,6 +278,14 @@ export type AiCoreClientExports = {
   /** The local player has the hands up / points, in whichever emote script runs. */
   IsHandsUp(): boolean;
   IsPointing(): boolean;
+  /**
+   * Puts a look from `GetCharacterAppearance` on a ped through the active clothing script; false when the ped is gone,
+   * its model differs from the look's or no clothing script runs. On the player's own ped it changes what they wear
+   * (whether that is saved is the clothing script's rule).
+   */
+  ApplyAppearance(ped: number, look: CharacterAppearance): boolean;
+  /** The look a ped wears now (same shape as `GetCharacterAppearance`), null when the clothing script cannot tell. */
+  GetPedAppearance(ped: number): CharacterAppearance | null;
 } & InventoryClientExports &
   RadialClientExports;
 
@@ -361,10 +381,12 @@ export type AiInventoryClientExports = {
   ): boolean;
 };
 
-/** ai-appearance's client exports ai-core uses. */
+/** ai-appearance's client exports (ai-core's appearance adapter uses them; scripts use lib `appearance`). */
 export type AiAppearanceClientExports = {
-  /** Puts a character's saved look (from the character screen) on a local freemode ped of its sex; false when the look is unknown. */
-  ApplyCharacterAppearance(ped: number, charId: number): boolean;
+  /** Puts an ai-appearance look (its `Appearance` JSON) on a ped of the look's model; false when the look is invalid or the model differs. */
+  ApplyAppearance(ped: number, appearance: unknown): boolean;
+  /** The look the local player wears (its `Appearance`), null for any other ped. */
+  GetPedAppearance(ped: number): unknown;
 };
 
 /**

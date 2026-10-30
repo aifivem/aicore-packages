@@ -19,7 +19,7 @@ export const CORE = {
   gangsChangedEvent: "ai-core:gangsChanged",
   /** (src, gang: string | null) */
   activeGangChangedEvent: "ai-core:activeGangChanged",
-  /** (src, charIds: number[]) each time a player's character screen loads; an appearance resource answers with portraits. */
+  /** (src, charIds: number[]) each time a player's character screen loads; ai-core sends the looks, a clothing script may answer with portraits. */
   characterScreenEvent: "ai-core:characterScreen",
   /** (resource: string | null) the inventory behind ai-core's inventory layer changed (the bridge drops its item cache). */
   inventoryChangedEvent: "ai-core:inventoryChanged",
@@ -33,8 +33,8 @@ export const CORE = {
   clientPlayerUnloadedEvent: "ai-core:client:playerUnloaded",
   /** (charId: number, url: string) a portrait image of a character on the character screen (e.g. `https://nui-img/<txd>/<txd>`). */
   clientCharacterPortraitEvent: "ai-core:client:characterPortrait",
-  /** (charId: number) ai-appearance holds this character's look: ai-core dresses its scene ped with `ApplyCharacterAppearance`. */
-  clientCharacterLookEvent: "ai-core:client:characterLook",
+  /** Server -> client (latent): (looks: { id: number, look: CharacterAppearance }[]) the character screen's looks, read through the appearance layer; ai-core dresses its scene peds with them. */
+  characterLooksEvent: "ai-core:client:characterLooks",
   /** (resource: string, id: string) the interaction key was pressed while that resource's prompt was on top. */
   clientPromptPressedEvent: "ai-core:client:promptPressed",
   /** (key: keyof PlayerCache, value) a cached value of the local player changed (one watcher in ai-core for every resource). */
@@ -79,6 +79,8 @@ export const PLAYER_BAGS = {
   dead: "dead",
   /** true while handcuffed (ai-police). */
   cuffed: "cuffed",
+  /** pma-voice's voice range `{ index, distance, mode }` (ai-voice writes it). */
+  proximity: "proximity",
 } as const;
 
 /** The first FXServer build known to fire `onPedDeath` / `onPedHealthChanged` (citizenfx/fivem 1424ad0). */

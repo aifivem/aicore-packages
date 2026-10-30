@@ -27,7 +27,12 @@ export {
 } from "./vehicleProps";
 export { getPlayerData, onPlayerData, seedPlayerData } from "./playerData";
 export { Keybind, type KeybindOptions } from "./keybind";
-export { requestAnimDict, requestModel, requestPtfxAsset } from "./streaming";
+export {
+  requestAnimDict,
+  requestAnimSet,
+  requestModel,
+  requestPtfxAsset,
+} from "./streaming";
 export {
   callExport,
   isResourceStarted,
@@ -56,5 +61,6 @@ export { isActionOk, replyError } from "../shared/action";
 export { hud } from "./hud";
 export { world } from "./world";
 export { gestures } from "./gestures";
+export { appearance } from "./appearance";
 export { keyHints } from "./keyHints";
 export { radial } from "./radial";

@@ -36,3 +36,13 @@ export async function requestPtfxAsset(
   await waitFor(() => HasNamedPtfxAssetLoaded(asset) || undefined, timeoutMs);
   return asset;
 }
+
+/** Loads a movement clipset (crouch walk, injured walk). Call `RemoveAnimSet(set)` when it is no longer used. */
+export async function requestAnimSet(
+  set: string,
+  timeoutMs = 10_000,
+): Promise<string> {
+  RequestAnimSet(set);
+  await waitFor(() => HasAnimSetLoaded(set) || undefined, timeoutMs);
+  return set;
+}

@@ -90,9 +90,14 @@ async function seatPlayer(
 
 const PLATE_LETTERS = "ABCDEFGHJKLMNPRSTUVWXYZ";
 
-/** A plate like the game's own: two digits, three letters, three digits. */
-function randomPlate(): string {
+/** A plate like the game's own (two digits, three letters, three digits), or `prefix` followed by digits (8 in all). */
+export function randomPlate(prefix?: string): string {
   const digit = () => String(Math.floor(Math.random() * 10));
+  if (prefix !== undefined) {
+    let plate = prefix.slice(0, 8);
+    while (plate.length < 8) plate += digit();
+    return plate;
+  }
   const letter = () =>
     PLATE_LETTERS[Math.floor(Math.random() * PLATE_LETTERS.length)] ?? "A";
   return `${digit()}${digit()}${letter()}${letter()}${letter()}${digit()}${digit()}${digit()}`;
@@ -162,6 +167,26 @@ export async function spawnVehicle(
   ];
   await Promise.all(riders.map((r) => seatPlayer(vehicle, r.source, r.seat)));
   return vehicle;
+}
+
+/**
+ * The closest vehicle within `metres` of a point (a spawn spot is free...) that passes `filter`; 0 when none. Walks
+ * every vehicle: for actions, not ticks.
+ */
+export function nearestVehicleAt(
+  point: { x: number; y: number; z: number },
+  metres: number,
+  filter?: (vehicle: number) => boolean,
+): number {
+  let best = 0;
+  let bestDistance = metres;
+  for (const vehicle of GetAllVehicles() as number[]) {
+    const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle);
+    const d = Math.hypot(vx - point.x, vy - point.y, vz - point.z);
+    if (d < bestDistance && (!filter || filter(vehicle)))
+      [best, bestDistance] = [vehicle, d];
+  }
+  return best;
 }
 
 /**

@@ -5,7 +5,8 @@ import { Zones } from "./zones";
 const log = createLogger(GetCurrentResourceName());
 
 export interface LocalPedOptions {
-  model: string;
+  /** Model name or hash. */
+  model: string | number;
   coords: { x: number; y: number; z: number; heading: number };
   /** `coords.z` is the floor (panel points): the ped stands on it. Otherwise z is the ped's own root. Default true. */
   ground?: boolean;
