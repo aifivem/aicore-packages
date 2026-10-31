@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.2.0...lib-v0.3.0) (2026-10-31)
+
+
+### New Features
+
+* **lib:** needs.refill fills hunger and thirst through ai-core's HUD layer ([6584552](https://github.com/aifivem/aicore-packages/commit/6584552a7b2e0556a359e696552d9c1f4a0f575e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @aicore-fivem/shared bumped from ^0.2.0 to ^0.3.0
+
 ## [0.2.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.1.0...lib-v0.2.0) (2026-10-31)
 
 
