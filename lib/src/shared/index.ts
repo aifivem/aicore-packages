@@ -147,3 +147,4 @@ export {
   readPlacePed,
   type PlacePed,
 } from "./placePed";
+export { cellKey, gridCell } from "./grid";

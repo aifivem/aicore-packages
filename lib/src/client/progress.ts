@@ -3,6 +3,8 @@ import { resourceExport } from "../fivem/exports";
 import { every } from "../fivem/scheduler";
 import { cache } from "./cache";
 import { controls } from "./controls";
+import { sleep } from "../shared/wait";
+import type { Vec3 } from "../shared/vec";
 import { requestAnimDict } from "./streaming";
 
 const core = resourceExport(CORE.resource);
@@ -32,7 +34,12 @@ export interface ProgressOptions {
   freeze?: boolean;
   /** Controls blocked while it runs: walking, driving, looking around, fighting. */
   disable?: { move?: boolean; car?: boolean; mouse?: boolean; combat?: boolean };
+  /** The player turns to this point before the bar starts (a pump, a counter, a vehicle). */
+  face?: Vec3;
 }
+
+/** How long the ped gets to turn towards `face`. */
+const FACE_MS = 600;
 
 /** The running progress of this resource (one at a time). */
 let running: { canCancel: boolean; cancelled: boolean } | null = null;
@@ -68,7 +75,11 @@ export async function progress(options: ProgressOptions): Promise<boolean> {
   const own = { canCancel: options.canCancel === true, cancelled: false };
   running = own;
   const ped = cache.ped;
-  const { anim, scenario } = options;
+  const { anim, scenario, face } = options;
+  if (face && cache.vehicle === false) {
+    TaskTurnPedToFaceCoord(ped, face.x, face.y, face.z, FACE_MS);
+    await sleep(FACE_MS);
+  }
   if (anim) {
     await requestAnimDict(anim.dict);
     TaskPlayAnim(

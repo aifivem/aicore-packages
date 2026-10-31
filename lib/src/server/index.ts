@@ -81,6 +81,11 @@ export {
 export { nearestPlayerTo, playersNear, playersNearEntity } from "./proximity";
 export { coordsOf, entityCoords, isNear } from "./position";
 export {
+  AreaStream,
+  type AreaItem,
+  type AreaStreamOptions,
+} from "./areaStream";
+export {
   Cooldowns,
   KeyedCooldowns,
   onCharacter,
@@ -88,6 +93,7 @@ export {
   type CharacterHandlers,
 } from "./players";
 export { PendingActions } from "./pending";
+export { progressFor, type ProgressForOptions } from "./progressFor";
 export {
   addCommand,
   type CommandArgs,

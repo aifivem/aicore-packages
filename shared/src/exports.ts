@@ -11,6 +11,7 @@ import type {
 } from "./player";
 import type { AiVehiclesServerExports } from "./vehicles";
 import type { InputRequest, ItemPickerRequest, MenuRequest } from "./menu";
+import type { MinigameRequest } from "./minigame";
 import type {
   InventoryClientExports,
   InventoryServerExports,
@@ -280,6 +281,8 @@ export type AiCoreClientExports = {
   OpenInput(requestId: number, request: InputRequest): void;
   /** Opens the item picker; the list (`PickedItem[]`) or null arrives as `MENU_EVENTS.menuResult`. */
   OpenItemPicker(requestId: number, request: ItemPickerRequest): void;
+  /** Starts a minigame (skill check, lockpick); its result arrives as `MENU_EVENTS.menuResult`. */
+  OpenMinigame(requestId: number, request: MinigameRequest): void;
   /** The key a lib `Keybind` was registered with (mapping command `+<name>_<key>`); null until it is registered. */
   GetKeybindKey(name: string): string | null;
   /** Shows a key hint of the calling resource until `HideKeyHint` (dropped when that resource stops). */

@@ -53,6 +53,10 @@ export const CORE = {
   clientDefinitionsEvent: "ai-core:client:definitions",
   /** Server -> client callback: (model: string) the `CreateVehicleServerSetter` type of a model, null when the game has no such vehicle (ai-core's client answers for every resource, lib `spawnVehicle`). */
   vehicleTypeCallback: "ai-core:vehicleType",
+  /** Server -> client callback: (ServerProgress) runs ai-core's progress bar for a server flow (lib `progressFor`), answers true when it ran out. */
+  progressForCallback: "ai-core:progressFor",
+  /** Server -> client: the server flow's progress bar stops (a newer `progressFor` replaced it). */
+  progressForCancelEvent: "ai-core:client:progressForCancel",
   /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */
   interactionStateKey: "ai:interaction",
 

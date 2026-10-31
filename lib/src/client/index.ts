@@ -1,6 +1,12 @@
 /** Client-only helpers. Import from "@aicore-fivem/lib/client". */
 
 export { TickLoop } from "./tickLoop";
+export { AreaFollower } from "./areaFollower";
+export {
+  NuiScreen,
+  type NuiPageMessage,
+  type NuiScreenOptions,
+} from "./nuiScreen";
 export { every, type EveryOptions, type Job } from "../fivem/scheduler";
 export { onServerCallback, triggerServerCallback } from "./callback";
 export { fromServer, onServerEvent } from "./netEvent";
@@ -26,7 +32,15 @@ export {
   progress,
   type ProgressOptions,
 } from "./progress";
-export { input, itemPicker, menu, type MenuListeners } from "./menu";
+export {
+  input,
+  itemPicker,
+  lockpick,
+  menu,
+  skillCheck,
+  type LockpickOptions,
+  type MenuListeners,
+} from "./menu";
 export { inventory } from "./inventory";
 export {
   getVehicleProps,
