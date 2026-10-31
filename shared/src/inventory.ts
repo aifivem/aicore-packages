@@ -72,8 +72,8 @@ export interface ShopDefinition {
 export interface InventoryAdapter {
   /** The inventory's resource name (detection, version check, panel choice). */
   readonly resource: string;
-  /** The inventory version the adapter is written against; another installed version logs a warning. */
-  readonly version: string;
+  /** The third-party inventory version the adapter is written against; another installed version logs a warning. None for ai-inventory. */
+  readonly version?: string;
   addItem(
     inv: InventoryRef,
     item: string,
