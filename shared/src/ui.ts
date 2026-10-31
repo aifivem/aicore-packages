@@ -23,6 +23,8 @@ export const LIB_UI = {
   minigameForCallback: "ai-lib:minigameFor",
   /** Client local: (owner: string, key: string, inside: boolean) the player entered or left a zone ai-lib checks for `owner` (lib `Zones`). */
   zoneEvent: "ai-lib:client:zone",
+  /** Client local: (owner: string, key: string, entity: number) the nearest object of a model point ai-lib scans for `owner` changed (0 = none near; lib `Points.addModel`). */
+  modelPointEvent: "ai-lib:client:modelPoint",
 } as const;
 
 /**
@@ -66,6 +68,9 @@ export type AiLibClientExports = {
   /** Checks a zone of the calling resource (lib `Zones` hands its zones over); enter / exit arrive as `LIB_UI.zoneEvent`. */
   AddZone(key: string, shape: unknown, interval: number, inside: boolean): void;
   RemoveZone(key: string): void;
+  /** Scans for the nearest object of a prompt-mode model point of the calling resource; changes arrive as `LIB_UI.modelPointEvent`. */
+  AddModelPoint(key: string, def: unknown, entity: number): void;
+  RemoveModelPoint(key: string): void;
   /** Shows a menu for the calling resource; the pick arrives as `MENU_EVENTS.menuResult`. */
   OpenMenu(requestId: number, request: MenuRequest): void;
   /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */
@@ -75,3 +80,13 @@ export type AiLibClientExports = {
   /** Closes the calling resource's open menu or input dialog (answered with null like a player close). */
   CloseDialog(): void;
 };
+
+/**
+ * Another notification UI ai-lib's cards can go to (ai-core panel setting `notify`, client half of ai-core's notify
+ * layer `resource/client/notify/`): translates one card into that script's call.
+ */
+export interface NotifyClientAdapter {
+  resource: string;
+  version?: string;
+  notify(notification: Notification): void;
+}

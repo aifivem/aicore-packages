@@ -1,50 +1,90 @@
 import { CORE } from "@aicore-fivem/shared";
-import { callExport, isResourceStarted } from "../fivem/exports";
+import { isResourceStarted } from "../fivem/exports";
 import { GlobalKey, stateString } from "../fivem/state";
 import { createLogger } from "../shared";
+import { TARGETS, type Target, type TargetAdapter } from "./targets";
 
-/** What `Points` and model points share: the interaction style, the target API, one action at a time. */
+/** What `Points` and model points share: the interaction style, the target in use, one action at a time. */
 
 export type Style = "prompt" | "target";
-export const TARGET = "ox_target";
-/** ai-target answers the ox_target API under its own name too. */
-const AI_TARGET = "ai-target";
-
-/**
- * The resource answering the ox_target API, null when none runs. ai-target `provide`s ox_target, but the state of a
- * provided name is not always reported as started, so its own name is checked too.
- */
-export const targetResource = (): string | null =>
-  isResourceStarted(TARGET)
-    ? TARGET
-    : isResourceStarted(AI_TARGET)
-      ? AI_TARGET
-      : null;
-/**
- * Set when a target call found no export: while clients load, a target resource reads started before its scripts
- * ran. Points stay prompts until its start event (`point.ts` restyles then).
- */
-let notReady = false;
-on("onClientResourceStart", (resource: string) => {
-  if (resource === TARGET || resource === AI_TARGET) notReady = false;
-});
-export const targetRunning = (): boolean =>
-  !notReady && targetResource() !== null;
 export const log = createLogger(GetCurrentResourceName());
 
-/** The ox_target API (ai-target answers it under that name); undefined, and target mode off, while it is not ready. */
-export function target(name: string, ...args: unknown[]): unknown {
+const NAMES = new Set(TARGETS.map((t) => t.resource));
+/**
+ * Targets that read started but answered "No such export": while clients load, a resource reads started before its
+ * scripts ran (and a provided name reads started without answering). They are skipped until a target starts.
+ */
+const notReady = new Set<string>();
+const changeHandlers: Array<() => void> = [];
+let changeQueued = false;
+/** Tells `onTargetChange` listeners once, after the current call (the start / stop event or the failed call). */
+function changed(): void {
+  if (changeQueued) return;
+  changeQueued = true;
+  setTimeout(() => {
+    changeQueued = false;
+    for (const fn of changeHandlers) fn();
+  }, 0);
+}
+for (const event of ["onClientResourceStart", "onClientResourceStop"])
+  on(event, (resource: string) => {
+    if (!NAMES.has(resource)) return;
+    if (event === "onClientResourceStart") notReady.clear();
+    changed();
+  });
+
+/** Runs `fn` when the target in use may have changed (a target started, stopped or turned out not ready). */
+export const onTargetChange = (fn: () => void) => void changeHandlers.push(fn);
+
+/** The target options go on: the first running one in `TARGETS` order that is ready, null when none. */
+export function activeTarget(): Target | null {
+  for (const target of TARGETS)
+    if (!notReady.has(target.resource) && isResourceStarted(target.resource))
+      return target;
+  return null;
+}
+export const targetRunning = (): boolean => activeTarget() !== null;
+
+/** One call on a target; null when it failed (no exports yet: the target is skipped until a target starts). */
+function useTarget<T>(
+  target: Target,
+  call: (adapter: TargetAdapter) => T,
+): { value: T } | null {
   try {
-    return callExport(targetResource() ?? TARGET, name, ...args);
+    return { value: call(target.adapter) };
   } catch (error) {
-    if (!String(error).includes("No such export")) throw error;
-    notReady = true;
-    return undefined;
+    if (String(error).includes("No such export")) {
+      notReady.add(target.resource);
+      changed();
+    } else log.error(`${target.resource} target call failed`, error);
+    return null;
   }
 }
 
+/** An option put on a target, with the call that takes it off again. */
+export interface Registration {
+  target: Target;
+  remove(adapter: TargetAdapter): void;
+}
+
+/** Puts an option on a target; null when the target could not take it (the point stays a prompt meanwhile). */
+export function register<T>(
+  target: Target,
+  add: (adapter: TargetAdapter) => T,
+  remove: (adapter: TargetAdapter, value: T) => void,
+): Registration | null {
+  const added = useTarget(target, add);
+  return added && { target, remove: (a) => remove(a, added.value) };
+}
+
+/** Takes an option off its target again (nothing to do when that target stopped: its options went with it). */
+export function unregister(registration: Registration | null): void {
+  if (registration && isResourceStarted(registration.target.resource))
+    useTarget(registration.target, registration.remove);
+}
+
 const interaction = new GlobalKey(CORE.interactionStateKey, stateString);
-/** Prompt mode, or target mode when the owner picked it and a resource answers the ox_target API. */
+/** Prompt mode, or target mode when the owner picked it and a target script runs. */
 export const style = (): Style =>
   interaction.get() === "target" && targetRunning() ? "target" : "prompt";
 export const onStyleChange = (fn: () => void) => interaction.onChange(fn);

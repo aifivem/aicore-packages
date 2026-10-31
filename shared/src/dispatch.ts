@@ -41,6 +41,8 @@ export interface DispatchAdapter {
   alert(alert: DispatchAlert): void;
   /** The system answers QB's `police:server:policeAlert` event itself: ai-core leaves that event to it. */
   answersPoliceAlert?: boolean;
+  /** Runs next to ai-policealert on purpose (an MDT with alerts): it does not make ai-policealert unneeded. */
+  besideOurs?: boolean;
 }
 
 const text = (v: unknown, max: number): string | undefined =>

@@ -4,6 +4,7 @@ import {
   type InventoryStack,
   type ItemDefinition,
   type ItemMetadata,
+  type ShopProduct,
   type UsableItemHandler,
 } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
@@ -66,6 +67,12 @@ export const inventory = {
   /** Runs `handler` when a player uses the item; register once at start, ai-core keeps it across inventory restarts. */
   registerUsableItem: (name: string, handler: UsableItemHandler): void =>
     core.RegisterUsableItem(name, handler),
+  /** Registers a shop (`{ name, price }` products); ai-core registers it again with any inventory that starts later. */
+  registerShop: (name: string, label: string, items: ShopProduct[]): void =>
+    core.RegisterShop(name, label, items),
+  /** Opens a registered shop on the player's screen, without range or access checks (check before). */
+  openShop: (source: number, name: string): boolean =>
+    core.OpenShop(source, name),
   /** An item's label, weight and flags; null when the inventory does not know it. */
   getItemDefinition: (name: string): ItemDefinition | null =>
     core.GetItemDefinition(name),

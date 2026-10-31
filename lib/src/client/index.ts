@@ -4,6 +4,8 @@ export { TickLoop } from "./tickLoop";
 export { AreaFollower } from "./areaFollower";
 export { ScriptCamera } from "./scriptCamera";
 export { medical } from "./medical";
+export { fuel } from "./fuel";
+export { mdt } from "./mdt";
 export {
   NuiScreen,
   type NuiPageMessage,
@@ -22,6 +24,7 @@ export { fromServer, onServerEvent } from "./netEvent";
 export { AdminWorld } from "./adminWorld";
 export { Zones, type ZoneOptions, type ZoneShape } from "./zones";
 export { ZoneEngine } from "./zoneEngine";
+export { ModelScanner, readModelScanDef, type ModelScanDef } from "./modelScan";
 export { cache, onCache, readPlayerState, readWeapon } from "./cache";
 export { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 export { Points, type PointOptions } from "./point";
@@ -115,6 +118,7 @@ export { isActionOk, replyError } from "../shared/action";
 export { hud } from "./hud";
 export { world } from "./world";
 export { gestures } from "./gestures";
+export { seatbelt } from "./seatbelt";
 export { appearance } from "./appearance";
 export { keyHints } from "./keyHints";
 export { radial } from "./radial";

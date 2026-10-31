@@ -1,13 +1,15 @@
 import {
+  activeTarget,
   onStyleChange,
+  onTargetChange,
   readAllowed,
   pointStyle,
   readLabel,
+  register,
   runPress,
   style,
-  target,
-  TARGET,
-  targetRunning,
+  unregister,
+  type Registration,
   type Style,
 } from "./interact";
 import { Blips, type BlipOptions } from "./blip";
@@ -19,6 +21,7 @@ import {
 } from "./modelPoint";
 import { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 import type { PromptAnchor } from "@aicore-fivem/shared";
+import type { TargetOption } from "./targets";
 import { Zones } from "./zones";
 
 interface Vec3 {
@@ -62,6 +65,7 @@ export interface PointOptions {
   blip?: Omit<BlipOptions, "coords"> & { coords?: Vec3 };
 }
 
+const RESOURCE = GetCurrentResourceName();
 const groups = new Set<Points>();
 const byPrompt = new Map<string, { press(): void }>();
 let nextGroup = 0;
@@ -69,7 +73,8 @@ let nextGroup = 0;
 class Point {
   inside = false;
   ped: LocalPed | null = null;
-  targetZone: unknown = null;
+  /** The target option while the point is on a target (a spot, or its ped). */
+  registration: Registration | null = null;
   /** The prompt text on screen, null while hidden. */
   shown: string | null = null;
   /** The label the target option was registered with. */
@@ -114,21 +119,25 @@ class Point {
   }
 
   style(group: Style): Style {
-    return pointStyle(this.options, group);
+    const mode = pointStyle(this.options, group);
+    // A target that cannot take an option at a bare point (interact from JavaScript) leaves such points prompts.
+    return mode === "target" &&
+      !this.options.ped &&
+      activeTarget()?.adapter.coords === false
+      ? "prompt"
+      : mode;
   }
 
-  targetOption() {
+  targetOption(): TargetOption {
     this.targetLabel = this.text();
-    return [
-      {
-        name: this.promptId,
-        label: this.targetLabel,
-        icon: this.options.icon,
-        distance: this.options.radius ?? 2,
-        canInteract: () => this.allowed(),
-        onSelect: () => this.press(),
-      },
-    ];
+    return {
+      name: `${RESOURCE}:${this.promptId}`,
+      label: this.targetLabel,
+      icon: this.options.icon,
+      distance: this.options.radius ?? 2,
+      canInteract: () => this.allowed(),
+      onSelect: () => this.press(),
+    };
   }
 }
 
@@ -160,12 +169,8 @@ export class Points {
       point.ped = new LocalPed({
         ...ped,
         coords: ped.coords ?? { ...options.coords, heading: 0 },
-        onSpawn: (entity) =>
-          point.style(style()) === "target" &&
-          target("addLocalEntity", entity, point.targetOption()),
-        onDespawn: (entity) =>
-          point.style(style()) === "target" &&
-          target("removeLocalEntity", entity, point.promptId),
+        onSpawn: () => this.attach(point, style()),
+        onDespawn: () => this.detach(point),
       });
     }
     if (options.blip)
@@ -222,7 +227,7 @@ export class Points {
   remove(id: string): void {
     const model = this.modelPoints.get(id);
     if (model) {
-      model.detach(targetRunning());
+      model.detach();
       byPrompt.delete(model.promptId);
       this.modelPoints.delete(id);
     }
@@ -250,14 +255,7 @@ export class Points {
     const mode = style();
     const one = id !== undefined ? this.points.get(id) : undefined;
     for (const [mid, model] of this.modelPoints)
-      if (
-        pointStyle(model.options, mode) === "target" &&
-        (id === undefined || id === mid) &&
-        typeof model.options.label === "function"
-      ) {
-        model.detach(true);
-        model.attach(mode);
-      }
+      if (id === undefined || id === mid) model.refresh(mode);
     for (const point of one
       ? [one]
       : id === undefined
@@ -287,33 +285,35 @@ export class Points {
       this.attach(point, mode);
       point.sync(mode);
     }
-    for (const model of this.modelPoints.values()) {
-      model.detach(targetRunning());
-      model.attach(mode);
-    }
+    for (const model of this.modelPoints.values()) model.restyle(mode);
   }
 
   private attach(point: Point, mode: Style): void {
-    if (point.style(mode) !== "target") return;
-    const ped = point.ped?.entity;
+    const target = activeTarget();
+    if (!target || point.registration || point.style(mode) !== "target") return;
+    const option = point.targetOption();
     if (point.ped) {
-      if (ped) target("addLocalEntity", ped, point.targetOption());
+      const ped = point.ped.entity;
+      if (ped)
+        point.registration = register(
+          target,
+          (a) => a.addLocalEntity(ped, option),
+          (a) => a.removeLocalEntity(ped, option),
+        );
       return;
     }
     // Far points get their target zone too: ai-target only scans zones near the player.
-    point.targetZone = target("addSphereZone", {
-      coords: point.options.coords,
-      radius: point.options.targetRadius ?? 1,
-      options: point.targetOption(),
-    });
+    const { coords, targetRadius } = point.options;
+    point.registration = register(
+      target,
+      (a) => a.addSphere(coords, targetRadius ?? 1, option),
+      (a, handle) => a.removeZone(handle, option),
+    );
   }
 
   private detach(point: Point): void {
-    if (!targetRunning()) return void (point.targetZone = null);
-    if (point.targetZone != null) target("removeZone", point.targetZone);
-    point.targetZone = null;
-    const ped = point.ped?.entity;
-    if (ped) target("removeLocalEntity", ped, point.promptId);
+    unregister(point.registration);
+    point.registration = null;
   }
 }
 
@@ -322,8 +322,4 @@ const restyleAll = () => {
   for (const group of groups) group.restyle();
 };
 onStyleChange(restyleAll);
-for (const event of ["onClientResourceStart", "onClientResourceStop"])
-  on(event, (resource: string) => {
-    if (resource === TARGET || resource === "ai-target")
-      setTimeout(restyleAll, 0);
-  });
+onTargetChange(restyleAll);

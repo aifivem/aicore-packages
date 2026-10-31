@@ -2,6 +2,8 @@ import {
   CORE,
   toCharacterAppearance,
   type CharacterAppearance,
+  type ClothingMenu,
+  type JobOutfit,
 } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 
@@ -18,4 +20,10 @@ export const appearance = {
   /** The look a ped wears now, null when the clothing script cannot tell. */
   read: (ped: number): CharacterAppearance | null =>
     toCharacterAppearance(core.GetPedAppearance(ped)),
+  /** Opens the clothing script's clothing shop, barber or saved outfits for the player; false when it has none. */
+  openMenu: (menu: ClothingMenu): boolean => core.OpenClothingMenu(menu),
+  /** Puts a job outfit (collection pieces) on the player until `reloadSkin`, not saved; false when it cannot. */
+  wearOutfit: (outfit: JobOutfit): boolean => core.WearOutfit(outfit),
+  /** Puts the player's saved look back on (takes a job outfit off); false without a clothing script. */
+  reloadSkin: (): boolean => core.ReloadSkin(),
 };

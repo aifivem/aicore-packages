@@ -53,6 +53,21 @@ export interface StashDefinition {
   jobs: string[];
 }
 
+/** One product of a script shop. */
+export interface ShopProduct {
+  name: string;
+  /** Price per item, paid the inventory's own way (cash / bank). */
+  price: number;
+}
+
+/** A shop a script registers (lib `inventory.registerShop`): opened by the server for a player, no place of its own. */
+export interface ShopDefinition {
+  /** Unique id (`police_armoury`). */
+  name: string;
+  label: string;
+  items: ShopProduct[];
+}
+
 /** One inventory resource behind the layer (server side). Adapters translate calls and nothing else. */
 export interface InventoryAdapter {
   /** The inventory's resource name (detection, version check, panel choice). */
@@ -101,6 +116,10 @@ export interface InventoryAdapter {
     name: string,
     handler: (source: number, item: unknown) => unknown,
   ): void;
+  /** Registers (or replaces) a script shop; absent when the inventory has no shops. */
+  registerShop?(shop: ShopDefinition): void;
+  /** Opens a registered shop on the player's screen, without range checks; false when it could not. */
+  openShop?(source: number, name: string): boolean;
 }
 
 /** The weapon item the local player holds, as the inventory knows it (HUD weapon box). */
@@ -165,6 +184,10 @@ export type InventoryServerExports = {
   RegisterUsableItem(name: string, handler: UsableItemHandler): void;
   GetItemDefinition(name: string): ItemDefinition | null;
   GetItemDefinitions(): Record<string, ItemDefinition>;
+  /** Kept by ai-core and registered again with every inventory that becomes active (`items`: `{ name, price }`). */
+  RegisterShop(name: string, label: string, items: ShopProduct[]): void;
+  /** Opens a registered shop on the player's screen (check access and range first); false when it could not. */
+  OpenShop(source: number, name: string): boolean;
   /** Runs the handler registered for an item (ai-core's bridge calls it from `ESX.UseItem` / QB `CanUseItem`). */
   UseItem(source: number, name: string, item?: unknown): unknown;
   IsUsableItem(name: string): boolean;

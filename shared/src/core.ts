@@ -57,6 +57,18 @@ export const CORE = {
   medicalStateKey: "ai:medical",
   /** Client local: (dead: boolean) the local player went down (dead or last stand) or got up, in any death script. */
   clientDeadEvent: "ai-core:client:dead",
+  /** GlobalState: the resource name of the MDT ai-core's MDT layer uses (client adapter pick). */
+  mdtStateKey: "ai:mdt",
+  /** Server -> client: (bills: { id, label, amount, sender }[]) the player's open ai-core bills (a new one arrived, or at load); the client lists them to pay. */
+  billsEvent: "ai-core:client:bills",
+  /** Callback: (id) -> ActionResult the player pays one of their ai-core bills. */
+  payBillCallback: "ai-core:payBill",
+  /** Client local: (worn: boolean | null) the local player's seat belt changed, in whichever seat belt script runs. */
+  clientSeatbeltEvent: "ai-core:client:seatbelt",
+  /** Server -> client: (amount: number) stress for a HUD that takes it only from its player's client (QB `hud:server:*Stress`). */
+  stressRelayEvent: "ai-core:client:stress",
+  /** GlobalState: the resource name of the notification UI ai-lib's notifications go to (unset = ai-lib's own cards). */
+  notifyStateKey: "ai:notify",
 
   // Callbacks (character screen).
   charactersCallback: "ai-core:characters",

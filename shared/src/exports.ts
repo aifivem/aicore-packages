@@ -7,6 +7,7 @@ import type {
   CharacterInfo,
   GangMembership,
   JobMembership,
+  Notification,
 } from "./player";
 import type { AiVehiclesServerExports } from "./vehicles";
 import type { ItemPickerRequest } from "./menu";
@@ -14,12 +15,24 @@ import type { AiLibClientExports } from "./ui";
 import type {
   InventoryClientExports,
   InventoryServerExports,
+  ShopProduct,
 } from "./inventory";
 import type { VehicleKeysServerExports } from "./vehicleKeys";
 import type { PhoneServerExports } from "./phone";
 import type { DispatchAlert, DispatchServerExports } from "./dispatch";
+import type { BillingServerExports } from "./billing";
+import type { BankingServerExports } from "./banking";
+import type { MdtServerExports } from "./mdt";
+import type { EmsServerExports } from "./ems";
+import type { FuelServerExports } from "./fuel";
+import type { DoorlockServerExports } from "./doorlock";
+import type { AiGaragesServerExports, GaragesServerExports } from "./garages";
 import type { RadialClientExports, RadialItem } from "./radial";
-import type { CharacterAppearance } from "./appearance";
+import type {
+  CharacterAppearance,
+  ClothingMenu,
+  JobOutfit,
+} from "./appearance";
 
 /** A grade of a job or gang definition (panel content). */
 export interface GradeDefinition {
@@ -253,10 +266,22 @@ export type AiCoreServerExports = {
     charId: number,
     done: (look: CharacterAppearance | null) => void,
   ): void;
+
+  /** The HUD ai-core's stress layer gives stress to (ai-hud, a QB-style HUD), or null. */
+  GetStressSystem(): string | null;
+  /** Adds stress to a player (a negative amount relieves it) through whichever HUD keeps it; false without one. */
+  AddStress(source: number, amount: number): boolean;
 } & InventoryServerExports &
   VehicleKeysServerExports &
   PhoneServerExports &
-  DispatchServerExports;
+  DispatchServerExports &
+  BillingServerExports &
+  BankingServerExports &
+  MdtServerExports &
+  EmsServerExports &
+  FuelServerExports &
+  DoorlockServerExports &
+  GaragesServerExports;
 
 /** ai-core's client exports. */
 export type AiCoreClientExports = {
@@ -302,6 +327,26 @@ export type AiCoreClientExports = {
   ApplyAppearance(ped: number, look: CharacterAppearance): boolean;
   /** The look a ped wears now (same shape as `GetCharacterAppearance`), null when the clothing script cannot tell. */
   GetPedAppearance(ped: number): CharacterAppearance | null;
+  /** Opens the active clothing script's clothing shop, barber or saved outfits; false when it has no such menu. */
+  OpenClothingMenu(menu: ClothingMenu): boolean;
+  /** Puts a job outfit on the local player until `ReloadSkin` (not saved); false when the clothing script cannot. */
+  WearOutfit(outfit: JobOutfit): boolean;
+  /** Puts the local player's saved look back on (takes a job outfit off); false without a clothing script. */
+  ReloadSkin(): boolean;
+  /** The emote script that plays emotes by name (tgiann-emotes, rpemotes), or null. */
+  GetEmoteProvider(): string | null;
+  /** Plays an emote of the running emote script by its command name (`e <name>`); false without one. */
+  PlayEmote(name: string): boolean;
+  /** Stops the emote the local player plays; false without an emote script. */
+  CancelEmote(): boolean;
+  /** The seat belt script ai-core reads (ai-smallresources, a HUD's own belt), or null. */
+  GetSeatbeltProvider(): string | null;
+  /** Whether the local player wears a seat belt; null when no seat belt script answers or not in a car with one. */
+  GetSeatbelt(): boolean | null;
+  /** Shows an ai-lib card in the notification UI the panel picked; false when ai-lib draws it itself. */
+  ExternalNotify(notification: Notification): boolean;
+  /** Opens the active MDT for the local player (the MDT checks the job itself); false when none runs or it cannot be opened from outside. */
+  OpenMdt(): boolean;
 } & InventoryClientExports &
   RadialClientExports;
 
@@ -344,6 +389,10 @@ export type AiInventoryServerExports = {
     item: string,
     metadata?: Record<string, unknown>,
   ): number;
+  /** Registers (or replaces) a script shop: `{ name, price }` products, paid from cash then bank. */
+  RegisterShop(name: string, label: string, items: ShopProduct[]): void;
+  /** Opens a registered script shop on the player's screen; false when it is unknown or the player has no inventory. */
+  OpenShop(source: number, name: string): boolean;
   /** Every stack of an inventory with its item label. */
   GetItems(inv: number | string): Array<{
     name: string;
@@ -403,6 +452,10 @@ export type AiAppearanceClientExports = {
   ApplyAppearance(ped: number, appearance: unknown): boolean;
   /** The look the local player wears (its `Appearance`), null for any other ped. */
   GetPedAppearance(ped: number): unknown;
+  /** Puts a job outfit on the local player until `ReloadSkin` (never saved). */
+  WearOutfit(outfit: JobOutfit): void;
+  /** Puts the saved look back on the local player. */
+  ReloadSkin(): void;
 };
 
 /**
@@ -457,6 +510,16 @@ export type AiHudClientExports = {
   GetMinimapAlways(): boolean;
 };
 
+/** ai-hud's server exports (ai-core's stress layer adds stress through `AddNeed`). */
+export type AiHudServerExports = {
+  /** Adds `delta` to a loaded player's need (0-100, clamped). */
+  AddNeed(
+    source: number,
+    need: "hunger" | "thirst" | "stress",
+    delta: number,
+  ): void;
+};
+
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
@@ -479,8 +542,9 @@ declare global {
     "ai-radialmenu": AiRadialClientExports;
     "ai-policealert": AiPoliceAlertServerExports;
     "ai-doorlock": AiDoorlockServerExports;
+    "ai-garages": AiGaragesServerExports;
     "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
     "ai-smallresources": AiSmallResourcesClientExports;
-    "ai-hud": AiHudClientExports;
+    "ai-hud": AiHudClientExports & AiHudServerExports;
   }
 }

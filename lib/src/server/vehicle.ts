@@ -2,6 +2,7 @@ import { CORE, VEHICLE_BAGS, type KeyPurpose } from "@aicore-fivem/shared";
 import { waitFor, type VehicleProps, type VehicleSetup } from "../shared";
 import { readId } from "../shared/strict";
 import { triggerClientCallback } from "./callback";
+import { fuel } from "./fuel";
 import { vehicleKeys } from "./vehicleKeys";
 
 export interface SpawnVehicleOptions {
@@ -13,7 +14,7 @@ export interface SpawnVehicleOptions {
   type?: string;
   /** Up to 8 characters. */
   plate?: string;
-  /** 0-100 into the `fuel` state bag. */
+  /** 0-100, set through ai-core's fuel layer (lib `fuel`). */
   fuel?: number;
   /** A player who gets the keys through ai-core's key layer, for `purpose` (default `temporary`). */
   keysTo?: number;
@@ -150,8 +151,8 @@ export async function spawnVehicle(
     SetEntityRoutingBucket(vehicle, options.bucket);
   if (options.locked) SetVehicleDoorsLocked(vehicle, 2);
   const state = Entity(vehicle).state;
-  if (options.fuel !== undefined)
-    state.set(VEHICLE_BAGS.fuel, options.fuel, true);
+  // Through ai-core's fuel layer: a fuel script that keeps fuel on clients gets it from the entity's owner.
+  if (options.fuel !== undefined) fuel.set(vehicle, options.fuel);
   if (options.props) state.set(VEHICLE_BAGS.props, options.props, true);
   if (options.setup) state.set(VEHICLE_BAGS.setup, options.setup, true);
   for (const [key, value] of Object.entries(options.bags ?? {}))
