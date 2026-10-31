@@ -26,6 +26,21 @@ export const LIB_UI = {
 } as const;
 
 /**
+ * NUI stacking (`SetNuiZindex`, higher on top): every resource with a page sets its layer at start, so the order
+ * does not depend on load order. Notifications and menus (ai-lib) are over everything, police alerts over the HUD.
+ */
+export const NUI_LAYER = {
+  hud: 10,
+  screen: 20,
+  death: 25,
+  radial: 30,
+  target: 35,
+  chat: 40,
+  alert: 50,
+  lib: 100,
+} as const;
+
+/**
  * Where a world prompt floats: a fixed point, or spots on entities (offsets in the entity's own space, so the prompt
  * moves and turns with it: a swinging door). Of several entity spots the one nearest the player is shown each frame.
  */

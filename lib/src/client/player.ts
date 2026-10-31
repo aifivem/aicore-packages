@@ -80,22 +80,35 @@ class AnimHold {
 const PROBE_STEP = 25;
 const PROBE_TOP = 1000;
 
-/** Streams the area by standing the (frozen) ped at rising heights until the game knows the ground there; null if never. */
+/**
+ * The lowest ground under a point that is not inside an interior: the (frozen) ped stands at rising heights, each
+ * probe waits for the collision there (an unloaded street would be skipped and the roof above taken), and a surface
+ * inside an MLO / IPL interior is passed over for the next one up. Null when there is no ground at all.
+ */
 async function findGround(
   ped: number,
   x: number,
   y: number,
   keepVehicle: boolean,
 ): Promise<number | null> {
+  let indoor: number | null = null;
   for (let height = 0; height <= PROBE_TOP; height += PROBE_STEP) {
     if (keepVehicle) SetPedCoordsKeepVehicle(ped, x, y, height);
     else SetEntityCoordsNoOffset(ped, x, y, height, false, false, false);
     RequestCollisionAtCoord(x, y, height);
     await sleep(50);
+    await waitFor(
+      () => HasCollisionLoadedAroundEntity(ped) || undefined,
+      500,
+      50,
+    ).catch(() => undefined);
     const [found, groundZ] = GetGroundZFor_3dCoord(x, y, height, false);
-    if (found) return groundZ;
+    if (!found) continue;
+    if (GetInteriorAtCoords(x, y, groundZ + 1) === 0) return groundZ;
+    indoor ??= groundZ;
   }
-  return null;
+  // Every surface is indoors (a covered spot): the lowest one rather than nothing.
+  return indoor;
 }
 
 /** Fades the screen out and resolves once it is black. */
