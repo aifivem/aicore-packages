@@ -12,8 +12,22 @@ export {
   readVec4,
 } from "./strict";
 export { fail, isActionOk, replyError, type ActionResult } from "./action";
-export { distance, headingTo, type Vec3 } from "./vec";
-export { groupDigits, round, stripGameText } from "./format";
+export { distance, headingTo, nearestOf, type Vec3 } from "./vec";
+export {
+  formatWeight,
+  groupDigits,
+  normalizePlate,
+  round,
+  stripGameText,
+} from "./format";
+export {
+  ACCESS_FIELDS,
+  accessFields,
+  decideAccess,
+  isPublic,
+  readAccess,
+  type AccessRule,
+} from "./access";
 export {
   BLIP_STYLE_FIELDS,
   readBlipStyle,
@@ -25,7 +39,13 @@ export {
   zoneContains,
   type ZoneShape,
 } from "./zone";
-export { LiveRecords, readRecords, type RecordReader } from "./records";
+export {
+  LiveRecords,
+  readRecords,
+  RecordObjects,
+  type RecordReader,
+  type RecordSource,
+} from "./records";
 export { formatText, LangTexts } from "./lang";
 export { spec } from "./spec";
 export {

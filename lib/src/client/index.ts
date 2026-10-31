@@ -2,12 +2,14 @@
 
 export { TickLoop } from "./tickLoop";
 export { AreaFollower } from "./areaFollower";
+export { ScriptCamera } from "./scriptCamera";
 export {
   NuiScreen,
   type NuiPageMessage,
   type NuiScreenOptions,
 } from "./nuiScreen";
 export { every, type EveryOptions, type Job } from "../fivem/scheduler";
+export { ByResource, caller, plateOf, Reasons } from "../fivem/byResource";
 export { onServerCallback, triggerServerCallback } from "./callback";
 export { fromServer, onServerEvent } from "./netEvent";
 export { AdminWorld } from "./adminWorld";
@@ -49,6 +51,7 @@ export {
 } from "./vehicleProps";
 export { getPlayerData, onPlayerData, seedPlayerData } from "./playerData";
 export {
+  allows,
   hasJob,
   inGang,
   onDutyIn,

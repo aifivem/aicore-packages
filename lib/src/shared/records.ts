@@ -90,3 +90,56 @@ export class LiveRecords<T> {
     else this.map.set(key, parsed);
   }
 }
+
+/** What `RecordObjects` needs of a panel store: `AdminWorld` (client) and `AdminPanel` (server) both fit. */
+export interface RecordSource {
+  records<T>(file: string, readOne: RecordReader<T>): ReadonlyMap<string, T>;
+  onChange(
+    file: string,
+    handler: (key: string | undefined, value: unknown) => void,
+  ): void;
+}
+
+/**
+ * The world objects of a records file (points, blips, peds, zones) kept in step one record at a time: `build(key,
+ * record)` makes one record's objects and returns how to remove them; an edited record removes and rebuilds only its
+ * own objects, a deleted one only removes them. A setting every record reads (a blip style) calls `rebuildAll()`.
+ * Never `clear()` + add everything on a change: with 10k records one edit would rebuild 10k objects on every client.
+ */
+export class RecordObjects<T> {
+  readonly records: ReadonlyMap<string, T>;
+  private readonly built = new Map<string, () => void>();
+
+  constructor(
+    source: RecordSource,
+    file: string,
+    readOne: RecordReader<T>,
+    private readonly build: (key: string, record: T) => (() => void) | void,
+  ) {
+    this.records = source.records(file, readOne);
+    source.onChange(file, (key) =>
+      key === undefined ? this.rebuildAll() : this.rebuild(key),
+    );
+    this.rebuildAll();
+  }
+
+  /** Removes and builds again one record's objects (its current value; gone when the record is). */
+  rebuild(key: string): void {
+    this.built.get(key)?.();
+    this.built.delete(key);
+    const record = this.records.get(key);
+    if (record === undefined) return;
+    const remove = this.build(key, record);
+    if (remove) this.built.set(key, remove);
+  }
+
+  /** Every record again (a shared setting changed, or the whole file was replaced). */
+  rebuildAll(): void {
+    for (const remove of this.built.values()) remove();
+    this.built.clear();
+    for (const [key, record] of this.records) {
+      const remove = this.build(key, record);
+      if (remove) this.built.set(key, remove);
+    }
+  }
+}

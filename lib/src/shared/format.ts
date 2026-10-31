@@ -24,3 +24,13 @@ export function stripGameText(text: unknown): string {
     .replace(/\s\s+/g, " ")
     .trim();
 }
+
+/** A weight in grams for players: "750 g", "1.5 kg", "1,250 kg" (one decimal under 100 kg). */
+export function formatWeight(grams: number): string {
+  if (Math.abs(grams) < 1000) return `${Math.round(grams)} g`;
+  const kg = grams / 1000;
+  return `${groupDigits(Math.abs(kg) < 100 ? round(kg, 1) : Math.round(kg))} kg`;
+}
+
+/** A plate as the game compares it: GTA pads plates to 8 characters with spaces; keys use the trimmed upper case. */
+export const normalizePlate = (plate: string): string => plate.trim().toUpperCase();

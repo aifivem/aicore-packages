@@ -126,6 +126,7 @@ export {
   resourceExport,
 } from "../fivem/exports";
 export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "../fivem/locale";
+export { ByResource, caller, plateOf, Reasons } from "../fivem/byResource";
 export { every, type EveryOptions, type Job } from "../fivem/scheduler";
 export { EntityState, GlobalGroup, GlobalKey, PlayerState } from "./state";
 export {

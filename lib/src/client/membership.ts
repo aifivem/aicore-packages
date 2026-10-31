@@ -1,3 +1,4 @@
+import { decideAccess, type AccessRule } from "../shared/access";
 import type { GangMembership, JobMembership } from "@aicore-fivem/shared";
 import { getPlayerData, onPlayerData } from "./playerData";
 
@@ -26,4 +27,15 @@ export function onMembershipChange(fn: () => void): void {
   onPlayerData("jobs", fn);
   onPlayerData("duty", fn);
   onPlayerData("gangs", fn);
+}
+
+/** Whether the local player may use a place with this access rule (the server's `online.allows` decides the same). */
+export function allows(rule: AccessRule): boolean {
+  const duty = getPlayerData("duty");
+  return decideAccess(
+    rule,
+    getPlayerData("jobs") ?? [],
+    getPlayerData("gangs") ?? [],
+    typeof duty === "string" ? duty : null,
+  );
 }

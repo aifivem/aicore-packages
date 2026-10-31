@@ -17,3 +17,26 @@ export function headingTo(
   const deg = (Math.atan2(to.x - from.x, to.y - from.y) * 180) / Math.PI;
   return (-deg + 360) % 360;
 }
+
+/** The item nearest to `point` (3D, `pos` reads an item's position), within `max` metres; undefined when none. */
+export function nearestOf<T>(
+  items: Iterable<T>,
+  point: Vec3,
+  pos: (item: T) => Vec3,
+  max = Infinity,
+): T | undefined {
+  let best: T | undefined;
+  let bestSq = max * max;
+  for (const item of items) {
+    const p = pos(item);
+    const dx = p.x - point.x;
+    const dy = p.y - point.y;
+    const dz = p.z - point.z;
+    const sq = dx * dx + dy * dy + dz * dz;
+    if (sq <= bestSq) {
+      bestSq = sq;
+      best = item;
+    }
+  }
+  return best;
+}

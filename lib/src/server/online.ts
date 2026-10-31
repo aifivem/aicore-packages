@@ -1,3 +1,4 @@
+import { isPublic, type AccessRule } from "../shared/access";
 import {
   CORE,
   type CharacterInfo,
@@ -204,6 +205,23 @@ class OnlinePlayers {
   onDutyIn(source: number, jobs: readonly string[]): boolean {
     const duty = this.dutyJob(source);
     return duty !== null && jobs.includes(duty);
+  }
+
+  /** Whether the player may use a place with this access rule (lib `AccessRule`; the client's `allows` decides the same). */
+  allows(source: number, rule: AccessRule): boolean {
+    if (isPublic(rule)) return true;
+    const min = (name: string) => rule.grades[name] ?? 0;
+    for (const gang of rule.gangs) {
+      const grade = this.gangGrade(source, gang);
+      if (grade !== null && grade >= min(gang)) return true;
+    }
+    const duty = rule.onDuty ? this.dutyJob(source) : null;
+    for (const job of rule.jobs) {
+      const grade = this.jobGrade(source, job);
+      if (grade !== null && grade >= min(job) && (!rule.onDuty || duty === job))
+        return true;
+    }
+    return false;
   }
 
   /** How many players are on duty over several jobs (O(jobs)). */
