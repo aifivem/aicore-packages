@@ -335,6 +335,8 @@ export interface AdminDelta {
 /** Exports each panel resource answers for ai-core (registered by the lib's AdminPanel). */
 export type AdminPanelResourceExports = {
   AdminPanelSnapshot(): AdminPanelSnapshot;
+  /** Every file's content (`AdminPanelSnapshot().data` without building schema and texts). */
+  AdminPanelData(): Record<string, unknown>;
   /** Schema, texts, settings files and the records' label index: what the panel needs at opening. */
   AdminPanelSummary(): AdminPanelSnapshot;
   AdminPanelApply(admin: number, patch: unknown): AdminResult;

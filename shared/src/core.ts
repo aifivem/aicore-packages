@@ -51,6 +51,8 @@ export const CORE = {
   vehicleTypeCallback: "ai-core:vehicleType",
   /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */
   interactionStateKey: "ai:interaction",
+  /** GlobalState: boolean, players can hurt each other (ai-core panel setting `pvp`, `/togglepvp`). */
+  pvpStateKey: "ai:pvp",
 
   // Callbacks (character screen).
   charactersCallback: "ai-core:characters",

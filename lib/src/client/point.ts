@@ -2,6 +2,7 @@ import { isResourceStarted } from "../fivem/exports";
 import {
   onStyleChange,
   readAllowed,
+  pointStyle,
   readLabel,
   runPress,
   style,
@@ -39,6 +40,10 @@ export interface PointOptions {
   targetRadius?: number;
   /** Always a prompt, whatever the owner picked: actions done from a vehicle (fuel pumps, car washes, drive-ins). */
   promptOnly?: boolean;
+  /** A target option whenever a target resource runs, whatever the owner picked (seats); else the prompt. */
+  preferTarget?: boolean;
+  /** As a prompt: drawn over `coords` (or the point a function gives when it shows) in the world instead of the right-hand list (doors). */
+  world?: boolean | (() => Vec3);
   /** Zone check interval in ms (default 500). */
   interval?: number;
   /** Whether the point is offered now (job, duty, in a vehicle...). Prompts re-check it on `refresh()`. */
@@ -88,13 +93,27 @@ class Point {
 
   /** The prompt follows inside + canShow + the current label (prompt mode only). */
   sync(group: Style): void {
-    const mode = this.options.promptOnly ? "prompt" : group;
     const text =
-      mode === "prompt" && this.inside && this.allowed() ? this.text() : null;
+      this.style(group) === "prompt" && this.inside && this.allowed()
+        ? this.text()
+        : null;
     if (text === this.shown) return;
     this.shown = text;
-    if (text !== null) showPrompt(this.promptId, text);
-    else hidePrompt(this.promptId);
+    if (text === null) return hidePrompt(this.promptId);
+    const { world } = this.options;
+    showPrompt(
+      this.promptId,
+      text,
+      typeof world === "function"
+        ? world()
+        : world
+          ? this.options.coords
+          : undefined,
+    );
+  }
+
+  style(group: Style): Style {
+    return pointStyle(this.options, group);
   }
 
   targetOption() {
@@ -141,12 +160,10 @@ export class Points {
         ...ped,
         coords: ped.coords ?? { ...options.coords, heading: 0 },
         onSpawn: (entity) =>
-          style() === "target" &&
-          !options.promptOnly &&
+          point.style(style()) === "target" &&
           target("addLocalEntity", entity, point.targetOption()),
         onDespawn: (entity) =>
-          style() === "target" &&
-          !options.promptOnly &&
+          point.style(style()) === "target" &&
           target("removeLocalEntity", entity, point.promptId),
       });
     }
@@ -231,15 +248,15 @@ export class Points {
   refresh(id?: string): void {
     const mode = style();
     const one = id !== undefined ? this.points.get(id) : undefined;
-    if (mode === "target")
-      for (const [mid, model] of this.modelPoints)
-        if (
-          (id === undefined || id === mid) &&
-          typeof model.options.label === "function"
-        ) {
-          model.detach(true);
-          model.attach(mode);
-        }
+    for (const [mid, model] of this.modelPoints)
+      if (
+        pointStyle(model.options, mode) === "target" &&
+        (id === undefined || id === mid) &&
+        typeof model.options.label === "function"
+      ) {
+        model.detach(true);
+        model.attach(mode);
+      }
     for (const point of one
       ? [one]
       : id === undefined
@@ -247,8 +264,7 @@ export class Points {
         : []) {
       point.sync(mode);
       if (
-        mode === "target" &&
-        !point.options.promptOnly &&
+        point.style(mode) === "target" &&
         typeof point.options.label === "function" &&
         point.targetLabel !== point.text()
       ) {
@@ -277,7 +293,7 @@ export class Points {
   }
 
   private attach(point: Point, mode: Style): void {
-    if (mode !== "target" || point.options.promptOnly) return;
+    if (point.style(mode) !== "target") return;
     const ped = point.ped?.entity;
     if (point.ped) {
       if (ped) target("addLocalEntity", ped, point.targetOption());

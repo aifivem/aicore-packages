@@ -56,6 +56,7 @@ export class AdminPanel {
     for (const [name, spec] of Object.entries(schema.files))
       this.load(name, spec);
     registerExport("AdminPanelSnapshot", () => this.snapshot());
+    registerExport("AdminPanelData", () => this.dataSnapshot());
     registerExport("AdminPanelSummary", () => this.summary());
     registerExport("AdminPanelApply", (admin: number, patch: unknown) =>
       this.apply(admin, patch),
@@ -104,8 +105,13 @@ export class AdminPanel {
       resource: this.resource,
       schema: this.schema,
       texts: loadLocaleTexts(),
-      data: clone(Object.fromEntries(this.data)),
+      data: this.dataSnapshot(),
     };
+  }
+
+  /** Every file's content without schema and texts (the panel already has them from `summary()`). */
+  dataSnapshot(): Data {
+    return clone(Object.fromEntries(this.data));
   }
 
   /**

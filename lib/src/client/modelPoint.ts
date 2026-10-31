@@ -1,6 +1,7 @@
 import { every } from "../fivem/scheduler";
 import { cache } from "./cache";
 import {
+  pointStyle,
   readAllowed,
   readLabel,
   runPress,
@@ -20,6 +21,8 @@ export interface ModelPointOptions {
   radius?: number;
   /** Object points are skipped while the player sits in a vehicle (no scan, no prompt) unless this is true. */
   inVehicle?: boolean;
+  /** A target option whenever a target resource runs, whatever the owner picked (seats); else the prompt. */
+  preferTarget?: boolean;
   /** Gets the object in question (0 when unknown). */
   canShow?: (entity: number) => boolean;
   /** Gets the object used. A returned promise blocks this resource's other points until it settles. */
@@ -118,7 +121,7 @@ export class ModelPoint {
   }
 
   attach(mode: Style): void {
-    if (mode === "target") {
+    if (pointStyle(this.options, mode) === "target") {
       const option = {
         name: this.promptId,
         label: readLabel(this.options.label),

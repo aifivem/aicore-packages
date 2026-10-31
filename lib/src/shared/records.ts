@@ -105,6 +105,8 @@ export interface RecordSource {
  * record)` makes one record's objects and returns how to remove them; an edited record removes and rebuilds only its
  * own objects, a deleted one only removes them. A setting every record reads (a blip style) calls `rebuildAll()`.
  * Never `clear()` + add everything on a change: with 10k records one edit would rebuild 10k objects on every client.
+ * `records` is a reader, or a view the script already keeps of the same file (`source.records(file, readOne)`), so
+ * each edit is parsed once.
  */
 export class RecordObjects<T> {
   readonly records: ReadonlyMap<string, T>;
@@ -113,10 +115,11 @@ export class RecordObjects<T> {
   constructor(
     source: RecordSource,
     file: string,
-    readOne: RecordReader<T>,
+    records: RecordReader<T> | ReadonlyMap<string, T>,
     private readonly build: (key: string, record: T) => (() => void) | void,
   ) {
-    this.records = source.records(file, readOne);
+    this.records =
+      typeof records === "function" ? source.records(file, records) : records;
     source.onChange(file, (key) =>
       key === undefined ? this.rebuildAll() : this.rebuild(key),
     );

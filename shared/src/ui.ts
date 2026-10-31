@@ -30,7 +30,12 @@ export type AiLibClientExports = {
   ShowProgress(label: string, duration: number): void;
   HideProgress(): void;
   /** Shows (or updates) the calling resource's prompt `id` on the right of the screen. */
-  ShowPrompt(id: string, text: string): void;
+  /** `at`: drawn over that world point (doors) instead of the right-hand list. */
+  ShowPrompt(
+    id: string,
+    text: string,
+    at?: { x: number; y: number; z: number },
+  ): void;
   HidePrompt(id: string): void;
   /** Shows a menu for the calling resource; the pick arrives as `MENU_EVENTS.menuResult`. */
   OpenMenu(requestId: number, request: MenuRequest): void;

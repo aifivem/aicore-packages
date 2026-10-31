@@ -21,6 +21,16 @@ export const style = (): Style =>
     : "prompt";
 export const onStyleChange = (fn: () => void) => interaction.onChange(fn);
 
+/** The style one point uses: the owner's, unless the point asks for its own (`promptOnly`, `preferTarget`). */
+export function pointStyle(
+  options: { promptOnly?: boolean; preferTarget?: boolean },
+  group: Style,
+): Style {
+  if (options.promptOnly) return "prompt";
+  if (options.preferTarget && isResourceStarted(TARGET)) return "target";
+  return group;
+}
+
 let busy = false;
 
 /** Runs a point's action unless another one of this resource still runs; a returned promise blocks until it settles. */

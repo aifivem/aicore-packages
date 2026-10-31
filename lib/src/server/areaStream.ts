@@ -55,8 +55,12 @@ export class AreaStream<T extends AreaItem, V = T> {
   });
   /** Followers by their own cell. */
   private readonly inCell = new Map<number, Set<number>>();
-  /** Items by their `alsoTo` player. */
-  private readonly alsoOf = new Map<number, Set<Entry<T>>>();
+  /** Items by their `alsoTo` player; a dropped player's are let go (a new player reusing the id never gets them). */
+  private readonly alsoOf = new PlayerMap<Set<Entry<T>>>({
+    onDrop: (_source, entries) => {
+      for (const entry of entries) entry.also = undefined;
+    },
+  });
   private readonly size_: number;
   private readonly range: number;
   private readonly chunk: number;
@@ -278,8 +282,7 @@ export class AreaStream<T extends AreaItem, V = T> {
     const r = this.range;
     for (let dx = -r; dx <= r; dx++)
       for (let dy = -r; dy <= r; dy++)
-        for (const entry of this.cells.get(cellKey(f.cx + dx, f.cy + dy)) ??
-          [])
+        for (const entry of this.cells.get(cellKey(f.cx + dx, f.cy + dy)) ?? [])
           puts.push(this.options.view(entry.item));
     for (const entry of this.alsoOf.get(source) ?? [])
       if (Math.abs(entry.cx - f.cx) > r || Math.abs(entry.cy - f.cy) > r)
@@ -308,7 +311,14 @@ export class AreaStream<T extends AreaItem, V = T> {
     const { event } = this.options;
     emitNet(event, source, reset, puts.slice(0, this.chunk), removes, ...extra);
     for (let i = this.chunk; i < puts.length; i += this.chunk)
-      emitNet(event, source, false, puts.slice(i, i + this.chunk), [], ...extra);
+      emitNet(
+        event,
+        source,
+        false,
+        puts.slice(i, i + this.chunk),
+        [],
+        ...extra,
+      );
   }
 
   private setAlso(entry: Entry<T>, also: number | undefined): void {
