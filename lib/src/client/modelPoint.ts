@@ -6,6 +6,7 @@ import {
   readLabel,
   runPress,
   target,
+  targetRunning,
   type Style,
 } from "./interact";
 import { hidePrompt, showPrompt } from "./prompt";
@@ -142,8 +143,11 @@ export class ModelPoint {
       };
       if (this.global) target("addGlobalVehicle", [option]);
       else target("addModel", this.options.models, [option]);
-      this.attached = true;
-      return;
+      // Not ready yet (client still loading): a prompt until the target starts and restyles every point.
+      if (targetRunning()) {
+        this.attached = true;
+        return;
+      }
     }
     scanning.add(this);
     schedule();

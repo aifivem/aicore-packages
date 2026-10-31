@@ -20,12 +20,28 @@ export const targetResource = (): string | null =>
     : isResourceStarted(AI_TARGET)
       ? AI_TARGET
       : null;
-export const targetRunning = (): boolean => targetResource() !== null;
+/**
+ * Set when a target call found no export: while clients load, a target resource reads started before its scripts
+ * ran. Points stay prompts until its start event (`point.ts` restyles then).
+ */
+let notReady = false;
+on("onClientResourceStart", (resource: string) => {
+  if (resource === TARGET || resource === AI_TARGET) notReady = false;
+});
+export const targetRunning = (): boolean =>
+  !notReady && targetResource() !== null;
 export const log = createLogger(GetCurrentResourceName());
 
-/** The ox_target API (ai-target answers it under that name). */
-export const target = (name: string, ...args: unknown[]) =>
-  callExport(targetResource() ?? TARGET, name, ...args);
+/** The ox_target API (ai-target answers it under that name); undefined, and target mode off, while it is not ready. */
+export function target(name: string, ...args: unknown[]): unknown {
+  try {
+    return callExport(targetResource() ?? TARGET, name, ...args);
+  } catch (error) {
+    if (!String(error).includes("No such export")) throw error;
+    notReady = true;
+    return undefined;
+  }
+}
 
 const interaction = new GlobalKey(CORE.interactionStateKey, stateString);
 /** Prompt mode, or target mode when the owner picked it and a resource answers the ox_target API. */
