@@ -117,6 +117,8 @@ export interface SpawnPoint {
   model: string;
   /** Body armour 0-100 saved with the character (metadata `armor`). */
   armour: number;
+  /** Ped health saved with the character (metadata `health`, GTA scale, above 100); 0 = keep the spawn's full health. */
+  health: number;
 }
 
 /** The local player's often read values, kept by ai-core's one watcher (lib `cache`); `false` = none. */
