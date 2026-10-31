@@ -1,4 +1,3 @@
-import { isResourceStarted } from "../fivem/exports";
 import {
   onStyleChange,
   readAllowed,
@@ -8,6 +7,7 @@ import {
   style,
   target,
   TARGET,
+  targetRunning,
   type Style,
 } from "./interact";
 import { Blips, type BlipOptions } from "./blip";
@@ -18,6 +18,7 @@ import {
   type VehiclePointOptions,
 } from "./modelPoint";
 import { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
+import type { PromptAnchor } from "@aicore-fivem/shared";
 import { Zones } from "./zones";
 
 interface Vec3 {
@@ -42,8 +43,8 @@ export interface PointOptions {
   promptOnly?: boolean;
   /** A target option whenever a target resource runs, whatever the owner picked (seats); else the prompt. */
   preferTarget?: boolean;
-  /** As a prompt: drawn over `coords` (or the point a function gives when it shows) in the world instead of the right-hand list (doors). */
-  world?: boolean | (() => Vec3);
+  /** As a prompt: drawn over `coords` (or the point / entity spots a function gives when it shows) in the world instead of the right-hand list (doors). */
+  world?: boolean | (() => PromptAnchor);
   /** Zone check interval in ms (default 500). */
   interval?: number;
   /** Whether the point is offered now (job, duty, in a vehicle...). Prompts re-check it on `refresh()`. */
@@ -221,7 +222,7 @@ export class Points {
   remove(id: string): void {
     const model = this.modelPoints.get(id);
     if (model) {
-      model.detach(isResourceStarted(TARGET));
+      model.detach(targetRunning());
       byPrompt.delete(model.promptId);
       this.modelPoints.delete(id);
     }
@@ -287,7 +288,7 @@ export class Points {
       point.sync(mode);
     }
     for (const model of this.modelPoints.values()) {
-      model.detach(isResourceStarted(TARGET));
+      model.detach(targetRunning());
       model.attach(mode);
     }
   }
@@ -308,7 +309,7 @@ export class Points {
   }
 
   private detach(point: Point): void {
-    if (!isResourceStarted(TARGET)) return void (point.targetZone = null);
+    if (!targetRunning()) return void (point.targetZone = null);
     if (point.targetZone != null) target("removeZone", point.targetZone);
     point.targetZone = null;
     const ped = point.ped?.entity;

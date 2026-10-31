@@ -1,4 +1,4 @@
-import { LIB_UI } from "@aicore-fivem/shared";
+import { LIB_UI, type PromptAnchor } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const ui = resourceExport(LIB_UI.resource);
@@ -9,11 +9,7 @@ const ui = resourceExport(LIB_UI.resource);
  * enter, hide it on exit, act in `onPromptPressed`. With `at` the prompt floats over that world point instead
  * (a door), the same key acting on it.
  */
-export function showPrompt(
-  id: string,
-  text: string,
-  at?: { x: number; y: number; z: number },
-): void {
+export function showPrompt(id: string, text: string, at?: PromptAnchor): void {
   ui.ShowPrompt(id, text, at);
 }
 

@@ -23,6 +23,19 @@ export const LIB_UI = {
   minigameForCallback: "ai-lib:minigameFor",
 } as const;
 
+/**
+ * Where a world prompt floats: a fixed point, or spots on entities (offsets in the entity's own space, so the prompt
+ * moves and turns with it: a swinging door). Of several entity spots the one nearest the player is shown each frame.
+ */
+export type PromptAnchor =
+  | { x: number; y: number; z: number }
+  | {
+      anchors: Array<{
+        entity: number;
+        offset: { x: number; y: number; z: number };
+      }>;
+    };
+
 /** ai-lib's client exports (the UI host); lib `notify`, `progress`, prompts, `menu`, `input` and minigames call them. */
 export type AiLibClientExports = {
   Notify(notification: Notification): void;
@@ -30,12 +43,8 @@ export type AiLibClientExports = {
   ShowProgress(label: string, duration: number): void;
   HideProgress(): void;
   /** Shows (or updates) the calling resource's prompt `id` on the right of the screen. */
-  /** `at`: drawn over that world point (doors) instead of the right-hand list. */
-  ShowPrompt(
-    id: string,
-    text: string,
-    at?: { x: number; y: number; z: number },
-  ): void;
+  /** `at`: drawn over that world point or entity spot (doors) instead of the right-hand list. */
+  ShowPrompt(id: string, text: string, at?: PromptAnchor): void;
   HidePrompt(id: string): void;
   /** Shows a menu for the calling resource; the pick arrives as `MENU_EVENTS.menuResult`. */
   OpenMenu(requestId: number, request: MenuRequest): void;

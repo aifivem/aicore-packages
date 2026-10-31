@@ -7,18 +7,30 @@ import { createLogger } from "../shared";
 
 export type Style = "prompt" | "target";
 export const TARGET = "ox_target";
+/** ai-target answers the ox_target API under its own name too. */
+const AI_TARGET = "ai-target";
+
+/**
+ * The resource answering the ox_target API, null when none runs. ai-target `provide`s ox_target, but the state of a
+ * provided name is not always reported as started, so its own name is checked too.
+ */
+export const targetResource = (): string | null =>
+  isResourceStarted(TARGET)
+    ? TARGET
+    : isResourceStarted(AI_TARGET)
+      ? AI_TARGET
+      : null;
+export const targetRunning = (): boolean => targetResource() !== null;
 export const log = createLogger(GetCurrentResourceName());
 
 /** The ox_target API (ai-target answers it under that name). */
 export const target = (name: string, ...args: unknown[]) =>
-  callExport(TARGET, name, ...args);
+  callExport(targetResource() ?? TARGET, name, ...args);
 
 const interaction = new GlobalKey(CORE.interactionStateKey, stateString);
 /** Prompt mode, or target mode when the owner picked it and a resource answers the ox_target API. */
 export const style = (): Style =>
-  interaction.get() === "target" && isResourceStarted(TARGET)
-    ? "target"
-    : "prompt";
+  interaction.get() === "target" && targetRunning() ? "target" : "prompt";
 export const onStyleChange = (fn: () => void) => interaction.onChange(fn);
 
 /** The style one point uses: the owner's, unless the point asks for its own (`promptOnly`, `preferTarget`). */
@@ -27,7 +39,7 @@ export function pointStyle(
   group: Style,
 ): Style {
   if (options.promptOnly) return "prompt";
-  if (options.preferTarget && isResourceStarted(TARGET)) return "target";
+  if (options.preferTarget && targetRunning()) return "target";
   return group;
 }
 
