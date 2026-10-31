@@ -7,11 +7,10 @@ import type {
   CharacterInfo,
   GangMembership,
   JobMembership,
-  Notification,
 } from "./player";
 import type { AiVehiclesServerExports } from "./vehicles";
-import type { InputRequest, ItemPickerRequest, MenuRequest } from "./menu";
-import type { MinigameRequest } from "./minigame";
+import type { ItemPickerRequest } from "./menu";
+import type { AiLibClientExports } from "./ui";
 import type {
   InventoryClientExports,
   InventoryServerExports,
@@ -252,9 +251,6 @@ export type AiCoreServerExports = {
 export type AiCoreClientExports = {
   GetPlayerData(): AiPlayerData | null;
   IsPlayerLoaded(): boolean;
-  /** Shows (or updates) the calling resource's prompt `id` on the right of the screen. */
-  ShowPrompt(id: string, text: string): void;
-  HidePrompt(id: string): void;
   /** Hides every HUD while any reason holds (the calling resource's reasons go when it stops). */
   HideHud(reason: string): void;
   ShowHud(reason: string): void;
@@ -271,18 +267,8 @@ export type AiCoreClientExports = {
   IsWorldSyncPaused(): boolean;
   /** Job or gang definitions as the panel file holds them (bridges; follow `CORE.clientDefinitionsEvent`). */
   GetDefinitions(file: "jobs" | "gangs"): Record<string, unknown> | null;
-  Notify(notification: Notification): void;
-  /** Shows the progress bar for `duration` ms (the calling resource runs the action and its animation). */
-  ShowProgress(label: string, duration: number): void;
-  HideProgress(): void;
-  /** Shows a menu for the calling resource; the pick arrives as `MENU_EVENTS.menuResult`. */
-  OpenMenu(requestId: number, request: MenuRequest): void;
-  /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */
-  OpenInput(requestId: number, request: InputRequest): void;
   /** Opens the item picker; the list (`PickedItem[]`) or null arrives as `MENU_EVENTS.menuResult`. */
   OpenItemPicker(requestId: number, request: ItemPickerRequest): void;
-  /** Starts a minigame (skill check, lockpick); its result arrives as `MENU_EVENTS.menuResult`. */
-  OpenMinigame(requestId: number, request: MinigameRequest): void;
   /** The key a lib `Keybind` was registered with (mapping command `+<name>_<key>`); null until it is registered. */
   GetKeybindKey(name: string): string | null;
   /** Shows a key hint of the calling resource until `HideKeyHint` (dropped when that resource stops). */
@@ -464,6 +450,7 @@ export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 declare global {
   interface CitizenExports {
     "ai-core": AiCoreExports;
+    "ai-lib": AiLibClientExports;
     "ai-target": AiTargetClientExports;
     "ai-appearance": AiAppearanceClientExports;
     "ai-vehicles": AiVehiclesServerExports;

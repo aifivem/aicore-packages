@@ -1,0 +1,43 @@
+import type { InputRequest, MenuRequest } from "./menu";
+import type { MinigameRequest } from "./minigame";
+import type { Notification } from "./player";
+
+/**
+ * ai-lib's shared player UI (notifications, the progress bar, prompts, menus, inputs, minigames): one page in the
+ * ai-lib resource that every resource draws through lib `notify` / `progress` / `showPrompt` / `menu` / `input` /
+ * `skillCheck` / `lockpick` (and the Lua `aiLib` ones). It runs without ai-core.
+ */
+export const LIB_UI = {
+  resource: "ai-lib",
+  /** Server -> client: (notification: Notification) a notification card on the player's screen. */
+  notifyEvent: "ai-lib:client:notify",
+  /** Client local: (resource: string, id: string) the interaction key was pressed while that resource's prompt was on top. */
+  promptPressedEvent: "ai-lib:client:promptPressed",
+  /** Client local: the player pressed the cancel key while a progress bar shows (lib `progress` with `canCancel`). */
+  cancelProgressEvent: "ai-lib:client:cancelProgress",
+  /** Server -> client callback: (ServerProgress) runs the progress bar for a server flow (lib `progressFor`), answers true when it ran out. */
+  progressForCallback: "ai-lib:progressFor",
+  /** Server -> client: the server flow's progress bar stops (a newer `progressFor` replaced it). */
+  progressForCancelEvent: "ai-lib:client:progressForCancel",
+  /** Server -> client callback: (MinigameRequest) plays a minigame for a server flow (lib `minigameFor`), answers its result. */
+  minigameForCallback: "ai-lib:minigameFor",
+} as const;
+
+/** ai-lib's client exports (the UI host); lib `notify`, `progress`, prompts, `menu`, `input` and minigames call them. */
+export type AiLibClientExports = {
+  Notify(notification: Notification): void;
+  /** Shows the progress bar for `duration` ms (the calling resource runs the action and its animation). */
+  ShowProgress(label: string, duration: number): void;
+  HideProgress(): void;
+  /** Shows (or updates) the calling resource's prompt `id` on the right of the screen. */
+  ShowPrompt(id: string, text: string): void;
+  HidePrompt(id: string): void;
+  /** Shows a menu for the calling resource; the pick arrives as `MENU_EVENTS.menuResult`. */
+  OpenMenu(requestId: number, request: MenuRequest): void;
+  /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */
+  OpenInput(requestId: number, request: InputRequest): void;
+  /** Starts a minigame (skill check, lockpick); its result arrives as `MENU_EVENTS.menuResult`. */
+  OpenMinigame(requestId: number, request: MinigameRequest): void;
+  /** Closes the calling resource's open menu or input dialog (answered with null like a player close). */
+  CloseDialog(): void;
+};

@@ -1,4 +1,4 @@
-import { CORE, type ServerProgress } from "@aicore-fivem/shared";
+import { CORE, LIB_UI, type ServerProgress } from "@aicore-fivem/shared";
 import { triggerClientCallback } from "./callback";
 import { PlayerMap } from "./players";
 
@@ -20,7 +20,7 @@ on(CORE.playerUnloadedEvent, (source: number) => {
 });
 
 /**
- * Runs ai-core's progress bar (animation or scenario, `face`, blocked controls) on the player's client and resolves
+ * Runs ai-lib's progress bar (animation or scenario, `face`, blocked controls) on the player's client and resolves
  * true only when it ran out there and at least `minRatio` of `duration` passed on the server; false on cancel, drop,
  * character switch, timeout or a too-early answer. One per player: a second call ends the first with false. Check the
  * flow's conditions again after it resolves (the player may have walked away). The label is a translated text.
@@ -32,7 +32,7 @@ export function progressFor(
   const previous = running.get(source);
   if (previous) {
     previous(false);
-    emitNet(CORE.progressForCancelEvent, source);
+    emitNet(LIB_UI.progressForCancelEvent, source);
   }
   const { minRatio = 0.8, ...bar } = options;
   const startedAt = GetGameTimer();
@@ -46,7 +46,7 @@ export function progressFor(
     };
     running.set(source, settle);
     triggerClientCallback(
-      CORE.progressForCallback,
+      LIB_UI.progressForCallback,
       source,
       [bar],
       bar.duration + TIMEOUT_SLACK_MS,

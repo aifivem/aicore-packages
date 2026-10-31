@@ -39,24 +39,16 @@ export const CORE = {
   clientCharacterPortraitEvent: "ai-core:client:characterPortrait",
   /** Server -> client (latent): (looks: { id: number, look: CharacterAppearance }[]) the character screen's looks, read through the appearance layer; ai-core dresses its scene peds with them. */
   characterLooksEvent: "ai-core:client:characterLooks",
-  /** (resource: string, id: string) the interaction key was pressed while that resource's prompt was on top. */
-  clientPromptPressedEvent: "ai-core:client:promptPressed",
   /** (key: keyof PlayerCache, value) a cached value of the local player changed (one watcher in ai-core for every resource). */
   clientCacheEvent: "ai-core:client:cache",
   /** Client local event: (visible: boolean) HUDs show or hide (a full-screen UI opened or closed; lib `hud`). */
   clientHudVisibleEvent: "ai-core:client:hudVisible",
   /** Client local: (paused: boolean) the weather and time sync is paused (interiors, scenes) or runs again. */
   clientWorldSyncEvent: "ai-core:client:worldSync",
-  /** Client local: the player pressed ai-core's cancel key while a progress bar shows (lib `progress` with `canCancel`). */
-  clientCancelProgressEvent: "ai-core:client:cancelProgress",
   /** Client local: (file: "jobs" | "gangs", name, definition | null) a job or gang definition changed. */
   clientDefinitionsEvent: "ai-core:client:definitions",
   /** Server -> client callback: (model: string) the `CreateVehicleServerSetter` type of a model, null when the game has no such vehicle (ai-core's client answers for every resource, lib `spawnVehicle`). */
   vehicleTypeCallback: "ai-core:vehicleType",
-  /** Server -> client callback: (ServerProgress) runs ai-core's progress bar for a server flow (lib `progressFor`), answers true when it ran out. */
-  progressForCallback: "ai-core:progressFor",
-  /** Server -> client: the server flow's progress bar stops (a newer `progressFor` replaced it). */
-  progressForCancelEvent: "ai-core:client:progressForCancel",
   /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */
   interactionStateKey: "ai:interaction",
 
@@ -65,9 +57,6 @@ export const CORE = {
   createCharacterCallback: "ai-core:createCharacter",
   deleteCharacterCallback: "ai-core:deleteCharacter",
   selectCharacterCallback: "ai-core:selectCharacter",
-
-  /** Server -> client: (notification: Notification) a notification card on the player's screen. */
-  clientNotifyEvent: "ai-core:client:notify",
 
   /** Server -> client: (spawn: SpawnPoint) puts the loaded character into the world. */
   spawnEvent: "ai-core:client:spawn",

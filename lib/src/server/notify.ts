@@ -1,10 +1,10 @@
 import {
-  CORE,
+  LIB_UI,
   type Notification,
   type NotificationKind,
 } from "@aicore-fivem/shared";
 
-/** Shows a notification card on one player's screen (ai-core draws it); `text` is already translated. */
+/** Shows a notification card on one player's screen (ai-lib draws it); `text` is already translated. */
 export function notify(
   source: number,
   text: string,
@@ -12,5 +12,5 @@ export function notify(
   duration?: number,
 ): void {
   const notification: Notification = { text, kind, duration };
-  emitNet(CORE.clientNotifyEvent, source, notification);
+  emitNet(LIB_UI.notifyEvent, source, notification);
 }

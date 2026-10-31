@@ -84,11 +84,11 @@ export interface InputRequest {
 
 export const MENU_EVENTS = {
   /** Client local: (resource, requestId, itemId | null) the player picked an item or closed the menu. */
-  menuResult: "ai-core:client:menuResult",
+  menuResult: "ai-lib:client:menuResult",
   /** Client local: (resource, requestId, itemId) the pointer or focus is on an item (previews). */
-  menuHover: "ai-core:client:menuHover",
+  menuHover: "ai-lib:client:menuHover",
   /** Client local: (resource, requestId, itemId, checked) the player flipped a switch row; the menu stays open. */
-  menuToggle: "ai-core:client:menuToggle",
+  menuToggle: "ai-lib:client:menuToggle",
   /** Client local: (resource, requestId, values | null) the player confirmed or closed the input dialog. */
-  inputResult: "ai-core:client:inputResult",
+  inputResult: "ai-lib:client:inputResult",
 } as const;

@@ -1,5 +1,6 @@
 import {
   CORE,
+  LIB_UI,
   LOCKPICK_AREAS,
   MENU_EVENTS,
   SKILL_STAGES,
@@ -13,6 +14,8 @@ import {
 } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 
+const ui = resourceExport(LIB_UI.resource);
+/** The item picker is an admin tool of ai-core (it needs ai-core's inventory layer). */
 const core = resourceExport(CORE.resource);
 
 export interface MenuListeners {
@@ -22,7 +25,7 @@ export interface MenuListeners {
   onToggle?: (item: string, checked: boolean) => void;
 }
 
-/** Menus and input dialogs this resource asked ai-core for, waiting for the player's answer. */
+/** Menus, input dialogs and minigames this resource asked ai-lib (the item picker: ai-core) for, waiting for the player's answer. */
 class Requests {
   private readonly resource = GetCurrentResourceName();
   private readonly waiting = new Map<number, (value: unknown) => void>();
@@ -75,7 +78,7 @@ class Requests {
 const requests = new Requests();
 
 /**
- * Shows ai-core's menu and resolves with the picked item id, or null when the player closed it. The second argument is
+ * Shows ai-lib's menu and resolves with the picked item id, or null when the player closed it. The second argument is
  * `onHover` (the item under the pointer or focus, for live previews) or `{ onHover, onToggle }`: items with `checked`
  * are switch rows that flip in place without closing the menu. Arrows move, Enter picks; in a sub menu (`back: true`)
  * a short Escape resolves `MENU_BACK` and holding Escape closes (null).
@@ -86,20 +89,20 @@ export function menu(
 ): Promise<string | null> {
   return new Promise((resolve) =>
     requests.ask(
-      (id) => core.OpenMenu(id, request),
+      (id) => ui.OpenMenu(id, request),
       (value) => resolve(typeof value === "string" ? value : null),
       typeof listeners === "function" ? { onHover: listeners } : listeners,
     ),
   );
 }
 
-/** Shows ai-core's input dialog and resolves with the entered values by field name, or null when closed. */
+/** Shows ai-lib's input dialog and resolves with the entered values by field name, or null when closed. */
 export function input(
   request: InputRequest,
 ): Promise<Record<string, string | number> | null> {
   return new Promise((resolve) =>
     requests.ask(
-      (id) => core.OpenInput(id, request),
+      (id) => ui.OpenInput(id, request),
       (value) => {
         if (typeof value !== "object" || value === null) return resolve(null);
         const out: Record<string, string | number> = {};
@@ -155,7 +158,7 @@ const stageOf = (d: SkillDifficulty): SkillStage =>
       };
 
 /**
- * ai-core's skill check: a needle runs around a ring once per stage, the player presses the shown key while it is
+ * ai-lib's skill check: a needle runs around a ring once per stage, the player presses the shown key while it is
  * on the green arc. Resolves true when every stage was hit, false on a miss, a wrong key or Escape. Stages are
  * `"easy" | "medium" | "hard"` or ox_lib's `{ areaSize, speedMultiplier }`; each stage shows one of `keys` (default E).
  * A result decides a client-side step only: the server keeps checking what it allows.
@@ -173,7 +176,7 @@ export function skillCheck(
   return new Promise((resolve) =>
     requests.ask(
       (id) =>
-        core.OpenMinigame(id, {
+        ui.OpenMinigame(id, {
           kind: "skillCheck",
           stages,
           keys: keyList.length ? keyList : ["e"],
@@ -193,7 +196,7 @@ export interface LockpickOptions {
 }
 
 /**
- * ai-core's lockpick: the player moves the pick with A / D (or the arrows), holds W to turn the lock; the lock turns
+ * ai-lib's lockpick: the player moves the pick with A / D (or the arrows), holds W to turn the lock; the lock turns
  * further the closer the pick is to the hidden sweet spot, forcing it wears the pick down. Resolves "opened" when
  * every pin turned, "broken" when the last pick broke (take the item), "cancelled" on Escape.
  */
@@ -203,7 +206,7 @@ export function lockpick(
   return new Promise((resolve) =>
     requests.ask(
       (id) =>
-        core.OpenMinigame(id, {
+        ui.OpenMinigame(id, {
           kind: "lockpick",
           pins: Math.min(6, Math.max(1, Math.floor(options.pins ?? 1))),
           area: LOCKPICK_AREAS[options.difficulty ?? "medium"],

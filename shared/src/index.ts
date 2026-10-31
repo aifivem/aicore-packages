@@ -16,3 +16,4 @@ export type * from "./action";
 export * from "./world";
 export * from "./appearance";
 export * from "./minigame";
+export * from "./ui";

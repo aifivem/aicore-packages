@@ -95,6 +95,11 @@ export {
 export { PendingActions } from "./pending";
 export { progressFor, type ProgressForOptions } from "./progressFor";
 export {
+  minigameFor,
+  type MinigameForOptions,
+  type MinigameOutcome,
+} from "./minigameFor";
+export {
   addCommand,
   type CommandArgs,
   type CommandHandler,
