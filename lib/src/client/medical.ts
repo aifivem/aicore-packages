@@ -12,9 +12,9 @@ on("onClientResourceStop", (resource: string) => {
 });
 
 /**
- * The local player's down state through ai-core's medical layer, whatever death script runs (ai-death, qbx_medical,
- * qb-ambulancejob, esx_ambulancejob, ars_ambulancejob): death scripts keep a downed ped alive to animate it, so
- * `IsEntityDead` alone misses them. A memory read after the first call.
+ * The local player's down state through ai-core's medical layer, whatever death script runs (`docs/compat/medical.md`):
+ * death scripts keep a downed ped alive to animate it, so `IsEntityDead` alone misses them. A memory read after the
+ * first call.
  */
 export const medical = {
   isDead(): boolean {

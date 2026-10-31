@@ -21,6 +21,8 @@ export const LIB_UI = {
   progressForCancelEvent: "ai-lib:client:progressForCancel",
   /** Server -> client callback: (MinigameRequest) plays a minigame for a server flow (lib `minigameFor`), answers its result. */
   minigameForCallback: "ai-lib:minigameFor",
+  /** Client local: (owner: string, key: string, inside: boolean) the player entered or left a zone ai-lib checks for `owner` (lib `Zones`). */
+  zoneEvent: "ai-lib:client:zone",
 } as const;
 
 /**
@@ -46,6 +48,9 @@ export type AiLibClientExports = {
   /** `at`: drawn over that world point or entity spot (doors) instead of the right-hand list. */
   ShowPrompt(id: string, text: string, at?: PromptAnchor): void;
   HidePrompt(id: string): void;
+  /** Checks a zone of the calling resource (lib `Zones` hands its zones over); enter / exit arrive as `LIB_UI.zoneEvent`. */
+  AddZone(key: string, shape: unknown, interval: number, inside: boolean): void;
+  RemoveZone(key: string): void;
   /** Shows a menu for the calling resource; the pick arrives as `MENU_EVENTS.menuResult`. */
   OpenMenu(requestId: number, request: MenuRequest): void;
   /** Shows an input dialog for the calling resource; the values arrive as `MENU_EVENTS.inputResult`. */

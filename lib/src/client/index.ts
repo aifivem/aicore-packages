@@ -21,6 +21,7 @@ export { onServerCallback, triggerServerCallback } from "./callback";
 export { fromServer, onServerEvent } from "./netEvent";
 export { AdminWorld } from "./adminWorld";
 export { Zones, type ZoneOptions, type ZoneShape } from "./zones";
+export { ZoneEngine } from "./zoneEngine";
 export { cache, onCache, readPlayerState, readWeapon } from "./cache";
 export { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
 export { Points, type PointOptions } from "./point";

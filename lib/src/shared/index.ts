@@ -43,6 +43,7 @@ export {
 } from "./blipStyle";
 export {
   polyFromCorners,
+  readZoneShape,
   zoneBounds,
   zoneContains,
   type ZoneShape,

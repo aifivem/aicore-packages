@@ -1,166 +1,161 @@
-import { every, type Job } from "../fivem/scheduler";
+import { LIB_UI } from "@aicore-fivem/shared";
+import { callExport, isResourceStarted } from "../fivem/exports";
 import { createLogger } from "../shared";
-import { zoneBounds, zoneContains, type ZoneShape } from "../shared/zone";
-import { cache } from "./cache";
+import type { ZoneShape } from "../shared/zone";
+import { ZoneEngine, type ZoneOptions } from "./zoneEngine";
+
+export type { ZoneShape, ZoneOptions };
 
 /**
- * Zones on this client: inside / outside checks at each zone's own interval, never per frame. Built for any count
- * (measured with 1,000,000 zones): zones sit in a grid of 64 m cells and a check looks only at the player's cell and
- * the zones the player is in.
+ * Zones are checked by ai-lib for every resource: FiveM enters a resource's JS every frame while it has any timer, so
+ * one checker for all costs one resource's frame time instead of every resource's. A resource checks its own zones
+ * only while ai-lib does not run (client still loading, ai-lib restarting) and hands them back when it starts.
  */
+const RESOURCE = GetCurrentResourceName();
+const HOST = LIB_UI.resource;
+const log = createLogger(RESOURCE);
 
-const log = createLogger(GetCurrentResourceName());
-
-export type { ZoneShape };
-
-export interface ZoneOptions {
-  shape: ZoneShape;
-  /** How often to check, in ms (default 500, at least 50). A shop needs ~500, a fast trigger ~100; per-frame work belongs elsewhere. */
-  interval?: number;
-  onEnter?: () => void;
-  onExit?: () => void;
+class Entry {
+  inside = false;
+  constructor(
+    readonly key: string,
+    readonly options: ZoneOptions,
+  ) {}
 }
 
-const CELL = 64;
-/** A zone wider than this many cells is kept in one list checked every time instead of in the grid. */
-const MAX_CELLS = 64;
-const cellKey = (cx: number, cy: number): number =>
-  ((cx + 32768) << 16) | (cy + 32768);
+/** Every zone of this resource by its key (`<group>:<id>`), so ai-lib's enter / exit events find it. */
+const entries = new Map<string, Entry>();
+const local = new ZoneEngine();
+let hosted = false;
+/** ai-lib reads started but its exports are not there yet (client loading): wait for its start event. */
+let waiting = false;
 
-class Zone {
-  inside = false;
-  nextCheck = 0;
-  readonly interval: number;
-  /** Grid cells the zone is filed under; empty when it is in the large list. */
-  readonly cells: number[] = [];
-
-  constructor(readonly options: ZoneOptions) {
-    this.interval = Math.max(50, options.interval ?? 500);
+function setInside(entry: Entry, inside: boolean): void {
+  if (entry.inside === inside) return;
+  entry.inside = inside;
+  try {
+    if (inside) entry.options.onEnter?.();
+    else entry.options.onExit?.();
+  } catch (error) {
+    log.error("zone handler failed", error);
   }
 }
 
+function addLocal(entry: Entry): void {
+  local.add(
+    entry.key,
+    {
+      shape: entry.options.shape,
+      interval: entry.options.interval,
+      onEnter: () => setInside(entry, true),
+      onExit: () => setInside(entry, false),
+    },
+    entry.inside,
+  );
+}
+
+/** Hands one zone to ai-lib; false while it cannot take it (not started, or its exports not there yet). */
+function addHosted(entry: Entry): boolean {
+  try {
+    callExport(
+      HOST,
+      "AddZone",
+      entry.key,
+      entry.options.shape,
+      entry.options.interval ?? 500,
+      entry.inside,
+    );
+    return true;
+  } catch (error) {
+    if (!String(error).includes("No such export")) throw error;
+    waiting = true;
+    return false;
+  }
+}
+
+/** ai-lib takes every zone over; the local checker stops. */
+function handOver(): void {
+  if (RESOURCE === HOST || waiting || !isResourceStarted(HOST)) return;
+  for (const entry of entries.values())
+    if (!addHosted(entry)) return takeBack();
+  hosted = true;
+  for (const key of entries.keys()) local.remove(key, true);
+}
+
+/** ai-lib is gone: this resource checks its zones again, from the state ai-lib last reported. */
+function takeBack(): void {
+  hosted = false;
+  for (const entry of entries.values()) addLocal(entry);
+}
+
+if (RESOURCE !== HOST) {
+  on(LIB_UI.zoneEvent, (owner: unknown, key: unknown, inside: unknown) => {
+    if (owner !== RESOURCE || typeof key !== "string") return;
+    const entry = entries.get(key);
+    if (entry && hosted) setInside(entry, inside === true);
+  });
+  on("onClientResourceStart", (resource: string) => {
+    if (resource !== HOST) return;
+    waiting = false;
+    handOver();
+  });
+  on("onClientResourceStop", (resource: string) => {
+    if (resource === HOST && hosted) takeBack();
+  });
+}
+
+let nextGroup = 0;
+
 /**
- * The zones of one resource. One scheduler job serves them all at the shortest interval any zone asks for; each zone
- * is checked only when its own interval has passed. With no zones the job stops.
+ * The zones of one feature (`add` / `remove` by id, `onEnter` / `onExit` per zone). Checked by ai-lib's one checker
+ * (each zone at its own interval, never per frame), or by this resource while ai-lib does not run.
  */
 export class Zones {
-  private readonly zones = new Map<string, Zone>();
-  private readonly grid = new Map<number, Set<Zone>>();
-  private readonly large = new Set<Zone>();
-  private readonly insideNow = new Set<Zone>();
-  /** How many zones use each interval, so the shortest one is found without walking every zone. */
-  private readonly intervals = new Map<number, number>();
-  private job: Job | null = null;
-  private period = 0;
+  private readonly prefix = `${++nextGroup}:`;
+  private readonly ids = new Set<string>();
 
   /** Adds (or replaces) a zone. A replaced zone the player was in fires its onExit first. */
   add(id: string, options: ZoneOptions): void {
     this.remove(id);
-    const zone = new Zone(options);
-    this.zones.set(id, zone);
-    const [minX, minY, maxX, maxY] = zoneBounds(options.shape);
-    const x0 = Math.floor(minX / CELL);
-    const y0 = Math.floor(minY / CELL);
-    const x1 = Math.floor(maxX / CELL);
-    const y1 = Math.floor(maxY / CELL);
-    if ((x1 - x0 + 1) * (y1 - y0 + 1) > MAX_CELLS) this.large.add(zone);
-    else {
-      for (let cx = x0; cx <= x1; cx++) {
-        for (let cy = y0; cy <= y1; cy++) {
-          const key = cellKey(cx, cy);
-          let cell = this.grid.get(key);
-          if (!cell) this.grid.set(key, (cell = new Set()));
-          cell.add(zone);
-          zone.cells.push(key);
-        }
-      }
+    const entry = new Entry(this.prefix + id, options);
+    entries.set(entry.key, entry);
+    this.ids.add(id);
+    if (!hosted) {
+      handOver();
+      if (!hosted) return addLocal(entry);
     }
-    this.intervals.set(
-      zone.interval,
-      (this.intervals.get(zone.interval) ?? 0) + 1,
-    );
-    this.schedule();
+    if (!addHosted(entry)) {
+      takeBack();
+      return;
+    }
   }
 
   remove(id: string): void {
-    const zone = this.zones.get(id);
-    if (!zone) return;
-    this.zones.delete(id);
-    this.large.delete(zone);
-    for (const key of zone.cells) {
-      const cell = this.grid.get(key);
-      cell?.delete(zone);
-      if (cell?.size === 0) this.grid.delete(key);
-    }
-    const left = (this.intervals.get(zone.interval) ?? 1) - 1;
-    if (left > 0) this.intervals.set(zone.interval, left);
-    else this.intervals.delete(zone.interval);
-    if (this.insideNow.delete(zone)) this.fire(zone, false);
-    this.schedule();
+    const key = this.prefix + id;
+    const entry = entries.get(key);
+    if (!entry) return;
+    entries.delete(key);
+    this.ids.delete(id);
+    if (hosted) {
+      try {
+        callExport(HOST, "RemoveZone", key);
+      } catch {
+        // ai-lib stopped meanwhile: its zones went with it.
+      }
+    } else local.remove(key, true);
+    setInside(entry, false);
   }
 
   /** Removes every zone (exits fire for the ones the player is in). */
   clear(): void {
-    const inside = [...this.insideNow];
-    this.zones.clear();
-    this.grid.clear();
-    this.large.clear();
-    this.insideNow.clear();
-    this.intervals.clear();
-    for (const zone of inside) this.fire(zone, false);
-    this.schedule();
+    for (const id of [...this.ids]) this.remove(id);
   }
 
   isInside(id: string): boolean {
-    return this.zones.get(id)?.inside ?? false;
+    return entries.get(this.prefix + id)?.inside ?? false;
   }
 
   get size(): number {
-    return this.zones.size;
-  }
-
-  private schedule(): void {
-    let period = 0;
-    for (const interval of this.intervals.keys())
-      period = period === 0 ? interval : Math.min(period, interval);
-    if (period === this.period) return;
-    this.job?.stop();
-    this.job = period
-      ? every(period, () => this.check(), { name: "zones" })
-      : null;
-    this.period = period;
-  }
-
-  private check(): void {
-    const now = GetGameTimer();
-    const [x = 0, y = 0, z = 0] = GetEntityCoords(cache.ped, false);
-    // The zones the player is in go first, so leaving one is noticed wherever the player went.
-    for (const zone of this.insideNow) this.test(zone, now, x, y, z);
-    for (const zone of this.large) this.test(zone, now, x, y, z);
-    const cell = this.grid.get(
-      cellKey(Math.floor(x / CELL), Math.floor(y / CELL)),
-    );
-    if (cell) for (const zone of cell) this.test(zone, now, x, y, z);
-  }
-
-  private test(zone: Zone, now: number, x: number, y: number, z: number): void {
-    if (now < zone.nextCheck) return;
-    zone.nextCheck = now + zone.interval;
-    const inside = zoneContains(zone.options.shape, x, y, z);
-    if (inside === zone.inside) return;
-    if (inside) this.insideNow.add(zone);
-    else this.insideNow.delete(zone);
-    this.fire(zone, inside);
-  }
-
-  private fire(zone: Zone, inside: boolean): void {
-    zone.inside = inside;
-    // A failing enter / exit handler must not stop the other zones.
-    try {
-      if (inside) zone.options.onEnter?.();
-      else zone.options.onExit?.();
-    } catch (error) {
-      log.error("zone handler failed", error);
-    }
+    return this.ids.size;
   }
 }

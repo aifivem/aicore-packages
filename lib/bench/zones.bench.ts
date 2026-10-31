@@ -1,5 +1,5 @@
-// Zones at scale (`bun bench/zones.bench.ts` in packages/lib): natives stubbed, N zones spread over the map, then
-// one check timed. Last run: 100,000 zones add 264 ms / check 5 µs; 1,000,000 zones add 3 s / check 46 µs.
+// The zone checker at scale (`bun bench/zones.bench.ts` in packages/lib): natives stubbed, N zones spread over the map, then
+// one check timed. Last run: 100,000 zones add 376 ms / check 7 µs; 1,000,000 zones add 4.4 s / check 44 µs.
 const g = globalThis as Record<string, unknown>;
 let player = { x: 0, y: 0, z: 30 };
 let now = 0;
@@ -25,7 +25,8 @@ g.clearTick = () => {
   timer.tick = null;
 };
 
-const { Zones } = await import("../src/client/zones");
+// ai-lib runs this engine for every resource's zones (lib `Zones` hands them over).
+const { ZoneEngine: Zones } = await import("../src/client/zoneEngine");
 
 for (const count of [100_000, 1_000_000]) {
   const zones = new Zones();

@@ -3,7 +3,7 @@ import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);
 
-/** Jail sentences through ai-core, whatever prison script runs (ai-prison, qb-prison). */
+/** Jail sentences through ai-core, whatever prison script runs (`docs/compat/prison.md`). */
 export const prison = {
   /** Sends a loaded player to prison for `minutes` (`by`: who sent them, for the log); false while no prison runs. */
   jail: (source: number, minutes: number, by = 0): boolean =>

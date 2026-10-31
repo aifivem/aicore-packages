@@ -14,6 +14,45 @@ export type ZoneShape =
       maxZ: number;
     };
 
+/** A zone shape from another resource (ai-lib's zone checker), null when it is not one. */
+export function readZoneShape(v: unknown): ZoneShape | null {
+  if (typeof v !== "object" || v === null) return null;
+  const s = v as Record<string, unknown>;
+  const num = (x: unknown): x is number =>
+    typeof x === "number" && Number.isFinite(x);
+  const vec = (x: unknown): Vec3 | null => {
+    if (typeof x !== "object" || x === null) return null;
+    const p = x as Record<string, unknown>;
+    return num(p.x) && num(p.y) && num(p.z) ? { x: p.x, y: p.y, z: p.z } : null;
+  };
+  if (s.type === "sphere" || s.type === "cylinder") {
+    const center = vec(s.center);
+    if (!center || !num(s.radius)) return null;
+    if (s.type === "sphere")
+      return { type: "sphere", center, radius: s.radius };
+    return num(s.height)
+      ? { type: "cylinder", center, radius: s.radius, height: s.height }
+      : null;
+  }
+  if (
+    s.type !== "poly" ||
+    !Array.isArray(s.points) ||
+    !num(s.minZ) ||
+    !num(s.maxZ)
+  )
+    return null;
+  const points: Array<{ x: number; y: number }> = [];
+  for (const p of s.points) {
+    if (typeof p !== "object" || p === null) return null;
+    const q = p as Record<string, unknown>;
+    if (!num(q.x) || !num(q.y)) return null;
+    points.push({ x: q.x, y: q.y });
+  }
+  return points.length >= 3
+    ? { type: "poly", points, minZ: s.minZ, maxZ: s.maxZ }
+    : null;
+}
+
 /** Whether a point lies inside a zone shape. */
 export function zoneContains(
   shape: ZoneShape,
