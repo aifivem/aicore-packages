@@ -449,6 +449,12 @@ export type AiHudClientExports = {
 /** Both sides share the resource key; a caller uses the half of its own side. */
 export type AiCoreExports = AiCoreServerExports & AiCoreClientExports;
 
+/** ai-vehicleshop's server exports. */
+export type AiVehicleshopServerExports = {
+  /** A model's catalog price, null when the catalog has no such model. */
+  GetCatalogPrice(model: string): number | null;
+};
+
 declare global {
   interface CitizenExports {
     "ai-core": AiCoreExports;
@@ -456,6 +462,7 @@ declare global {
     "ai-target": AiTargetClientExports;
     "ai-appearance": AiAppearanceClientExports;
     "ai-vehicles": AiVehiclesServerExports;
+    "ai-vehicleshop": AiVehicleshopServerExports;
     "ai-vehiclekeys": AiVehicleKeysServerExports;
     "ai-death": AiDeathServerExports;
     "ai-radialmenu": AiRadialClientExports;
