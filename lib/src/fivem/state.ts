@@ -121,6 +121,10 @@ export class EntityState<T> extends Mirror<number, T> {
   }
 }
 
+/** Every player state of this resource: one `playerDropped` listener forgets the leaver in all of them. */
+const playerStates = new Set<{ dropPlayer(serverId: number): void }>();
+let dropListener = false;
+
 /** One key of player state bags (`dead`, `cuffed`, pma-voice's `proximity`...), by server id. */
 export class PlayerState<T> extends Mirror<number, T> {
   private readonly seen = new Set<number>();
@@ -137,8 +141,20 @@ export class PlayerState<T> extends Mirror<number, T> {
         this.store(id, value);
       },
     );
-    if (isServer)
-      on("playerDropped", () => this.forget(Number(globalThis.source)));
+    if (!isServer) return;
+    playerStates.add(this);
+    if (dropListener) return;
+    dropListener = true;
+    // One listener for every instance: more than 10 on one event print Node's MaxListenersExceededWarning.
+    on("playerDropped", () => {
+      const id = Number(globalThis.source);
+      for (const state of playerStates) state.dropPlayer(id);
+    });
+  }
+
+  /** A player left (the shared drop listener calls it). */
+  dropPlayer(serverId: number): void {
+    this.forget(serverId);
   }
 
   /** The value of a player by server id (the local player: `cache.serverId`). */
