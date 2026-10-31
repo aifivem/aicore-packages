@@ -29,7 +29,7 @@ export const CORE = {
   inventoryChangedEvent: "ai-core:inventoryChanged",
   /** (src, name: string, status: Record<string, number> | null) a player used an item; status = the needs it gives, from inventories that define them. */
   itemUsedEvent: "ai-core:itemUsed",
-  /** (src, killer: number | null, weaponHash: number) a player with a loaded character died; fired from FXServer's `onPedDeath` (needs `PED_DEATH_STATE_KEY`). */
+  /** (src, killer: number | null, weaponHash: number) a player with a loaded character died; fired from FXServer's `onPedDeath` (ai-core requires FXServer 38039+). */
   playerDiedEvent: "ai-core:playerDied",
 
   // Client local events (same payloads, for client scripts and bridges).
@@ -76,8 +76,6 @@ export const dutyCountKey = (job: string): string =>
 /** GlobalState key holding the resource name of the active inventory (null while none runs). */
 export const INVENTORY_STATE_KEY = "ai:inventory";
 
-/** GlobalState key: true when the server reports player deaths itself (FXServer 38039+ `onPedDeath`), so clients need not watch their health. */
-export const PED_DEATH_STATE_KEY = "ai:pedDeath";
 /** Client local event: (worn: boolean | null) the local player's seat belt changed (ai-smallresources, read by HUDs). */
 export const SEATBELT_EVENT = "ai-smallresources:seatbelt";
 /** Player state bag keys several resources read (written by one server resource each). */
@@ -89,9 +87,6 @@ export const PLAYER_BAGS = {
   /** pma-voice's voice range `{ index, distance, mode }` (ai-voice writes it). */
   proximity: "proximity",
 } as const;
-
-/** The first FXServer build known to fire `onPedDeath` / `onPedHealthChanged` (citizenfx/fivem 1424ad0). */
-export const PED_EVENTS_MIN_BUILD = 38039;
 
 /** Why a character is let go: the player left, or went back to the character screen. */
 export type UnloadReason = "dropped" | "switch";
