@@ -155,7 +155,7 @@ export { banking } from "./banking";
 export { mdt } from "./mdt";
 export { ems } from "./ems";
 export { appearance } from "./appearance";
-export { stress } from "./stress";
+export { needs, stress } from "./stress";
 export { fuel } from "./fuel";
 export { doors } from "./doors";
 export { garages } from "./garages";

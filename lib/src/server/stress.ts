@@ -14,3 +14,9 @@ export const stress = {
   /** The HUD that keeps stress, or null. */
   provider: (): string | null => core.GetStressSystem(),
 };
+
+/** Players' hunger and thirst through the same layer (the HUD that keeps them, ai-core's metadata without one). */
+export const needs = {
+  /** Hunger and thirst to full (admin revive, hospital); false when the player has no character. */
+  refill: (source: number): boolean => core.RefillNeeds(source),
+};

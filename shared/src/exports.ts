@@ -301,6 +301,8 @@ export type AiCoreServerExports = {
   GetStressSystem(): string | null;
   /** Adds stress to a player (a negative amount relieves it) through whichever HUD keeps it; false without one. */
   AddStress(source: number, amount: number): boolean;
+  /** Fills a player's hunger and thirst through the HUD that keeps them (metadata without one); false when not loaded. */
+  RefillNeeds(source: number): boolean;
 } & InventoryServerExports &
   VehicleKeysServerExports &
   PhoneServerExports &
@@ -547,6 +549,12 @@ export type AiHudServerExports = {
     source: number,
     need: "hunger" | "thirst" | "stress",
     delta: number,
+  ): void;
+  /** Sets a loaded player's need to `value` (0-100, clamped). */
+  SetNeed(
+    source: number,
+    need: "hunger" | "thirst" | "stress",
+    value: number,
   ): void;
 };
 
