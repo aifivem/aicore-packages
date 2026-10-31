@@ -3,8 +3,13 @@
  * a player, to a player. Texts are already translated.
  */
 export interface BillRequest {
-  /** The player who gets the bill. */
-  to: number;
+  /** The player who gets the bill (server id); or `toCitizenid`. */
+  to?: number;
+  /**
+   * The character who gets the bill by citizen id, online or offline (instead of `to`). An offline character gets it
+   * only from ai-core's own bills; a billing script needs the player online.
+   */
+  toCitizenid?: string;
   /** Whole dollars. */
   amount: number;
   /** What it is for ("Speeding", "Engine repair"). */
@@ -17,6 +22,8 @@ export interface BillRequest {
 
 /** A bill as an adapter gets it: the request with what ai-core knows about the players filled in. */
 export interface BillSend extends BillRequest {
+  /** The recipient's server id (adapters only get bills to online players). */
+  to: number;
   toCitizenid: string;
   fromCitizenid?: string;
   fromName?: string;
@@ -63,10 +70,15 @@ export function toBillRequest(value: unknown): BillRequest | null {
     return null;
   const v = value as Record<string, unknown>;
   const to = id(v.to);
+  const toCitizenid =
+    typeof v.toCitizenid === "string" &&
+    /^[A-Za-z0-9]{1,16}$/.test(v.toCitizenid)
+      ? v.toCitizenid
+      : undefined;
   const label = text(v.label, 80);
   const amount = v.amount;
   if (
-    to === undefined ||
+    (to === undefined) === (toCitizenid === undefined) ||
     !label ||
     typeof amount !== "number" ||
     !Number.isSafeInteger(amount) ||
@@ -80,8 +92,8 @@ export function toBillRequest(value: unknown): BillRequest | null {
       ? v.job
       : undefined;
   if (job === undefined && from === undefined) return null;
-  if (from === to) return null;
-  return { to, amount, label, from, job };
+  if (to !== undefined && from === to) return null;
+  return { to, toCitizenid, amount, label, from, job };
 }
 
 /** ai-core's billing exports: whatever billing script runs (ai-core's own bills without one). */

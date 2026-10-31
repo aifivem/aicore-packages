@@ -8,7 +8,7 @@ const core = resourceExport(CORE.resource);
  * own bills (the player pays from a list on screen, the money moves when they pay).
  */
 export const billing = {
-  /** Sends a bill from a job (`job`, fines and service fees) or a player (`from`) to `to`; false when refused. */
+  /** Sends a bill from a job (`job`, fines and service fees) or a player (`from`) to `to` (or `toCitizenid`, also offline with ai-core's own bills); false when refused. */
   send: (bill: BillRequest): boolean => core.SendBill(bill),
   /** The player's open bills (null when the billing script cannot list them). */
   unpaid: (source: number): Promise<UnpaidBill[] | null> =>
