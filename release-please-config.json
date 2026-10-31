@@ -1,0 +1,72 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "include-component-in-tag": true,
+  "changelog-sections": [
+    {
+      "type": "feat",
+      "section": "New Features"
+    },
+    {
+      "type": "fix",
+      "section": "Bug Fixes"
+    },
+    {
+      "type": "perf",
+      "section": "Performance"
+    },
+    {
+      "type": "refactor",
+      "section": "Code Refactoring"
+    },
+    {
+      "type": "docs",
+      "section": "Documentation"
+    },
+    {
+      "type": "chore",
+      "section": "Miscellaneous Chores"
+    },
+    {
+      "type": "build",
+      "section": "Build",
+      "hidden": true
+    },
+    {
+      "type": "ci",
+      "section": "CI",
+      "hidden": true
+    },
+    {
+      "type": "test",
+      "section": "Tests",
+      "hidden": true
+    },
+    {
+      "type": "style",
+      "section": "Styles",
+      "hidden": true
+    }
+  ],
+  "plugins": [
+    "node-workspace"
+  ],
+  "packages": {
+    "build": {
+      "package-name": "@aicore-fivem/build",
+      "component": "build"
+    },
+    "lib": {
+      "package-name": "@aicore-fivem/lib",
+      "component": "lib"
+    },
+    "mysql": {
+      "package-name": "@aicore-fivem/mysql",
+      "component": "mysql"
+    },
+    "shared": {
+      "package-name": "@aicore-fivem/shared",
+      "component": "shared"
+    }
+  }
+}
