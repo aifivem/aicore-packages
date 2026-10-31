@@ -1,12 +1,13 @@
 import type { KeyPurpose } from "./vehicleKeys";
 /** Owned vehicle contract (ai-vehicles keeps them; garages, shops, keys and fuel use them). */
 
-export type VehicleOwnerType = "character" | "job" | "gang";
+/** `resource`: held by a script (a used car lot listing), no player has it. */
+export type VehicleOwnerType = "character" | "job" | "gang" | "resource";
 export type VehicleState = "garage" | "out" | "impound";
 
 export interface VehicleOwner {
   type: VehicleOwnerType;
-  /** Character id (as text), job or gang name. */
+  /** Character id (as text), job or gang name, or the holding resource's name. */
   id: string;
 }
 
