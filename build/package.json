@@ -1,6 +1,6 @@
 {
   "name": "@aicore-fivem/build",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Build steps every ai-core resource runs (client error wrapper, database types).",
   "license": "GPL-3.0-only",
   "type": "module",
@@ -15,7 +15,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@aicore-fivem/shared": "^0.1.0"
+    "@aicore-fivem/shared": "^0.2.0"
   },
   "devDependencies": {
     "@types/bun": "latest"
