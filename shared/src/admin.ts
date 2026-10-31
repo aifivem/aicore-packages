@@ -26,6 +26,8 @@ export type LookupSource =
 export interface LookupOption {
   value: string;
   label: string;
+  /** Jobs and gangs: the grade names, the grade number is the index (the `grade` widget lists them). */
+  grades?: string[];
 }
 
 /** Every lookup list, sent with the panel when it opens. */
@@ -129,11 +131,38 @@ export type WidgetSpec = WidgetBase &
       }
     | {
         widget: "list";
+        /** Row controls: `text`, `number`, `switch`, `select`, `grade`, `point`; a row control's `showIf` path is read in its row. */
         rows: WidgetSpec[];
         newRow: Record<string, unknown>;
         addLabel: string;
         rowLabel?: string;
         max?: number;
+        /** Fewest rows the remove button leaves (default 1). */
+        min?: number;
+        /** Long lists: a search box over the rows' values, newest rows first, 50 shown at a time. */
+        search?: boolean;
+        /** Rows with more controls than fit on one line wrap onto the next. */
+        wrap?: boolean;
+      }
+    /**
+     * A job or gang grade (data: the grade number): a select of the grade names of the job or gang named at `of` (a
+     * path in the same record, or in the same row inside a `list`), from the `lookup` list.
+     */
+    | { widget: "grade"; of: string; lookup: "job" | "gang" }
+    /**
+     * A long read-only names list (data: `names`, thousands of entries): search and 50 shown at a time. With `addTo`,
+     * each entry has a button that appends `newRow` with the entry at `field` to the list section at `path`
+     * (`label`: lang key of the button, `doneLabel`: shown instead when a row there already has the entry).
+     */
+    | {
+        widget: "browse";
+        addTo?: {
+          path: string;
+          field: string;
+          newRow: Record<string, unknown>;
+          label: string;
+          doneLabel: string;
+        };
       }
     /** A map blip `{ sprite, color, scale }` (data: an object of three numbers): picture grid, colour swatches, size. */
     | { widget: "blip" }

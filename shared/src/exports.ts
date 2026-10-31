@@ -10,6 +10,7 @@ import type {
   Notification,
 } from "./player";
 import type { AiVehiclesServerExports } from "./vehicles";
+import type { VrpConfig } from "./vrp";
 import type { ItemPickerRequest } from "./menu";
 import type { AiLibClientExports } from "./ui";
 import type {
@@ -97,6 +98,35 @@ export type AiCoreServerExports = {
   GetSourceByCitizenId(citizenid: string): number | null;
   GetLoadedSources(): number[];
   GetFivemId(src: number): string | null;
+  /** The account id (`ai_core_users.id`) of a connected player, also on the character screen. */
+  GetUserId(src: number): number | null;
+  /** A character by id, loaded or not, with its account id; `done` gets null for an unknown or deleted one. */
+  GetCharacterInfo(
+    charId: number,
+    done: (info: (CharacterInfo & { userId: number }) | null) => void,
+  ): void;
+
+  // vRP layer (ai-core's bridge/vrp calls these; values are hex text so any bytes survive).
+  /** A vRP data value (`kind` c / u / s / g, owner id as text) as hex, `""` when unset; at once when cached. */
+  VrpGetData(
+    kind: string,
+    owner: string,
+    key: string,
+    done: (hex: string) => void,
+  ): void;
+  /** Stores a vRP data value (hex); written within a second. */
+  VrpSetData(kind: string, owner: string, key: string, hex: string): boolean;
+  /** vRP's DB API on ai-core's pool: `done(error | null, ...)` with rows + affected, affected, or the scalar. */
+  VrpQuery(
+    sql: string,
+    params: unknown,
+    mode: "query" | "execute" | "scalar",
+    done: (error: string | null, ...answer: unknown[]) => void,
+  ): void;
+  /** The panel's vRP permission mapping (`data/vrp.json`). */
+  GetVrpConfig(): VrpConfig;
+  /** Records a permission string a script asked for (the panel lists them); true when it was new. */
+  VrpPermissionAsked(permission: string): boolean;
   SwitchCharacter(src: number): boolean;
 
   GetMoney(src: number, account: string): number | null;

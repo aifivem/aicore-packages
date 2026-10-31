@@ -184,6 +184,10 @@ export type InventoryServerExports = {
   RegisterUsableItem(name: string, handler: UsableItemHandler): void;
   GetItemDefinition(name: string): ItemDefinition | null;
   GetItemDefinitions(): Record<string, ItemDefinition>;
+  /** A player's carried weight and limit (grams); null when the active inventory does not tell them. */
+  GetInventoryWeight(
+    source: number,
+  ): { weight: number; maxWeight: number } | null;
   /** Kept by ai-core and registered again with every inventory that becomes active (`items`: `{ name, price }`). */
   RegisterShop(name: string, label: string, items: ShopProduct[]): void;
   /** Opens a registered shop on the player's screen (check access and range first); false when it could not. */

@@ -7,6 +7,8 @@ export const CORE = {
   // Server local events (other resources and the bridges mirror player state from these deltas).
   /** (src, character: CharacterInfo) after a character is loaded and spawned. */
   playerLoadedEvent: "ai-core:playerLoaded",
+  /** (src, charId) the loaded character was sent into the world (after `playerLoaded`; after the pick when the player chooses where to appear). */
+  playerSpawnedEvent: "ai-core:playerSpawned",
   /** (src, charId, reason: UnloadReason) before a character's state is dropped. */
   playerUnloadedEvent: "ai-core:playerUnloaded",
   /** (src, account: string, balance: number, delta: number, reason: string) */
