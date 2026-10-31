@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.2.0...shared-v0.3.0) (2026-10-31)
+
+
+### New Features
+
+* **lib:** needs.refill fills hunger and thirst through ai-core's HUD layer ([6584552](https://github.com/aifivem/aicore-packages/commit/6584552a7b2e0556a359e696552d9c1f4a0f575e))
+* **player:** spawn point carries the saved health ([e088760](https://github.com/aifivem/aicore-packages/commit/e08876004b2d7c9e34ebf16026582d9833aae00d))
+* **vrp:** vRP bridge contracts, player spawned event, inventory weight export, panel grade and browse widgets ([bdae4fe](https://github.com/aifivem/aicore-packages/commit/bdae4fe680e93850d9f746eb44433473adacfaa2))
+
+
+### Bug Fixes
+
+* **inventory:** adapter version is optional (none for ai-inventory) ([b0f02e5](https://github.com/aifivem/aicore-packages/commit/b0f02e5e5f51d48a1dffe592ec2fcfc0d9a8dba3))
+
 ## [0.2.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.1.0...shared-v0.2.0) (2026-10-31)
 
 
