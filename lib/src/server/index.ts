@@ -94,6 +94,7 @@ export {
 } from "./players";
 export { PendingActions } from "./pending";
 export { progressFor, type ProgressForOptions } from "./progressFor";
+export { definitions } from "./definitions";
 export {
   minigameFor,
   type MinigameForOptions,

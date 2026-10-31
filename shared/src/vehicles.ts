@@ -54,6 +54,8 @@ export type AiVehiclesServerExports = {
   GetVehicles(owner: VehicleOwner): OwnedVehicle[];
   IsOwnedPlate(plate: string): boolean;
   GetVehicleIdByEntity(entity: number): number | null;
+  /** Every owned vehicle in memory as `[plate, ownerType, ownerId]` (key systems mirror it, then follow `VEHICLES_EVENTS.owners`). */
+  GetPlateOwners(): Array<[plate: string, type: VehicleOwnerType, id: string]>;
   GetEntity(id: number): number | null;
   /**
    * Saves condition and look: fuel, damage, state, garage and `props` (colours, extras, dirt, ...). The stored tuning
@@ -89,3 +91,9 @@ export type AiVehiclesServerExports = {
     setup?: unknown,
   ): void;
 };
+
+/** ai-vehicles' server local events. */
+export const VEHICLES_EVENTS = {
+  /** (puts: [plate, ownerType, ownerId][], removes: plate[]) owners of vehicles in memory changed (one batch per tick). */
+  owners: "ai-vehicles:owners",
+} as const;

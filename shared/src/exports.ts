@@ -32,6 +32,8 @@ export interface JobDefinition {
   label: string;
   type: string;
   defaultDuty: boolean;
+  /** Shown in job centers (ESX esx_joblisting: `whitelisted` = not listed). */
+  listed?: boolean;
   grades: GradeDefinition[];
 }
 
