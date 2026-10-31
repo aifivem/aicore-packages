@@ -266,7 +266,12 @@ export interface AdminPanelSnapshot {
   resource: string;
   schema: PanelSchema;
   texts: Record<string, string>;
+  /** Every file when `loaded`; only the settings files in the open summary. */
   data: Record<string, unknown>;
+  /** False in the open summary: the records files come with `ADMIN.panelDataCallback` when the script is opened. */
+  loaded?: boolean;
+  /** Records files' labels by key (the global search while the records are not loaded). */
+  index?: Record<string, Record<string, string>>;
 }
 
 /**
@@ -330,6 +335,8 @@ export interface AdminDelta {
 /** Exports each panel resource answers for ai-core (registered by the lib's AdminPanel). */
 export type AdminPanelResourceExports = {
   AdminPanelSnapshot(): AdminPanelSnapshot;
+  /** Schema, texts, settings files and the records' label index: what the panel needs at opening. */
+  AdminPanelSummary(): AdminPanelSnapshot;
   AdminPanelApply(admin: number, patch: unknown): AdminResult;
 };
 
@@ -337,8 +344,10 @@ export type AdminPanelResourceExports = {
 export const ADMIN = {
   /** ACE every panel action checks: `add_ace group.admin ai.admin allow`. */
   ace: "ai.admin",
-  /** Callback: (keybinds: KeybindInfo[] the admin's client knows) -> AdminPanelSnapshot[]. */
+  /** Callback: (keybinds: KeybindInfo[] the admin's client knows) -> AdminOpenData (each script's summary). */
   openCallback: "ai-core:admin:open",
+  /** Callback: (resource) -> the script's whole panel data, asked when the admin opens that script. */
+  panelDataCallback: "ai-core:admin:panelData",
   applyCallback: "ai-core:admin:apply",
   closeEvent: "ai-core:admin:close",
   /** Server -> client: () open the panel (the `aiadmin` command, checked on the server). */

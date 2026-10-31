@@ -56,6 +56,7 @@ export class AdminPanel {
     for (const [name, spec] of Object.entries(schema.files))
       this.load(name, spec);
     registerExport("AdminPanelSnapshot", () => this.snapshot());
+    registerExport("AdminPanelSummary", () => this.summary());
     registerExport("AdminPanelApply", (admin: number, patch: unknown) =>
       this.apply(admin, patch),
     );
@@ -104,6 +105,34 @@ export class AdminPanel {
       schema: this.schema,
       texts: loadLocaleTexts(),
       data: clone(Object.fromEntries(this.data)),
+    };
+  }
+
+  /**
+   * What the panel needs at opening: schema, texts, the settings files and each records file's labels by key (for the
+   * global search). The records themselves come with `snapshot()` when the admin opens this script.
+   */
+  summary(): AdminPanelSnapshot {
+    const data: Data = {};
+    const index: Record<string, Record<string, string>> = {};
+    for (const [file, spec] of Object.entries(this.schema.files)) {
+      const content = this.data.get(file);
+      if (spec.kind !== "records") {
+        data[file] = clone(content ?? {});
+        continue;
+      }
+      const labels: Record<string, string> = {};
+      for (const [key, record] of Object.entries(content ?? {}))
+        labels[key] = labelOf(record, spec.labelPath) ?? key;
+      index[file] = labels;
+    }
+    return {
+      resource: this.resource,
+      schema: this.schema,
+      texts: loadLocaleTexts(),
+      data,
+      loaded: false,
+      index,
     };
   }
 
@@ -224,4 +253,15 @@ export class AdminPanel {
     this.data.set(name, data);
     if (filled || raw === null || !file.hasSchemaRef()) file.write(data);
   }
+}
+
+/** A record's label at a dotted path (`labelPath`), when it is a text. */
+function labelOf(record: unknown, path: string | undefined): string | null {
+  if (!path) return null;
+  let at: unknown = record;
+  for (const part of path.split(".")) {
+    if (typeof at !== "object" || at === null) return null;
+    at = (at as Record<string, unknown>)[part];
+  }
+  return typeof at === "string" && at !== "" ? at : null;
 }
