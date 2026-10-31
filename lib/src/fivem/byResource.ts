@@ -6,16 +6,24 @@ export function caller(): string {
     : GetCurrentResourceName();
 }
 
-/** One resource-stop listener for every owner map of this resource. */
+/** One resource-stop listener for every owner map and `onStop` of this resource. */
 const stopHandlers: Array<(resource: string) => void> = [];
 let listening = false;
-function onStop(handler: (resource: string) => void): void {
+function onAnyStop(handler: (resource: string) => void): void {
   stopHandlers.push(handler);
   if (listening) return;
   listening = true;
   const event = IsDuplicityVersion() ? "onResourceStop" : "onClientResourceStop";
   on(event, (resource: string) => {
     for (const stop of stopHandlers) stop(resource);
+  });
+}
+
+/** Runs `fn` when this resource stops (the side's stop event; one listener per resource). */
+export function onStop(fn: () => void): void {
+  const self = GetCurrentResourceName();
+  onAnyStop((resource) => {
+    if (resource === self) fn();
   });
 }
 
@@ -32,7 +40,7 @@ export class ByResource<K, V> {
       onDrop?: (resource: string, key: K, value: V) => void;
     } = {},
   ) {
-    onStop((resource) => this.dropResource(resource));
+    onAnyStop((resource) => this.dropResource(resource));
   }
 
   /** Sets the entry under `owner` (default: the calling resource), moving it from another owner. */
@@ -98,7 +106,7 @@ export class Reasons {
   private readonly listeners: Array<(any: boolean) => void> = [];
 
   constructor() {
-    onStop((resource) => {
+    onAnyStop((resource) => {
       const before = this.any;
       for (const key of this.set_)
         if (key.startsWith(`${resource}:`)) this.set_.delete(key);

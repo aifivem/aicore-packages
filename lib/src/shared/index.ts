@@ -12,7 +12,15 @@ export {
   readVec4,
 } from "./strict";
 export { fail, isActionOk, replyError, type ActionResult } from "./action";
-export { distance, headingTo, nearestOf, type Vec3 } from "./vec";
+export {
+  distance,
+  flatDistance,
+  headingTo,
+  nearestOf,
+  type Vec3,
+} from "./vec";
+export { pickRandom, randomInt, rollChance } from "./random";
+export { ServerClock } from "./clock";
 export {
   formatWeight,
   groupDigits,

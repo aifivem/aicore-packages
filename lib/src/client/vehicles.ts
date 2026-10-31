@@ -31,3 +31,7 @@ export function nearestVehicle(
   }
   return best;
 }
+
+/** The vehicle the local player drives (driver seat), false otherwise. */
+export const drivenVehicle = (): number | false =>
+  cache.seat === -1 ? cache.vehicle : false;

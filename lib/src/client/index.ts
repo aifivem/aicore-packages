@@ -3,13 +3,20 @@
 export { TickLoop } from "./tickLoop";
 export { AreaFollower } from "./areaFollower";
 export { ScriptCamera } from "./scriptCamera";
+export { medical } from "./medical";
 export {
   NuiScreen,
   type NuiPageMessage,
   type NuiScreenOptions,
 } from "./nuiScreen";
 export { every, type EveryOptions, type Job } from "../fivem/scheduler";
-export { ByResource, caller, plateOf, Reasons } from "../fivem/byResource";
+export {
+  ByResource,
+  caller,
+  onStop,
+  plateOf,
+  Reasons,
+} from "../fivem/byResource";
 export { onServerCallback, triggerServerCallback } from "./callback";
 export { fromServer, onServerEvent } from "./netEvent";
 export { AdminWorld } from "./adminWorld";
@@ -25,6 +32,7 @@ export {
   fadeOut,
   player,
   type AnimOptions,
+  type HoldAnimOptions,
   type TeleportOptions,
 } from "./player";
 export { notify } from "./notify";
@@ -73,6 +81,9 @@ export {
   type LocationName,
 } from "./location";
 export { pedHeadshot } from "./headshot";
+export { waypoint } from "./waypoint";
+export { attachProp, type AttachPropOptions } from "./prop";
+export { PreviewVehicle } from "./preview";
 export {
   callExport,
   isResourceStarted,
@@ -93,10 +104,10 @@ export {
   type StateParse,
 } from "../fivem/state";
 export { controls } from "./controls";
-export { nearestVehicle } from "./vehicles";
-export { waitForEntity } from "./entity";
+export { drivenVehicle, nearestVehicle } from "./vehicles";
+export { entityFromNetId, waitForEntity } from "./entity";
 export { raycast, type RaycastOptions, type RayHit } from "./raycast";
-export { nearestPlayer } from "./players";
+export { nearestPlayer, playerPed } from "./players";
 export { onShot } from "./shot";
 export { callAction, type CallActionOptions } from "./action";
 export { isActionOk, replyError } from "../shared/action";

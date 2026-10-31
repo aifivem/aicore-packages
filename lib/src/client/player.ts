@@ -1,3 +1,4 @@
+import { every } from "../fivem/scheduler";
 import { sleep, waitFor } from "../shared";
 import { cache } from "./cache";
 import { requestAnimDict } from "./streaming";
@@ -28,6 +29,51 @@ export interface AnimOptions {
   duration?: number;
   blendIn?: number;
   blendOut?: number;
+}
+
+export interface HoldAnimOptions extends AnimOptions {
+  /** Read every half second: the hold ends (and the animation stops) once it answers false. */
+  while?: () => boolean;
+}
+
+/** The held animation of this resource: one at a time, put back by one shared job when something interrupts it. */
+class AnimHold {
+  private current: {
+    dict: string;
+    clip: string;
+    options: HoldAnimOptions;
+  } | null = null;
+  private readonly job = every(500, () => this.check(), {
+    active: false,
+    name: "holdAnim",
+  });
+
+  start(
+    dict: string,
+    clip: string,
+    options: HoldAnimOptions,
+  ): { stop(): void } {
+    const hold = { dict, clip, options };
+    this.current = hold;
+    void player.playAnim(dict, clip, options);
+    this.job.set(true);
+    return { stop: () => this.end(hold) };
+  }
+
+  private end(hold: AnimHold["current"]): void {
+    if (this.current !== hold) return;
+    this.current = null;
+    this.job.set(false);
+    player.stopAnim();
+  }
+
+  private check(): void {
+    const hold = this.current;
+    if (!hold) return;
+    if (hold.options.while && !hold.options.while()) return this.end(hold);
+    if (!IsEntityPlayingAnim(cache.ped, hold.dict, hold.clip, 3))
+      void player.playAnim(hold.dict, hold.clip, hold.options);
+  }
 }
 
 /** Heights tried for the ground under a point, bottom to top. */
@@ -72,6 +118,8 @@ export async function fadeIn(ms = 400): Promise<void> {
  * The local player's ped, like ox_core's player object: position, moves and animations in one place. Reads use
  * `cache.ped` (loops); one-off actions read the ped fresh, so they also work right after a model change.
  */
+let holds: AnimHold | null = null;
+
 export const player = {
   get ped(): number {
     return cache.ped;
@@ -158,5 +206,17 @@ export const player = {
 
   stopAnim(): void {
     ClearPedTasks(PlayerPedId());
+  },
+
+  /**
+   * Keeps an animation playing (put back within half a second when a fall or a bump interrupts it) until `stop()` or
+   * `while` answers false; one hold per resource, a new one replaces the old.
+   */
+  holdAnim(
+    dict: string,
+    clip: string,
+    options: HoldAnimOptions = {},
+  ): { stop(): void } {
+    return (holds ??= new AnimHold()).start(dict, clip, options);
   },
 };

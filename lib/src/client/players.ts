@@ -32,3 +32,13 @@ export function nearestPlayer(
   }
   return best;
 }
+
+/**
+ * The ped of a player by server id: `cache.ped` for the local player, 0 when that player is not in scope (never the
+ * local ped through `GetPlayerPed(-1)`).
+ */
+export function playerPed(serverId: number): number {
+  if (serverId === cache.serverId) return cache.ped;
+  const player = GetPlayerFromServerId(serverId);
+  return player === -1 ? 0 : GetPlayerPed(player);
+}

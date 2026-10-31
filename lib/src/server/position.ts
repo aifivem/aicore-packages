@@ -10,6 +10,17 @@ export function entityCoords(entity: number): Vec3 {
 export const coordsOf = (source: number): Vec3 =>
   entityCoords(GetPlayerPed(String(source)));
 
+/** The vehicle the player sits in (with `driver: true` only when in its driver seat), 0 on foot. */
+export function vehicleOf(
+  source: number,
+  options: { driver?: boolean } = {},
+): number {
+  const ped = GetPlayerPed(String(source));
+  const vehicle = GetVehiclePedIsIn(ped, false);
+  if (!vehicle || !options.driver) return vehicle;
+  return GetPedInVehicleSeat(vehicle, -1) === ped ? vehicle : 0;
+}
+
 /** The player's ped is within `metres` of a point. */
 export function isNear(source: number, point: Vec3, metres: number): boolean {
   const [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));

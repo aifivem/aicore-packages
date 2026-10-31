@@ -63,6 +63,15 @@ export interface MedicalAdapter {
   isDead(source: number): boolean;
 }
 
+/** A death script's client half for ai-core's client medical layer. */
+export interface MedicalClientAdapter {
+  resource: string;
+  /** The local player is down (dead or last stand). */
+  isDead(): boolean;
+  /** Calls `changed` when that may have changed (a state bag, player data); registered once at start. */
+  watch(changed: () => void): void;
+}
+
 /**
  * ai-core's server exports: synchronous, small values. Callers mirror what they need and follow ai-core's local
  * events (`CORE.*Event`) instead of calling these in hot paths. A type alias, not an interface: it must fit
@@ -252,6 +261,8 @@ export type AiCoreServerExports = {
 /** ai-core's client exports. */
 export type AiCoreClientExports = {
   GetPlayerData(): AiPlayerData | null;
+  /** The local player is down in whatever death script runs (lib `medical.isDead`, kept by `CORE.clientDeadEvent`). */
+  IsDead(): boolean;
   IsPlayerLoaded(): boolean;
   /** Hides every HUD while any reason holds (the calling resource's reasons go when it stops). */
   HideHud(reason: string): void;

@@ -53,6 +53,10 @@ export const CORE = {
   interactionStateKey: "ai:interaction",
   /** GlobalState: boolean, players can hurt each other (ai-core panel setting `pvp`, `/togglepvp`). */
   pvpStateKey: "ai:pvp",
+  /** GlobalState: the resource name of the death script ai-core's medical layer uses (client adapter pick). */
+  medicalStateKey: "ai:medical",
+  /** Client local: (dead: boolean) the local player went down (dead or last stand) or got up, in any death script. */
+  clientDeadEvent: "ai-core:client:dead",
 
   // Callbacks (character screen).
   charactersCallback: "ai-core:characters",

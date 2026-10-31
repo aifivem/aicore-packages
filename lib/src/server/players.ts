@@ -129,8 +129,12 @@ export class KeyedCooldowns<K = number> {
 export interface CharacterHandlers {
   /** A character entered the world; also once at start for every character loaded before this resource (re)started. */
   loaded?: (source: number, character: CharacterInfo) => void | Promise<void>;
-  /** The character left: logout, character switch or drop (each `loaded` gets exactly one). */
-  unloaded?: (source: number, charId: number) => void;
+  /** The character left: logout or character switch (`"switch"`) or a drop (`"dropped"`); each `loaded` gets exactly one. */
+  unloaded?: (
+    source: number,
+    charId: number,
+    reason: "dropped" | "switch",
+  ) => void;
 }
 
 /**
@@ -154,27 +158,33 @@ export function onCharacter(handlers: CharacterHandlers): void {
       log.error(`character loaded handler failed for ${source}`, error);
     }
   };
-  const end = (source: number, charId: number): void => {
+  const end = (
+    source: number,
+    charId: number,
+    reason: "dropped" | "switch",
+  ): void => {
     if (!live.delete(source)) return;
     try {
-      handlers.unloaded?.(source, charId);
+      handlers.unloaded?.(source, charId, reason);
     } catch (error) {
       log.error(`character unloaded handler failed for ${source}`, error);
     }
   };
   on(CORE.playerLoadedEvent, (source: number, character: CharacterInfo) => {
     const previous = live.get(source);
-    if (previous !== undefined) end(source, previous);
+    if (previous !== undefined) end(source, previous, "switch");
     deliver(source, character);
   });
-  on(CORE.playerUnloadedEvent, (source: number, charId: number) =>
-    end(source, charId),
+  on(
+    CORE.playerUnloadedEvent,
+    (source: number, charId: number, reason: unknown) =>
+      end(source, charId, reason === "dropped" ? "dropped" : "switch"),
   );
   // ai-core unloads on drop itself; this only catches a drop whose unload never came (ai-core stopping).
   onDropped((source) =>
     setImmediate(() => {
       const charId = live.get(source);
-      if (charId !== undefined) end(source, charId);
+      if (charId !== undefined) end(source, charId, "dropped");
     }),
   );
   setImmediate(() => {

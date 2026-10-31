@@ -9,6 +9,12 @@ export interface Vec3 {
 export const distance = (a: Vec3, b: Vec3): number =>
   Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 
+/** Distance on the ground plane (x / y only), in metres. */
+export const flatDistance = (
+  a: Pick<Vec3, "x" | "y">,
+  b: Pick<Vec3, "x" | "y">,
+): number => Math.hypot(a.x - b.x, a.y - b.y);
+
 /** The heading (0-360, GTA's: 0 = north, counter-clockwise) that faces from `from` towards `to`. */
 export function headingTo(
   from: Pick<Vec3, "x" | "y">,

@@ -147,6 +147,12 @@ class OnlinePlayers {
     return this.players.get(source)?.character ?? null;
   }
 
+  /** The id of the player's loaded character, undefined when none. */
+  charId(source: number): number | undefined {
+    this.start();
+    return this.players.get(source)?.character.id;
+  }
+
   /** The character's "Firstname Lastname", else the FiveM player name ("" with `fallback: false`). */
   name(source: number, options: { fallback?: boolean } = {}): string {
     const c = this.character(source);

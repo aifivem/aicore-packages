@@ -1,3 +1,4 @@
+import { medical } from "./medical";
 import { LIB_UI } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 import { every } from "../fivem/scheduler";
@@ -33,7 +34,12 @@ export interface ProgressOptions {
   /** Holds the player in place while it runs. */
   freeze?: boolean;
   /** Controls blocked while it runs: walking, driving, looking around, fighting. */
-  disable?: { move?: boolean; car?: boolean; mouse?: boolean; combat?: boolean };
+  disable?: {
+    move?: boolean;
+    car?: boolean;
+    mouse?: boolean;
+    combat?: boolean;
+  };
   /** The player turns to this point before the bar starts (a pump, a counter, a vehicle). */
   face?: Vec3;
 }
@@ -107,7 +113,7 @@ export async function progress(options: ProgressOptions): Promise<boolean> {
       () => {
         const cancelled =
           own.cancelled ||
-          (!options.whileDead && IsEntityDead(cache.ped)) ||
+          (!options.whileDead && medical.isDead()) ||
           (!options.allowVehicle && cache.vehicle !== false);
         if (!cancelled && GetGameTimer() < end) return;
         job.stop();

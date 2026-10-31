@@ -79,7 +79,7 @@ export {
   type SpawnVehicleOptions,
 } from "./vehicle";
 export { nearestPlayerTo, playersNear, playersNearEntity } from "./proximity";
-export { coordsOf, entityCoords, isNear } from "./position";
+export { coordsOf, entityCoords, isNear, vehicleOf } from "./position";
 export {
   AreaStream,
   type AreaItem,
@@ -93,6 +93,7 @@ export {
   type CharacterHandlers,
 } from "./players";
 export { PendingActions } from "./pending";
+export { KeyWatchers } from "./watchers";
 export { progressFor, type ProgressForOptions } from "./progressFor";
 export { definitions } from "./definitions";
 export {
@@ -127,7 +128,13 @@ export {
   resourceExport,
 } from "../fivem/exports";
 export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "../fivem/locale";
-export { ByResource, caller, plateOf, Reasons } from "../fivem/byResource";
+export {
+  ByResource,
+  caller,
+  onStop,
+  plateOf,
+  Reasons,
+} from "../fivem/byResource";
 export { every, type EveryOptions, type Job } from "../fivem/scheduler";
 export { EntityState, GlobalGroup, GlobalKey, PlayerState } from "./state";
 export {

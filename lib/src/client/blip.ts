@@ -18,6 +18,8 @@ export interface BlipOptions {
   shortRange?: boolean;
   /** `SetBlipDisplay` (default 4: map and minimap). */
   display?: number;
+  /** A GPS route to the blip: true in the game's route colour, a number for that route colour. */
+  route?: boolean | number;
 }
 
 import type { BlipStyle } from "../shared/blipStyle";
@@ -40,6 +42,10 @@ export function createBlip(options: BlipOptions): number {
     BeginTextCommandSetBlipName(LABEL);
     AddTextComponentSubstringPlayerName(options.label);
     EndTextCommandSetBlipName(blip);
+  }
+  if (options.route !== undefined && options.route !== false) {
+    SetBlipRoute(blip, true);
+    if (options.route !== true) SetBlipRouteColour(blip, options.route);
   }
   return blip;
 }
