@@ -19,4 +19,7 @@ export const stress = {
 export const needs = {
   /** Hunger and thirst to full (admin revive, hospital); false when the player has no character. */
   refill: (source: number): boolean => core.RefillNeeds(source),
+  /** Adds hunger or thirst (0-100 scale; a negative amount takes it away), a food or drink's value. */
+  add: (source: number, need: "hunger" | "thirst", amount: number): boolean =>
+    core.AddNeed(source, need, amount),
 };

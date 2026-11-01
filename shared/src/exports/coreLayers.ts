@@ -40,4 +40,6 @@ export type CoreLayerServerExports = {
   AddStress(source: number, amount: number): boolean;
   /** Fills a player's hunger and thirst through the HUD that keeps them (metadata without one); false when not loaded. */
   RefillNeeds(source: number): boolean;
+  /** Adds hunger or thirst (0-100 scale, a negative amount takes it away) through the same HUD; false when refused. */
+  AddNeed(source: number, need: "hunger" | "thirst", amount: number): boolean;
 };
