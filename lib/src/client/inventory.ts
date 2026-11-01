@@ -36,6 +36,17 @@ export const inventory = {
   /** An item's label, weight, flags and picture from ai-core's client mirror; null when unknown. */
   itemDefinition: (name: string): ItemDefinition | null =>
     toDefinition(core.GetItemDefinition(name)),
+  /** Every item definition of ai-core's client mirror, by name. */
+  itemDefinitions: (): Record<string, ItemDefinition> => {
+    const all: unknown = core.GetItemDefinitions();
+    const out: Record<string, ItemDefinition> = {};
+    if (isRecord(all))
+      for (const [name, def] of Object.entries(all)) {
+        const read = toDefinition(def);
+        if (read) out[name] = read;
+      }
+    return out;
+  },
   /** Every stack the player holds; null when the active inventory has no client list (ask your server). */
   items: (): InventoryStack[] | null => {
     const list: unknown = core.GetItems();

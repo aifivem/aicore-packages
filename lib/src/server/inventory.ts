@@ -76,6 +76,9 @@ export const inventory = {
   /** An item's label, weight and flags; null when the inventory does not know it. */
   getItemDefinition: (name: string): ItemDefinition | null =>
     core.GetItemDefinition(name),
+  /** Every item definition of the active inventory, by name. */
+  getItemDefinitions: (): Record<string, ItemDefinition> =>
+    core.GetItemDefinitions() ?? {},
   /** Replaces the metadata of the stack at `slot` (ammo, components, durability); false when the inventory could not. */
   setItemMetadata: (
     inv: InventoryRef,
