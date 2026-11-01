@@ -56,6 +56,15 @@ export type AiVehiclesServerExports = {
   GetVehicleIdByEntity(entity: number): number | null;
   /** Every owned vehicle in memory as `[plate, ownerType, ownerId]` (key systems mirror it, then follow `VEHICLES_EVENTS.owners`). */
   GetPlateOwners(): Array<[plate: string, type: VehicleOwnerType, id: string]>;
+  /** A vehicle by plate, also of an owner who is not online (from the database). */
+  FindVehicle(plate: string, done: (vehicle: OwnedVehicle | null) => void): void;
+  /** An owner's vehicles, also of a character who is not online (from the database). */
+  GetVehiclesOf(owner: VehicleOwner, done: (vehicles: OwnedVehicle[]) => void): void;
+  /**
+   * Another plate for a vehicle in memory (custom plate, plate changer; its entity too): 1-8 letters / digits, never
+   * a generated `AI...` one; `done(false)` when it is taken or not valid.
+   */
+  SetPlate(id: number, plate: string, done?: (ok: boolean) => void): void;
   GetEntity(id: number): number | null;
   /**
    * Saves condition and look: fuel, damage, state, garage and `props` (colours, extras, dirt, ...). The stored tuning
