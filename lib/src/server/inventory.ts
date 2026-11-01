@@ -76,4 +76,15 @@ export const inventory = {
   /** An item's label, weight and flags; null when the inventory does not know it. */
   getItemDefinition: (name: string): ItemDefinition | null =>
     core.GetItemDefinition(name),
+  /** Replaces the metadata of the stack at `slot` (ammo, components, durability); false when the inventory could not. */
+  setItemMetadata: (
+    inv: InventoryRef,
+    slot: number,
+    metadata: ItemMetadata,
+  ): boolean => core.SetItemMetadata(inv, slot, metadata),
+  /** Sets a player's weight limit in grams until the inventory reloads it; false when the inventory has no way. */
+  setMaxWeight: (source: number, grams: number): boolean =>
+    core.SetMaxWeight(source, grams),
+  /** Names of every item a usable handler is registered for. */
+  usableItems: (): string[] => core.GetUsableItems(),
 };
