@@ -1,6 +1,7 @@
 import { resourceExport } from "../fivem/exports";
 import {
   CORE,
+  type CharacterResult,
   type GangDefinition,
   type JobDefinition,
 } from "@aicore-fivem/shared";
@@ -28,6 +29,29 @@ class Definitions {
     if (def === undefined)
       this.jobs.set(name, (def = core.GetJobDefinition(name) ?? null));
     return def;
+  }
+
+  /**
+   * Registers a job of the calling resource (gone when it stops, never saved to the panel); refused with an ai-core
+   * lang key when the panel has a job of that name or another resource registered it.
+   */
+  registerJob(name: string, definition: JobDefinition): CharacterResult {
+    return core.RegisterJobDefinition(name, definition);
+  }
+
+  /** Removes a job this resource registered; false otherwise. */
+  removeJob(name: string): boolean {
+    return core.RemoveJobDefinition(name);
+  }
+
+  /** Registers a gang of the calling resource, like `registerJob`. */
+  registerGang(name: string, definition: GangDefinition): CharacterResult {
+    return core.RegisterGangDefinition(name, definition);
+  }
+
+  /** Removes a gang this resource registered; false otherwise. */
+  removeGang(name: string): boolean {
+    return core.RemoveGangDefinition(name);
   }
 
   gang(name: string): GangDefinition | null {
