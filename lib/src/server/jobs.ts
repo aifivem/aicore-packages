@@ -25,6 +25,8 @@ export const jobs = {
   set: (source: number, job: string, grade: number): boolean =>
     core.SetJob(source, job, grade),
   remove: (source: number, job: string): boolean => core.RemoveJob(source, job),
+  /** The job of a character without one (the panel's setting). */
+  unemployed: (): string => core.GetUnemployedJob(),
   /** How many players are on duty in a job. */
   onDutyCount: (job: string): number => core.GetOnDutyCount(job),
   /** Every gang of the player. */

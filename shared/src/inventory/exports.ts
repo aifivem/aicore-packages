@@ -8,6 +8,9 @@ import type {
   UsableItemHandler,
 } from "./items";
 
+/** One item of a combined carry check (`CanCarryItems`). */
+export type CarryItem = { name: string; count: number; metadata?: ItemMetadata };
+
 /** ai-core's server inventory exports; the active inventory answers them (false / 0 / empty while none runs). */
 export type InventoryServerExports = {
   AddItem(
@@ -36,6 +39,8 @@ export type InventoryServerExports = {
     count?: number,
     metadata?: ItemMetadata,
   ): boolean;
+  /** Whether all the items fit together (weight and space shared, like one trade or reward). */
+  CanCarryItems(inv: InventoryRef, items: CarryItem[]): boolean;
   GetItems(inv: InventoryRef): InventoryStack[];
   ClearInventory(inv: InventoryRef): void;
   /** Kept by ai-core and registered again with every inventory that becomes active. */

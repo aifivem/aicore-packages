@@ -39,6 +39,11 @@ export type AiInventoryServerExports = {
     count: number,
     metadata?: Record<string, unknown>,
   ): boolean;
+  /** Whether all the items fit together (summed weight, shared stack room and grid space). */
+  CanCarryItems(
+    inv: number | string,
+    items: Array<{ name: string; count: number; metadata?: Record<string, unknown> }>,
+  ): boolean;
   /** `handler` returning false keeps the item (otherwise the item's "consume" amount is taken). */
   RegisterUsableItem(
     name: string,

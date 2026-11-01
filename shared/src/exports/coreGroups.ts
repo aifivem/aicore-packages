@@ -24,4 +24,6 @@ export type CoreGroupServerExports = {
   GetGangDefinitions(): Record<string, GangDefinition>;
   GetJobDefinition(job: string): JobDefinition | null;
   GetGangDefinition(gang: string): GangDefinition | null;
+  /** The job of a character without one (the panel's `jobs.unemployed` setting). */
+  GetUnemployedJob(): string;
 };

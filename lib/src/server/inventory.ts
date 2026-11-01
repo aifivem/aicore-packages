@@ -1,5 +1,6 @@
 import {
   CORE,
+  type CarryItem,
   type InventoryRef,
   type InventoryStack,
   type ItemDefinition,
@@ -49,6 +50,9 @@ export const inventory = {
     count = 1,
     metadata?: ItemMetadata,
   ): boolean => core.CanCarryItem(inv, item, count, metadata),
+  /** Whether all the items fit together (one trade, one reward): weight and space shared. */
+  canCarryItems: (inv: InventoryRef, items: CarryItem[]): boolean =>
+    core.CanCarryItems(inv, items),
   /** Every stack of an inventory with its item label. */
   getItems: (inv: InventoryRef): InventoryStack[] => core.GetItems(inv),
   /** Empties an inventory. */

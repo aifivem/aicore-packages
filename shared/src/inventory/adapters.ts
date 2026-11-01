@@ -7,6 +7,7 @@ import type {
   ShopDefinition,
   StashDefinition,
 } from "./items";
+import type { CarryItem } from "./exports";
 
 /** One inventory resource behind the layer (server side). Adapters translate calls and nothing else. */
 export interface InventoryAdapter {
@@ -39,6 +40,8 @@ export interface InventoryAdapter {
     count: number,
     metadata: ItemMetadata | undefined,
   ): boolean;
+  /** Whether all the items fit together; without it the layer checks each item on its own. */
+  canCarryItems?(inv: InventoryRef, items: CarryItem[]): boolean;
   getItems(inv: InventoryRef): InventoryStack[];
   clearInventory(inv: InventoryRef): void;
   registerStash(stash: StashDefinition): void;

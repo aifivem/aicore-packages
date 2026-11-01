@@ -48,6 +48,10 @@ export const characters = {
     limit?: number,
   ): Promise<MembersPage> =>
     ask((done) => core.GetJobMembers(job, done, after, limit)),
+  /** Whether anyone holds a job, loaded or not (one row is read). */
+  hasJobMember: async (job: string): Promise<boolean> =>
+    (await ask<MembersPage>((done) => core.GetJobMembers(job, done, undefined, 1)))
+      .members.length > 0,
   gangMembers: (
     gang: string,
     after?: number,
