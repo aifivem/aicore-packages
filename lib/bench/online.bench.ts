@@ -1,7 +1,8 @@
 // Online mirror and proximity at scale (`bun bench/online.bench.ts` in packages/lib): natives stubbed, N players spread
 // over the map (8 km square). ai-core's `GetPlayersInScope` export is stubbed with precomputed scope lists (players
 // within 424 m, what ai-core's scope handlers keep); like the real export it hands out a copy per call.
-// Times the mirror's start, one playersNear / nearestPlayerTo and one onDutyFor walk.
+// Times the mirror's start, one playersNear / nearestPlayerTo, one playersNearCoords (walks every loaded player) and one
+// onDutyFor walk.
 // Online counts stop at 10k: FiveM caps a server at 2048 players (OneSync), so 100k online cannot happen.
 // Last run: see the `aicore-fivem` skill's references/scale.md.
 const g = globalThis as Record<string, unknown>;
@@ -12,6 +13,7 @@ g.GetCurrentResourceName = () => "bench";
 g.on = (name: string, fn: (...args: unknown[]) => void) =>
   handlers.set(name, fn);
 g.GetPlayerPed = (source: string) => Number(source);
+g.GetPlayerRoutingBucket = (source: string) => Number(source) % 4;
 g.GetEntityCoords = (ped: number) => {
   const p = players[ped - 1];
   return p ? [p.x, p.y, 30] : [0, 0, 0];
@@ -82,7 +84,7 @@ for (const count of [2048, 10_000]) {
   handlers.clear();
   // Fresh module instances per size (the mirror starts once).
   const { online } = await import(`../src/server/online.ts?${count}`);
-  const { nearestPlayerTo, playersNear } = await import(
+  const { nearestPlayerTo, playersNear, playersNearCoords } = await import(
     `../src/server/proximity.ts?${count}`
   );
   const start = time(() => online.size);
@@ -93,6 +95,14 @@ for (const count of [2048, 10_000]) {
   const nearest = time(() => {
     for (let i = 1; i <= 1000; i++)
       if (nearestPlayerTo(i, 50, (o: number) => o % 2 === 0) !== null) found++;
+  });
+  const nearCoords = time(() => {
+    for (let i = 1; i <= 1000; i++)
+      found += playersNearCoords({ x: 0, y: 0, z: 30 }, 50).length;
+  });
+  const nearCoordsBucket = time(() => {
+    for (let i = 1; i <= 1000; i++)
+      found += playersNearCoords({ x: 0, y: 0, z: 30 }, 500, 1).length;
   });
   const duty = time(() => {
     for (let i = 0; i < 1000; i++)
@@ -116,7 +126,7 @@ for (const count of [2048, 10_000]) {
       jobsChanged(i, [{ job: jobs[(i + 1) % jobs.length], grade: 1 }]);
   });
   console.log(
-    `${count.toLocaleString("en")} online (~${avgScope.toFixed(0)} in scope): mirror start ${fmt(start)}, playersNear ${fmt(near / 1000)}, nearestPlayerTo ${fmt(nearest / 1000)}, onDutyFor("police") walk ${fmt(duty / 1000)} (${online.onDutyFor("police").size} on duty), jobMembers("police") + grades ${fmt(members / 1000)} vs walking everyone ${fmt(walkAll / 1000)} (${online.jobMembers("police").size} members), one jobsChanged ${fmt(change / 1000)}`,
+    `${count.toLocaleString("en")} online (~${avgScope.toFixed(0)} in scope): mirror start ${fmt(start)}, playersNear ${fmt(near / 1000)}, nearestPlayerTo ${fmt(nearest / 1000)}, playersNearCoords ${fmt(nearCoords / 1000)} (500 m in bucket 1 ${fmt(nearCoordsBucket / 1000)}), onDutyFor("police") walk ${fmt(duty / 1000)} (${online.onDutyFor("police").size} on duty), jobMembers("police") + grades ${fmt(members / 1000)} vs walking everyone ${fmt(walkAll / 1000)} (${online.jobMembers("police").size} members), one jobsChanged ${fmt(change / 1000)}`,
   );
 }
 export {};

@@ -3,11 +3,12 @@ import { resourceExport } from "../fivem/exports";
 
 const ui = resourceExport(LIB_UI.resource);
 
-/** Shows a notification card on this player's screen (ai-lib draws it); `text` is already translated. */
+/** Shows a notification card on this player's screen (ai-lib draws it, `title` above the text); texts are already translated. */
 export function notify(
   text: string,
   kind: NotificationKind = "info",
   duration?: number,
+  title?: string,
 ): void {
-  ui.Notify({ text, kind, duration });
+  ui.Notify({ text, kind, duration, title });
 }

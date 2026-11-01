@@ -1,6 +1,7 @@
 import { CORE } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 import type { Vec3 } from "../shared/vec";
+import { online } from "./online";
 import { coordsOf, entityCoords } from "./position";
 
 /**
@@ -30,6 +31,33 @@ export function playersNear(source: number, radius: number): number[] {
     source,
     ...core.GetPlayersInScope(source),
   ]);
+}
+
+/**
+ * Players with a loaded character whose ped is within `radius` of a point (in routing bucket `bucket` when given).
+ * Walks every loaded player (two natives each, the bucket read only for those in range): for actions and commands,
+ * not ticks; around a player or an entity use `playersNear` / `playersNearEntity` (scope candidates only).
+ */
+export function playersNearCoords(
+  coords: Vec3,
+  radius: number,
+  bucket?: number,
+): number[] {
+  const out: number[] = [];
+  const max = radius * radius;
+  for (const source of online.sources()) {
+    const id = String(source);
+    const ped = GetPlayerPed(id);
+    if (!ped) continue;
+    const [x = 0, y = 0, z = 0] = GetEntityCoords(ped);
+    const dx = x - coords.x;
+    const dy = y - coords.y;
+    const dz = z - coords.z;
+    if (dx * dx + dy * dy + dz * dz > max) continue;
+    if (bucket !== undefined && GetPlayerRoutingBucket(id) !== bucket) continue;
+    out.push(source);
+  }
+  return out;
 }
 
 /**

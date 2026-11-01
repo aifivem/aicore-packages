@@ -70,3 +70,22 @@ export async function requestWeaponAsset(
   await waitFor(() => HasWeaponAssetLoaded(hash) || undefined, timeoutMs);
   return hash;
 }
+
+/**
+ * Loads a scaleform movie and resolves its handle, or 0 when it does not load within `timeoutMs`.
+ * Call `SetScaleformMovieAsNoLongerNeeded(handle)` when done.
+ */
+export async function requestScaleformMovie(
+  name: string,
+  timeoutMs = 10_000,
+): Promise<number> {
+  const handle = RequestScaleformMovie(name);
+  if (!handle) return 0;
+  const loaded = await waitFor(
+    () => HasScaleformMovieLoaded(handle) || undefined,
+    timeoutMs,
+  ).catch(() => false);
+  if (loaded) return handle;
+  SetScaleformMovieAsNoLongerNeeded(handle);
+  return 0;
+}

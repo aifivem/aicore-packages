@@ -78,7 +78,12 @@ export {
   vehicleType,
   type SpawnVehicleOptions,
 } from "./vehicle";
-export { nearestPlayerTo, playersNear, playersNearEntity } from "./proximity";
+export {
+  nearestPlayerTo,
+  playersNear,
+  playersNearCoords,
+  playersNearEntity,
+} from "./proximity";
 export { coordsOf, entityCoords, isNear, vehicleOf } from "./position";
 export {
   AreaStream,
@@ -160,4 +165,5 @@ export { fuel } from "./fuel";
 export { doors } from "./doors";
 export { garages } from "./garages";
 export { characters } from "./characters";
+export { bans } from "./bans";
 export { isPrimeTime } from "./primeTime";

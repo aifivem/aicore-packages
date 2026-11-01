@@ -56,6 +56,7 @@ export {
   type MenuListeners,
 } from "./menu";
 export { inventory } from "./inventory";
+export { vehicleKeys } from "./vehicleKeys";
 export {
   getVehicleProps,
   setVehicleProps,
@@ -75,6 +76,7 @@ export {
   requestAnimSet,
   requestModel,
   requestPtfxAsset,
+  requestScaleformMovie,
   requestTextureDict,
   requestWeaponAsset,
 } from "./streaming";
@@ -109,6 +111,13 @@ export {
 } from "../fivem/state";
 export { controls } from "./controls";
 export { drivenVehicle, nearestVehicle } from "./vehicles";
+export {
+  entitiesInArea,
+  isSpawnClear,
+  nearestEntity,
+  type EntityKind,
+  type NearestEntity,
+} from "./entities";
 export { entityFromNetId, waitForEntity } from "./entity";
 export { raycast, type RaycastOptions, type RayHit } from "./raycast";
 export { nearestPlayer, playerPed } from "./players";
