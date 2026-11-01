@@ -108,6 +108,10 @@ export interface InventoryAdapter {
   getItemDefinitions(): Record<string, ItemDefinition>;
   /** A player's carried weight and limit, when the inventory tells them. */
   getWeight?(source: number): { weight: number; maxWeight: number } | null;
+  /** Replaces the metadata of the stack at `slot`; false when the slot is empty or the inventory has no way. */
+  setMetadata(inv: InventoryRef, slot: number, metadata: ItemMetadata): boolean;
+  /** Sets a player's weight limit (grams) until the inventory reloads it; false when the inventory has no way. */
+  setMaxWeight(source: number, grams: number): boolean;
   /**
    * Inventories with their own usable item list get every handler here. The others call the framework's use
    * functions (`ESX.UseItem`, QB `CanUseItem`), which ai-core's bridge answers from the layer.
@@ -137,6 +141,8 @@ export interface InventoryClientAdapter {
   /** Opens the player's own inventory screen. */
   openInventory(): void;
   hasItem(item: string, count: number): boolean;
+  /** How many of an item the player holds, from the inventory's own client state; null when it has no such export. */
+  itemCount(item: string): number | null;
   /** The held weapon item, or null (unarmed, or the inventory has no such export). */
   currentWeapon(): HeldWeapon | null;
 }
@@ -195,6 +201,12 @@ export type InventoryServerExports = {
   /** Runs the handler registered for an item (ai-core's bridge calls it from `ESX.UseItem` / QB `CanUseItem`). */
   UseItem(source: number, name: string, item?: unknown): unknown;
   IsUsableItem(name: string): boolean;
+  /** Names of every item a handler is registered for (`RegisterUsableItem`). */
+  GetUsableItems(): string[];
+  /** Replaces the metadata of the stack at `slot` (weapon ammo, components, tint...); false when it could not. */
+  SetItemMetadata(inv: InventoryRef, slot: number, metadata: ItemMetadata): boolean;
+  /** Sets a player's weight limit in grams until the inventory reloads it; false when the inventory has no way. */
+  SetMaxWeight(source: number, grams: number): boolean;
 };
 
 /** ai-core's client inventory exports. */
@@ -204,4 +216,18 @@ export type InventoryClientExports = {
   HasItem(item: string, count?: number): boolean;
   /** The held weapon item through the active inventory, or null. */
   GetCurrentWeapon(): HeldWeapon | null;
+  /** How many of an item the local player holds; null when the active inventory has no client count. */
+  GetItemCount(item: string): number | null;
+  /** Every item definition of the active inventory (a copy of ai-core's client mirror). */
+  GetItemDefinitions(): Record<string, ItemDefinition>;
+  GetItemDefinition(name: string): ItemDefinition | null;
 };
+
+/** Client -> server callback: every item definition of the active inventory (the client's snapshot). */
+export const ITEM_DEFINITIONS_CALLBACK = "ai-core:itemDefinitions";
+/** Server -> clients: `(changes: Record<name, ItemDefinition | null>)`, null = the item is gone. */
+export const ITEM_DEFINITIONS_EVENT = "ai-core:client:itemDefinitions";
+/** Client local: `(changes: Record<name, ItemDefinition | null>)` after the snapshot (every item) and each change. */
+export const CLIENT_ITEM_DEFINITIONS_EVENT = "ai-core:client:itemDefinitionsChanged";
+/** Server local, emitted by an inventory adapter: the active inventory's definitions changed (no arguments). */
+export const ITEM_DEFINITIONS_CHANGED_EVENT = "ai-core:itemDefinitionsChanged";

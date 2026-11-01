@@ -62,3 +62,17 @@ export type VehicleKeysServerExports = {
   RemoveVehicleKeys(source: number, vehicle: number | string): void;
   HasVehicleKeys(source: number, vehicle: number | string): boolean;
 };
+
+/** Client -> server callback `(netId | plate)`: whether the local player holds that vehicle's keys (the server layer's answer). */
+export const VEHICLE_KEYS_HAS_CALLBACK = "ai-core:vehicleKeys:has";
+/** Server -> one client: `(plate, held)` after ai-core's layer gave or took that player's key. */
+export const VEHICLE_KEY_HELD_EVENT = "ai-core:client:vehicleKeyHeld";
+
+/** ai-core's client vehicle key export. */
+export type VehicleKeysClientExports = {
+  /**
+   * Whether the local player holds the keys of a vehicle (entity handle or plate), from a short-lived mirror of the
+   * server's answers: the first call for a vehicle the player has not entered answers false and asks the server.
+   */
+  HasVehicleKeys(vehicle: number | string): boolean;
+};

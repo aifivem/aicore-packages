@@ -18,7 +18,10 @@ import type {
   InventoryServerExports,
   ShopProduct,
 } from "./inventory";
-import type { VehicleKeysServerExports } from "./vehicleKeys";
+import type {
+  VehicleKeysClientExports,
+  VehicleKeysServerExports,
+} from "./vehicleKeys";
 import type { PhoneServerExports } from "./phone";
 import type { DispatchAlert, DispatchServerExports } from "./dispatch";
 import type { BillingServerExports } from "./billing";
@@ -28,6 +31,8 @@ import type { EmsServerExports } from "./ems";
 import type { FuelServerExports } from "./fuel";
 import type { DoorlockServerExports } from "./doorlock";
 import type { AiGaragesServerExports, GaragesServerExports } from "./garages";
+import type { CharacterServerExports } from "./characters";
+import type { MulticharServerExports } from "./multichar";
 import type { RadialClientExports, RadialItem } from "./radial";
 import type {
   CharacterAppearance,
@@ -313,7 +318,9 @@ export type AiCoreServerExports = {
   EmsServerExports &
   FuelServerExports &
   DoorlockServerExports &
-  GaragesServerExports;
+  GaragesServerExports &
+  CharacterServerExports &
+  MulticharServerExports;
 
 /** ai-core's client exports. */
 export type AiCoreClientExports = {
@@ -380,6 +387,7 @@ export type AiCoreClientExports = {
   /** Opens the active MDT for the local player (the MDT checks the job itself); false when none runs or it cannot be opened from outside. */
   OpenMdt(): boolean;
 } & InventoryClientExports &
+  VehicleKeysClientExports &
   RadialClientExports;
 
 /** ai-target's client exports that ai-core uses. */
@@ -466,6 +474,14 @@ export type AiInventoryServerExports = {
   Items(name?: string): unknown;
   /** An inventory's carried weight and limit (grams), null when it is not loaded. */
   GetWeight(inv: number | string): { weight: number; maxWeight: number } | null;
+  /** Replaces the metadata of the stack at `slot`; false when the inventory is not loaded or the slot is empty. */
+  SetMetadata(
+    inv: number | string,
+    slot: number,
+    metadata: Record<string, unknown>,
+  ): boolean;
+  /** Sets a loaded inventory's weight limit (grams) until it loads again or the panel changes the limit. */
+  SetMaxWeight(inv: number | string, grams: number): boolean;
 };
 
 /** ai-inventory's own client exports (ai-core's inventory adapter uses them). */
@@ -476,6 +492,8 @@ export type AiInventoryClientExports = {
     items: string | string[] | Record<string, number>,
     amount?: number,
   ): boolean;
+  /** How many of an item the player holds. */
+  GetItemCount(item: string): number;
 };
 
 /** ai-appearance's client exports (ai-core's appearance adapter uses them; scripts use lib `appearance`). */

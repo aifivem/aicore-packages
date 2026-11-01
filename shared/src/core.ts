@@ -23,8 +23,13 @@ export const CORE = {
   activeGangChangedEvent: "ai-core:activeGangChanged",
   /** Server local: (src, key, value | null) a character metadata value changed. */
   metaChangedEvent: "ai-core:metaChanged",
-  /** Server local: (file: "jobs" | "gangs", name) a job or gang definition changed in the panel. */
+  /** Server local: (file: "jobs" | "gangs", name) a job or gang definition changed (panel edit, or a script registered / removed one). */
   definitionsChangedEvent: "ai-core:definitionsChanged",
+  /** Server local: (charId, userId) a character was deleted (soft delete: character screen, admin panel, `DeleteCharacter`). */
+  characterDeletedEvent: "ai-core:characterDeleted",
+  /** GlobalState prefixes: `<prefix><name>` = a job / gang definition a script registered (`RegisterJobDefinition`); panel ones are not here. */
+  runtimeJobPrefix: "ai:jobdef:",
+  runtimeGangPrefix: "ai:gangdef:",
   /** (src, charIds: number[]) each time a player's character screen loads; ai-core sends the looks, a clothing script may answer with portraits. */
   characterScreenEvent: "ai-core:characterScreen",
   /** (resource: string | null) the inventory behind ai-core's inventory layer changed (the bridge drops its item cache). */
@@ -86,6 +91,14 @@ export const CORE = {
   spawnChoiceCallback: "ai-core:spawnChoice",
   /** Server -> client: () the character was let go (switch); show the character screen again. */
   openCharactersEvent: "ai-core:client:openCharacters",
+  /** GlobalState: the resource name of the external character screen (a multichar) while one runs; unset = ai-core's own screen. */
+  characterScreenKey: "ai:characterScreen",
+  /** Server -> client: (armour, health) the character loaded under an external character screen, which spawns the ped itself. */
+  externalLoadedEvent: "ai-core:client:externalLoaded",
+  /** Client -> server: () the character loaded under an external screen stands in the world (`playerSpawned` follows). */
+  externalSpawnedEvent: "ai-core:externalSpawned",
+  /** Server -> client: () the character was let go under an external character screen (that screen shows itself again). */
+  externalLogoutEvent: "ai-core:client:externalLogout",
 } as const;
 
 /** GlobalState key holding how many players are on duty in a job (counts only, never member lists). */
