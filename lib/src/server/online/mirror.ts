@@ -44,6 +44,8 @@ export class OnlineMirror {
   protected readonly onDuty = new Map<string, Set<number>>();
   protected readonly jobIndex = new Map<string, Set<number>>();
   protected readonly gangIndex = new Map<string, Set<number>>();
+  /** citizenid -> server id of each loaded character. */
+  protected readonly byCitizenid = new Map<string, number>();
   private started = false;
 
   protected start(): void {
@@ -60,6 +62,7 @@ export class OnlineMirror {
         gangNames: [],
         duty: null,
       });
+      this.byCitizenid.set(character.citizenid, source);
       this.setJobs(source, core.GetJobs(source) ?? []);
       this.setGangs(source, core.GetGangs(source) ?? []);
       this.setDuty(source, core.GetDutyJob(source));
@@ -87,6 +90,7 @@ export class OnlineMirror {
     this.setDuty(source, null);
     reindex(this.jobIndex, source, player.jobNames, []);
     reindex(this.gangIndex, source, player.gangNames, []);
+    this.byCitizenid.delete(player.character.citizenid);
     this.players.delete(source);
   }
 

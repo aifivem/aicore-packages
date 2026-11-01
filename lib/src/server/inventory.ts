@@ -76,6 +76,15 @@ export const inventory = {
   /** An item's label, weight and flags; null when the inventory does not know it. */
   getItemDefinition: (name: string): ItemDefinition | null =>
     core.GetItemDefinition(name),
+  /** An inventory's stacks by slot. */
+  itemsBySlot: (inv: InventoryRef): Record<number, InventoryStack> => {
+    const out: Record<number, InventoryStack> = {};
+    for (const stack of core.GetItems(inv) ?? []) out[stack.slot] = stack;
+    return out;
+  },
+  /** The first stack of an item in an inventory, or null. */
+  firstStack: (inv: InventoryRef, item: string): InventoryStack | null =>
+    (core.GetItems(inv) ?? []).find((stack) => stack.name === item) ?? null,
   /** Every item definition of the active inventory, by name. */
   getItemDefinitions: (): Record<string, ItemDefinition> =>
     core.GetItemDefinitions() ?? {},

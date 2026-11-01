@@ -27,6 +27,20 @@ class OnlinePlayers extends OnlineMirror {
     return this.players.get(source)?.character ?? null;
   }
 
+  /** The server id of a loaded character by its citizenid, or null. */
+  sourceOf(citizenid: string): number | null {
+    this.start();
+    return this.byCitizenid.get(citizenid) ?? null;
+  }
+
+  /** Every loaded character by server id (a copy). */
+  characters(): Map<number, CharacterInfo> {
+    this.start();
+    const out = new Map<number, CharacterInfo>();
+    for (const [source, player] of this.players) out.set(source, player.character);
+    return out;
+  }
+
   /** The id of the player's loaded character, undefined when none. */
   charId(source: number): number | undefined {
     this.start();

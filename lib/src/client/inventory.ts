@@ -52,6 +52,17 @@ export const inventory = {
     const list: unknown = core.GetItems();
     return Array.isArray(list) ? list.flatMap(toStack) : null;
   },
+  /** The player's stacks by slot; null when the active inventory has no client list. */
+  itemsBySlot: (): Record<number, InventoryStack> | null => {
+    const list = inventory.items();
+    if (!list) return null;
+    const out: Record<number, InventoryStack> = {};
+    for (const stack of list) out[stack.slot] = stack;
+    return out;
+  },
+  /** The first stack of an item the player holds; null when none (or no client list). */
+  firstStack: (item: string): InventoryStack | null =>
+    inventory.items()?.find((stack) => stack.name === item) ?? null,
   /** Runs `handler(item, count, previous)` each time the player's total of an item changes in the active inventory. */
   onCount: (
     handler: (item: string, count: number, previous: number) => void,
