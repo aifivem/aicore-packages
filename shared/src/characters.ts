@@ -42,6 +42,22 @@ export interface MembersPage {
   next: number | null;
 }
 
+/** A character a search found, loaded or not. */
+export interface CharacterMatch {
+  charId: number;
+  citizenid: string;
+  firstname: string;
+  lastname: string;
+  /** The player's server id while the character is loaded, else null. */
+  source: number | null;
+}
+
+/** A page of a character search, newest characters first; `next` is the `cursor` of the next page, null on the last. */
+export interface CharacterSearchPage {
+  characters: CharacterMatch[];
+  next: number | null;
+}
+
 /** What a character write answers: ok, or a lang key of ai-core (`locales/en.json`). */
 export type CharacterResult = ActionResult;
 

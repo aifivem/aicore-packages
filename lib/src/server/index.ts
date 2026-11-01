@@ -148,6 +148,7 @@ export { prison } from "./prison";
 export { phone } from "./phone";
 export { dispatch } from "./dispatch";
 export { money } from "./money";
+export { jobs } from "./jobs";
 export { buckets } from "./buckets";
 export { medical } from "./medical";
 export { billing } from "./billing";

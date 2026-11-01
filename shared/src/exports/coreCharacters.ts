@@ -10,6 +10,7 @@ import type {
 import type {
   CharacterInfoPatch,
   CharacterResult,
+  CharacterSearchPage,
   MembersPage,
   OfflineCharacter,
   StoredCharacter,
@@ -22,6 +23,15 @@ export type CharacterServerExports = {
   GetOfflineCharacter(
     charId: number,
     done: (character: OfflineCharacter | null) => void,
+  ): void;
+  /**
+   * Characters by a typed text, loaded or not (the admin panel's rules: first / last name prefixes, "first last",
+   * citizenid, fivem / license / discord id), 25 a page newest first (`cursor` = the last page's `next`).
+   */
+  SearchCharacters(
+    text: string,
+    done: (page: CharacterSearchPage) => void,
+    cursor?: number,
   ): void;
   /** The characters of an account by its id or a license (`license:abc` or `abc`), by slot. */
   GetCharactersOfUser(

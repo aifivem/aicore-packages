@@ -2,6 +2,7 @@ import {
   CORE,
   type CharacterInfoPatch,
   type CharacterResult,
+  type CharacterSearchPage,
   type MembersPage,
   type OfflineCharacter,
   type StoredCharacter,
@@ -31,6 +32,12 @@ export const characters = {
   /** Info, money, jobs, gangs, metadata and position of a character; null when unknown or deleted. */
   get: (charId: number): Promise<OfflineCharacter | null> =>
     ask((done) => core.GetOfflineCharacter(charId, done)),
+  /**
+   * Characters by a typed text, loaded or not: first / last name prefixes ("first last" too), citizenid, fivem /
+   * license / discord id; 25 a page, newest first (`cursor` = the last page's `next`).
+   */
+  search: (text: string, cursor?: number): Promise<CharacterSearchPage> =>
+    ask((done) => core.SearchCharacters(text, done, cursor)),
   /** The characters of an account id or of every account with a license (`license:abc` or `abc`). */
   ofUser: (user: number | string): Promise<StoredCharacter[]> =>
     ask((done) => core.GetCharactersOfUser(user, done)),
