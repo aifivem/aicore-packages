@@ -1,8 +1,8 @@
 // Online mirror and proximity at scale (`bun bench/online.bench.ts` in packages/lib): natives stubbed, N players spread
 // over the map (8 km square). ai-core's `GetPlayersInScope` export is stubbed with precomputed scope lists (players
 // within 424 m, what ai-core's scope handlers keep); like the real export it hands out a copy per call.
-// Times the mirror's start, one playersNear / nearestPlayerTo, one playersNearCoords (walks every loaded player) and one
-// onDutyFor walk.
+// Times the mirror's start, one playersNear / nearestPlayerTo, one playersNearCoords (walks every loaded player), one
+// onDutyFor walk, countMembers / membersOf over two jobs and a job change with an onJobState listener.
 // Online counts stop at 10k: FiveM caps a server at 2048 players (OneSync), so 100k online cannot happen.
 // Last run: see the `aicore-fivem` skill's references/scale.md.
 const g = globalThis as Record<string, unknown>;
@@ -125,6 +125,27 @@ for (const count of [2048, 10_000]) {
     for (let i = 1; i <= 1000; i++)
       jobsChanged(i, [{ job: jobs[(i + 1) % jobs.length], grade: 1 }]);
   });
+  // tgiann-core's job counts: members over several jobs (each player once), the same on duty, and the list
+  const policeJobs = ["police", "ambulance"];
+  const countMembers = time(() => {
+    for (let i = 0; i < 1000; i++) found += online.countMembers(policeJobs);
+  });
+  const countDuty = time(() => {
+    for (let i = 0; i < 1000; i++)
+      found += online.countMembers(policeJobs, true);
+  });
+  const membersOf = time(() => {
+    for (let i = 0; i < 1000; i++) found += online.membersOf(policeJobs).length;
+  });
+  // A job change with one onJobState listener (tgiann-core's jobStateChanged) attached
+  online.onJobState(() => found++);
+  const changeListened = time(() => {
+    for (let i = 1; i <= 1000; i++)
+      jobsChanged(i, [{ job: jobs[i % jobs.length], grade: 2 }]);
+  });
+  console.log(
+    `${count.toLocaleString("en")} online: countMembers(2 jobs) ${fmt(countMembers / 1000)}, on duty ${fmt(countDuty / 1000)}, membersOf(2 jobs) ${fmt(membersOf / 1000)}, one jobsChanged with an onJobState listener ${fmt(changeListened / 1000)}`,
+  );
   console.log(
     `${count.toLocaleString("en")} online (~${avgScope.toFixed(0)} in scope): mirror start ${fmt(start)}, playersNear ${fmt(near / 1000)}, nearestPlayerTo ${fmt(nearest / 1000)}, playersNearCoords ${fmt(nearCoords / 1000)} (500 m in bucket 1 ${fmt(nearCoordsBucket / 1000)}), onDutyFor("police") walk ${fmt(duty / 1000)} (${online.onDutyFor("police").size} on duty), jobMembers("police") + grades ${fmt(members / 1000)} vs walking everyone ${fmt(walkAll / 1000)} (${online.jobMembers("police").size} members), one jobsChanged ${fmt(change / 1000)}`,
   );

@@ -64,7 +64,7 @@ export { AdminPanel } from "./admin/panel";
 export { aiLog, aiLogChannels } from "./log";
 export { notify } from "./notify";
 export { inventory } from "./inventory";
-export { online } from "./online/online";
+export { online, type JobStateChange } from "./online/online";
 export { vehicleKeys } from "./vehicleKeys";
 export { vehicleType } from "./vehicle/vehicleType";
 export { spawnVehicle, type SpawnVehicleOptions } from "./vehicle/spawn";

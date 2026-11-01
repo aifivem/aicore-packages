@@ -1,6 +1,8 @@
 import type { CharacterInfo } from "@aicore-fivem/shared";
 import { isPublic, type AccessRule } from "../../shared/access";
-import { OnlineMirror } from "./mirror";
+import { OnlineMirror, type JobStateChange } from "./mirror";
+
+export type { JobStateChange } from "./mirror";
 
 /**
  * This resource's mirror of ai-core's loaded players: characters, job and gang memberships (with grades), member sets
@@ -37,7 +39,8 @@ class OnlinePlayers extends OnlineMirror {
   characters(): Map<number, CharacterInfo> {
     this.start();
     const out = new Map<number, CharacterInfo>();
-    for (const [source, player] of this.players) out.set(source, player.character);
+    for (const [source, player] of this.players)
+      out.set(source, player.character);
     return out;
   }
 
@@ -130,6 +133,49 @@ class OnlinePlayers extends OnlineMirror {
     let count = 0;
     for (const job of jobs) count += this.onDuty.get(job)?.size ?? 0;
     return count;
+  }
+
+  /** How many players hold one of the jobs (a player in two of them counts once), or with `onlyOnDuty` are on duty in one. */
+  countMembers(jobs: readonly string[], onlyOnDuty = false): number {
+    if (onlyOnDuty) return this.countOnDuty(jobs);
+    this.start();
+    // a player in several of the jobs is counted at the first one (no set allocated)
+    let count = 0;
+    for (let i = 0; i < jobs.length; i++) {
+      const set = this.jobIndex.get(jobs[i]!);
+      if (!set) continue;
+      count += set.size;
+      if (i === 0) continue;
+      for (const source of set)
+        for (let k = 0; k < i; k++)
+          if (this.jobIndex.get(jobs[k]!)?.has(source)) {
+            count--;
+            break;
+          }
+    }
+    return count;
+  }
+
+  /** Server ids of the players holding one of the jobs (or with `onlyOnDuty` on duty in one), each once. */
+  membersOf(jobs: readonly string[], onlyOnDuty = false): number[] {
+    this.start();
+    const index = onlyOnDuty ? this.onDuty : this.jobIndex;
+    if (jobs.length === 1) return [...(index.get(jobs[0]!) ?? EMPTY)];
+    const seen = new Set<number>();
+    for (const job of jobs)
+      for (const source of index.get(job) ?? EMPTY) seen.add(source);
+    return [...seen];
+  }
+
+  /**
+   * Calls `listener` when a loaded player's jobs or duty change, once at each load (`previous` empty) and at each
+   * unload (`online` false); the players already loaded when it subscribes are not replayed (read `sources()`).
+   * Returns the unsubscribe.
+   */
+  onJobState(listener: (change: JobStateChange) => void): () => void {
+    this.start();
+    this.jobListeners.add(listener);
+    return () => this.jobListeners.delete(listener);
   }
 
   /** Players on duty for a job (a live set: copy before awaiting). */
