@@ -1,4 +1,4 @@
-import { every, type Job } from "../fivem/scheduler";
+import { every, type Job } from "../fivem/scheduler/every";
 
 /** A per-frame job (`every(0, fn)` on the resource's scheduler) switched on only while needed. */
 export class TickLoop {

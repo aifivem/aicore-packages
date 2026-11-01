@@ -1,4 +1,4 @@
-import { every, type Job } from "../fivem/scheduler";
+import { every, type Job } from "../fivem/scheduler/every";
 import { createLogger } from "../shared";
 import { zoneBounds, zoneContains, type ZoneShape } from "../shared/zone";
 import { cache } from "./cache";

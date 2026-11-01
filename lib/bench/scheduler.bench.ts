@@ -17,7 +17,7 @@ g.clearTick = () => {
   timer.tick = null;
 };
 
-const { every } = await import("../src/fivem/scheduler");
+const { every } = await import("../src/fivem/scheduler/every");
 
 const FRAME = 1000 / 60;
 const FRAMES = 60 * 60;

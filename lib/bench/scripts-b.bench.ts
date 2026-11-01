@@ -13,7 +13,7 @@ let natives = 0;
 // Every PascalCase call in the lib's client code gets a counting stub that returns 0.
 for (const dir of ["../src/client", "../src/fivem", "../src/shared"]) {
   const path = join(import.meta.dirname, dir);
-  for (const file of readdirSync(path)) {
+  for (const file of readdirSync(path, { recursive: true }) as string[]) {
     if (!file.endsWith(".ts")) continue;
     const text = readFileSync(join(path, file), "utf8");
     for (const [, name] of text.matchAll(/\b([A-Z][A-Za-z0-9]+)\(/g))
@@ -59,7 +59,7 @@ const time = (fn: () => void): number => {
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
 // --- ai-properties client: a `prop:<id>` change re-adds only that property's door point (label function, blip).
-const { Points } = await import("../src/client/point");
+const { Points } = await import("../src/client/points/points");
 for (const count of [1_000, 10_000, 100_000]) {
   const points = new Points();
   const doors = Array.from({ length: count }, (_, i) => ({

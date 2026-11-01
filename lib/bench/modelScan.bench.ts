@@ -56,7 +56,7 @@ g.GetClosestObjectOfType = () => {
   return 0;
 };
 
-const { ModelScanner } = await import("../src/client/modelScan");
+const { ModelScanner } = await import("../src/client/modelScan/scanner");
 
 for (const count of [100_000, 1_000_000]) {
   models = new Int32Array(count + 2);

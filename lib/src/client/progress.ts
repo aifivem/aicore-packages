@@ -1,7 +1,7 @@
 import { medical } from "./medical";
 import { LIB_UI } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
-import { every } from "../fivem/scheduler";
+import { every } from "../fivem/scheduler/every";
 import { cache } from "./cache";
 import { controls } from "./controls";
 import { sleep } from "../shared/wait";

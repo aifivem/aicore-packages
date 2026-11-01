@@ -1,11 +1,7 @@
-import type {
-  DataSpec,
-  FileSpec,
-  PanelSchema,
-  WidgetSpec,
-} from "@aicore-fivem/shared";
+import type { DataSpec, FileSpec, PanelSchema } from "@aicore-fivem/shared";
 import { mkdir, writeFile } from "node:fs/promises";
-import { isRecord, type Logger } from "../../shared";
+import type { Logger } from "../../shared";
+import { describe, texts, type Descriptions } from "./descriptions";
 
 /**
  * JSON Schemas of a script's panel files (draft-07), so an editor validates and explains `data/*.json` while someone
@@ -14,64 +10,11 @@ import { isRecord, type Logger } from "../../shared";
  */
 
 type Json = Record<string, unknown>;
-/** Path inside a file (`branding.name`, list items as `rows[].x`) -> "Label: hint". */
-type Descriptions = Map<string, string>;
 
 const SCHEMA_KEY = {
   type: "string",
   description: "This file's JSON Schema (for editors).",
 };
-
-function langFile(resource: string): Record<string, string> {
-  try {
-    const raw: unknown = JSON.parse(
-      LoadResourceFile(resource, "locales/en.json") ?? "{}",
-    );
-    return isRecord(raw)
-      ? Object.fromEntries(
-          Object.entries(raw).filter(
-            (e): e is [string, string] => typeof e[1] === "string",
-          ),
-        )
-      : {};
-  } catch {
-    return {};
-  }
-}
-
-/** The script's texts over ai-core's generic panel texts (shared fields such as a place's NPC use those). */
-function texts(resource: string): Record<string, string> {
-  return { ...langFile("ai-core"), ...langFile(resource) };
-}
-
-function collect(
-  fields: WidgetSpec[],
-  prefix: string,
-  lang: Record<string, string>,
-  out: Descriptions,
-): void {
-  for (const field of fields) {
-    // An action button names a handler, not a stored value.
-    if (field.widget === "action") continue;
-    const path = prefix + field.path;
-    const label = lang[field.label] ?? field.label;
-    const hint = field.hint ? (lang[field.hint] ?? field.hint) : "";
-    if (!out.has(path)) out.set(path, hint ? `${label}: ${hint}` : label);
-    if (field.widget === "list") collect(field.rows, `${path}[].`, lang, out);
-  }
-}
-
-function describe(
-  schema: PanelSchema,
-  file: string,
-  lang: Record<string, string>,
-): Descriptions {
-  const out: Descriptions = new Map();
-  for (const tab of schema.tabs)
-    if (tab.file === file)
-      for (const card of tab.cards) collect(card.fields, "", lang, out);
-  return out;
-}
 
 function toJson(spec: DataSpec, path: string, desc: Descriptions): Json {
   const description = desc.get(path);

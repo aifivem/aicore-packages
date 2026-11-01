@@ -11,7 +11,7 @@ export {
   type NuiPageMessage,
   type NuiScreenOptions,
 } from "./nuiScreen";
-export { every, type EveryOptions, type Job } from "../fivem/scheduler";
+export { every, type EveryOptions, type Job } from "../fivem/scheduler/every";
 export {
   ByResource,
   caller,
@@ -24,21 +24,22 @@ export { fromServer, onServerEvent } from "./netEvent";
 export { AdminWorld } from "./adminWorld";
 export { Zones, type ZoneOptions, type ZoneShape } from "./zones";
 export { ZoneEngine } from "./zoneEngine";
-export { ModelScanner, readModelScanDef, type ModelScanDef } from "./modelScan";
+export { ModelScanner } from "./modelScan/scanner";
+export { readModelScanDef, type ModelScanDef } from "./modelScan/def";
 export { cache, onCache, readPlayerState, readWeapon } from "./cache";
 export { hidePrompt, onPromptPressed, showPrompt } from "./prompt";
-export { Points, type PointOptions } from "./point";
-export type { ModelPointOptions, VehiclePointOptions } from "./modelPoint";
+export { Points } from "./points/points";
+export type { PointOptions } from "./points/point";
+export type {
+  ModelPointOptions,
+  VehiclePointOptions,
+} from "./points/modelPoint";
 export { LocalPed, type LocalPedOptions } from "./localPed";
 export { Blips, createBlip, type BlipOptions, type BlipStyle } from "./blip";
-export {
-  fadeIn,
-  fadeOut,
-  player,
-  type AnimOptions,
-  type HoldAnimOptions,
-  type TeleportOptions,
-} from "./player";
+export { fadeIn, fadeOut } from "./player/fade";
+export { player } from "./player/player";
+export type { AnimOptions, HoldAnimOptions } from "./player/anim";
+export type { TeleportOptions } from "./player/teleport";
 export { notify } from "./notify";
 export {
   cancelProgress,
@@ -46,15 +47,13 @@ export {
   progress,
   type ProgressOptions,
 } from "./progress";
+export { input, itemPicker, menu } from "./menu/dialogs";
 export {
-  input,
-  itemPicker,
   lockpick,
-  menu,
   skillCheck,
   type LockpickOptions,
-  type MenuListeners,
-} from "./menu";
+} from "./menu/minigames";
+export type { MenuListeners } from "./menu/requests";
 export { inventory } from "./inventory";
 export { vehicleKeys } from "./vehicleKeys";
 export {
@@ -99,16 +98,15 @@ export {
   resourceExport,
 } from "../fivem/exports";
 export { createLocale, loadLocaleTexts, LOCALE_CONVAR } from "../fivem/locale";
+export { EntityState } from "../fivem/state/entityState";
+export { GlobalGroup, GlobalKey } from "../fivem/state/globalState";
+export { PlayerState } from "../fivem/state/playerState";
 export {
-  EntityState,
-  GlobalGroup,
-  GlobalKey,
-  PlayerState,
   stateBoolean,
   stateNumber,
   stateString,
   type StateParse,
-} from "../fivem/state";
+} from "../fivem/state/mirror";
 export { controls } from "./controls";
 export { drivenVehicle, nearestVehicle } from "./vehicles";
 export {

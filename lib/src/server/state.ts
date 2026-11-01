@@ -1,9 +1,9 @@
+import { EntityState as EntityMirror } from "../fivem/state/entityState";
 import {
-  EntityState as EntityMirror,
   GlobalGroup as GlobalGroupMirror,
   GlobalKey as GlobalKeyMirror,
-  PlayerState as PlayerMirror,
-} from "../fivem/state";
+} from "../fivem/state/globalState";
+import { PlayerState as PlayerMirror } from "../fivem/state/playerState";
 
 /**
  * The server side of the state classes: the same memory reads plus `set`, the only way state bags are written

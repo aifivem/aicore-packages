@@ -1,7 +1,7 @@
 import { CORE } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
 import type { Vec3 } from "../shared/vec";
-import { online } from "./online";
+import { online } from "./online/online";
 import { coordsOf, entityCoords } from "./position";
 
 /**

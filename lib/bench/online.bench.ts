@@ -83,7 +83,7 @@ for (const count of [2048, 10_000]) {
   const avgScope = scopes.reduce((n, s) => n + s.length, 0) / count;
   handlers.clear();
   // Fresh module instances per size (the mirror starts once).
-  const { online } = await import(`../src/server/online.ts?${count}`);
+  const { online } = await import(`../src/server/online/online.ts?${count}`);
   const { nearestPlayerTo, playersNear, playersNearCoords } = await import(
     `../src/server/proximity.ts?${count}`
   );

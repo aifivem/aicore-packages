@@ -1,5 +1,6 @@
 import { VEHICLE_BAGS } from "@aicore-fivem/shared";
-import { EntityState, stateNumber } from "../fivem/state";
+import { EntityState } from "../fivem/state/entityState";
+import { stateNumber } from "../fivem/state/mirror";
 
 /** The `fuel` bag mirror, made on first use: a resource that never reads fuel adds no state bag handler. */
 let bag: EntityState<number> | null = null;

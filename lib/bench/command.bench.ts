@@ -32,7 +32,7 @@ g.setImmediate = (fn: () => void) => {
   tick.flush = fn;
 };
 
-const { addCommand } = await import("../src/server/command");
+const { addCommand } = await import("../src/server/command/addCommand");
 const refresh = (source: number) => {
   for (const fn of listeners.get("ai-core:playerLoaded") ?? []) fn(source);
 };

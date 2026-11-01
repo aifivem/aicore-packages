@@ -1,4 +1,4 @@
-import { every } from "../fivem/scheduler";
+import { every } from "../fivem/scheduler/every";
 import { gridCell } from "../shared/grid";
 import { cache } from "./cache";
 

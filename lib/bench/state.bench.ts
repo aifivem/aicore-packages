@@ -27,7 +27,8 @@ g.Entity = (entity: number) => ({
   ),
 });
 
-const { EntityState, stateNumber } = await import("../src/fivem/state");
+const { EntityState } = await import("../src/fivem/state/entityState");
+const { stateNumber } = await import("../src/fivem/state/mirror");
 
 const time = (fn: () => unknown): number => {
   const start = performance.now();

@@ -64,20 +64,17 @@ export { AdminPanel } from "./admin/panel";
 export { aiLog, aiLogChannels } from "./log";
 export { notify } from "./notify";
 export { inventory } from "./inventory";
-export { online } from "./online";
+export { online } from "./online/online";
 export { vehicleKeys } from "./vehicleKeys";
+export { vehicleType } from "./vehicle/vehicleType";
+export { spawnVehicle, type SpawnVehicleOptions } from "./vehicle/spawn";
+export { randomPlate } from "./vehicle/plate";
 export {
   nearestVehicleAt,
   nearestVehicleTo,
-  randomPlate,
-  spawnVehicle,
-  entityFromNet,
-  pedFromNet,
-  vehicleFromNet,
   vehicleNearPlayer,
-  vehicleType,
-  type SpawnVehicleOptions,
-} from "./vehicle";
+} from "./vehicle/nearby";
+export { entityFromNet, pedFromNet, vehicleFromNet } from "./netEntity";
 export {
   nearestPlayerTo,
   playersNear,
@@ -85,11 +82,9 @@ export {
   playersNearEntity,
 } from "./proximity";
 export { coordsOf, entityCoords, isNear, vehicleOf } from "./position";
-export {
-  AreaStream,
-  type AreaItem,
-  type AreaStreamOptions,
-} from "./areaStream";
+export { AreaStream } from "./areaStream/areaStream";
+export type { AreaItem } from "./areaStream/grid";
+export type { AreaStreamOptions } from "./areaStream/options";
 export {
   Cooldowns,
   KeyedCooldowns,
@@ -111,7 +106,7 @@ export {
   type CommandArgs,
   type CommandHandler,
   type CommandOptions,
-} from "./command";
+} from "./command/addCommand";
 export { onClientCallback, triggerClientCallback } from "./callback";
 export { onClientEvent } from "./netEvent";
 export {
@@ -140,14 +135,14 @@ export {
   plateOf,
   Reasons,
 } from "../fivem/byResource";
-export { every, type EveryOptions, type Job } from "../fivem/scheduler";
+export { every, type EveryOptions, type Job } from "../fivem/scheduler/every";
 export { EntityState, GlobalGroup, GlobalKey, PlayerState } from "./state";
 export {
   stateBoolean,
   stateNumber,
   stateString,
   type StateParse,
-} from "../fivem/state";
+} from "../fivem/state/mirror";
 export { world } from "./world";
 export { prison } from "./prison";
 export { phone } from "./phone";

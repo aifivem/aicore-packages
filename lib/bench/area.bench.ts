@@ -18,7 +18,7 @@ g.GetEntityCoords = (ped: number) => {
   return [p.x, p.y, p.z];
 };
 
-const { AreaStream } = await import("../src/server/areaStream");
+const { AreaStream } = await import("../src/server/areaStream/areaStream");
 
 interface Item {
   id: number;

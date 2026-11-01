@@ -1,6 +1,6 @@
 import { CORE, type CharacterInfo } from "@aicore-fivem/shared";
 import { createLogger } from "../shared";
-import { online } from "./online";
+import { online } from "./online/online";
 
 const log = createLogger(GetCurrentResourceName());
 
