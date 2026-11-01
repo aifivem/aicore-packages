@@ -1,6 +1,8 @@
 import {
+  CLIENT_ITEM_COUNT_EVENT,
   CORE,
   type HeldWeapon,
+  type InventoryStack,
   type ItemDefinition,
 } from "@aicore-fivem/shared";
 import { resourceExport } from "../fivem/exports";
@@ -34,7 +36,44 @@ export const inventory = {
   /** An item's label, weight, flags and picture from ai-core's client mirror; null when unknown. */
   itemDefinition: (name: string): ItemDefinition | null =>
     toDefinition(core.GetItemDefinition(name)),
+  /** Every stack the player holds; null when the active inventory has no client list (ask your server). */
+  items: (): InventoryStack[] | null => {
+    const list: unknown = core.GetItems();
+    return Array.isArray(list) ? list.flatMap(toStack) : null;
+  },
+  /** Runs `handler(item, count, previous)` each time the player's total of an item changes in the active inventory. */
+  onCount: (
+    handler: (item: string, count: number, previous: number) => void,
+  ): void => {
+    on(
+      CLIENT_ITEM_COUNT_EVENT,
+      (item: unknown, count: unknown, previous: unknown) => {
+        if (typeof item === "string" && typeof count === "number")
+          handler(item, count, typeof previous === "number" ? previous : 0);
+      },
+    );
+  },
 };
+
+/** One stack of ai-core's answer, checked; none when it is not one. */
+function toStack(value: unknown): InventoryStack[] {
+  if (
+    !isRecord(value) ||
+    typeof value.name !== "string" ||
+    typeof value.count !== "number" ||
+    typeof value.slot !== "number"
+  )
+    return [];
+  return [
+    {
+      name: value.name,
+      label: typeof value.label === "string" ? value.label : value.name,
+      count: value.count,
+      slot: value.slot,
+      metadata: isRecord(value.metadata) ? value.metadata : {},
+    },
+  ];
+}
 
 /** ai-core's answer, checked like `toHeldWeapon`. */
 function toDefinition(value: unknown): ItemDefinition | null {

@@ -85,3 +85,8 @@ export const ITEM_DEFINITIONS_EVENT = "ai-core:client:itemDefinitions";
 export const CLIENT_ITEM_DEFINITIONS_EVENT = "ai-core:client:itemDefinitionsChanged";
 /** Server local, emitted by an inventory adapter: the active inventory's definitions changed (no arguments). */
 export const ITEM_DEFINITIONS_CHANGED_EVENT = "ai-core:itemDefinitionsChanged";
+/**
+ * Client local: `(item: string, count: number, previous: number)` the local player's total of an item changed in the
+ * active inventory (0 = none left). The first counts after a load arrive as changes from 0.
+ */
+export const CLIENT_ITEM_COUNT_EVENT = "ai-core:client:itemCount";

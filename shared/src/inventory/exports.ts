@@ -79,6 +79,8 @@ export type InventoryClientExports = {
   GetCurrentWeapon(): HeldWeapon | null;
   /** How many of an item the local player holds; null when the active inventory has no client count. */
   GetItemCount(item: string): number | null;
+  /** Every stack the local player holds; null when the active inventory has no client list (ask the server). */
+  GetItems(): InventoryStack[] | null;
   /** Every item definition of the active inventory (a copy of ai-core's client mirror). */
   GetItemDefinitions(): Record<string, ItemDefinition>;
   GetItemDefinition(name: string): ItemDefinition | null;

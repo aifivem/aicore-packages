@@ -86,4 +86,6 @@ export type AiInventoryClientExports = {
   ): boolean;
   /** How many of an item the player holds. */
   GetItemCount(item: string): number;
+  /** The player's stacks (ox_inventory's item shape plus `amount` / `info`); its totals change with `ox_inventory:itemCount`. */
+  GetPlayerItems(): unknown[];
 };

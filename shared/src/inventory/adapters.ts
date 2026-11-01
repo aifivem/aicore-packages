@@ -76,4 +76,8 @@ export interface InventoryClientAdapter {
   itemCount(item: string): number | null;
   /** The held weapon item, or null (unarmed, or the inventory has no such export). */
   currentWeapon(): HeldWeapon | null;
+  /** Every stack the player holds, from the inventory's own client state; null when it has no such export. */
+  items(): InventoryStack[] | null;
+  /** Calls `listener` when the player's items may have changed (the layer reads `items` and sends what changed). */
+  onChange?(listener: () => void): void;
 }
