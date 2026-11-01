@@ -36,7 +36,7 @@ export const CORE = {
   inventoryChangedEvent: "ai-core:inventoryChanged",
   /** (src, name: string, status: Record<string, number> | null) a player used an item; status = the needs it gives, from inventories that define them. */
   itemUsedEvent: "ai-core:itemUsed",
-  /** (src, killer: number | null, weaponHash: number) a player with a loaded character died; fired from FXServer's `onPedDeath` (ai-core requires FXServer 38039+). */
+  /** (src, killer: number | null, weaponHash: number, info: DeathInfo) a player with a loaded character died; fired from FXServer's `onPedDeath` (ai-core requires FXServer 38039+); `info` (`deaths.ts`) says who, how and from where, built on the server. */
   playerDiedEvent: "ai-core:playerDied",
 
   // Client local events (same payloads, for client scripts and bridges).

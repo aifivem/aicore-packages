@@ -27,3 +27,4 @@ export * from "./ui";
 export * from "./vrp";
 export * from "./characters";
 export type * from "./multichar";
+export type * from "./deaths";
