@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.4.0...shared-v0.5.0) (2026-11-01)
+
+
+### New Features
+
+* **inventory:** client item list and item count events in the inventory contract and lib ([31eb748](https://github.com/aifivem/aicore-packages/commit/31eb74875fa323896ae9594abf35ca2bccf86649))
+* **lib:** character search, ledger history, money and jobs helpers ([6400abc](https://github.com/aifivem/aicore-packages/commit/6400abcc2a66f1a843938fb3c8b809cc831e5f25))
+* **lib:** inventory.canCarryItems, jobs.unemployed and characters.hasJobMember ([f75f1e8](https://github.com/aifivem/aicore-packages/commit/f75f1e8bf1f8e2a0f39b2c0fa27c59b0f67874be))
+* **lib:** needs.add ([5c809f5](https://github.com/aifivem/aicore-packages/commit/5c809f59008c4d722f69bc39f7db891288b0c3e2))
+* **vehicles:** FindVehicle, GetVehiclesOf and SetPlate contracts ([deb62f4](https://github.com/aifivem/aicore-packages/commit/deb62f4a50ef1cc8fd6245b53a15c804be634404))
+* **vehicles:** framework shaped props in the vehicle reads ([94e2da1](https://github.com/aifivem/aicore-packages/commit/94e2da1c5942e6be94b3eda656308fa82c059291))
+
 ## [0.4.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.3.0...shared-v0.4.0) (2026-11-01)
 
 

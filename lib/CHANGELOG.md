@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.4.0...lib-v0.5.0) (2026-11-01)
+
+
+### New Features
+
+* **inventory:** client item list and item count events in the inventory contract and lib ([31eb748](https://github.com/aifivem/aicore-packages/commit/31eb74875fa323896ae9594abf35ca2bccf86649))
+* **lib:** character search, ledger history, money and jobs helpers ([6400abc](https://github.com/aifivem/aicore-packages/commit/6400abcc2a66f1a843938fb3c8b809cc831e5f25))
+* **lib:** every item definition on both sides ([847960d](https://github.com/aifivem/aicore-packages/commit/847960d3dbc8d2c16f943092ebacf41cc4525871))
+* **lib:** inventory.canCarryItems, jobs.unemployed and characters.hasJobMember ([f75f1e8](https://github.com/aifivem/aicore-packages/commit/f75f1e8bf1f8e2a0f39b2c0fa27c59b0f67874be))
+* **lib:** needs.add ([5c809f5](https://github.com/aifivem/aicore-packages/commit/5c809f59008c4d722f69bc39f7db891288b0c3e2))
+* **lib:** online.sourceOf / characters, inventory itemsBySlot / firstStack ([56581e9](https://github.com/aifivem/aicore-packages/commit/56581e93f1b57d072b0629dffba2290e70bc600b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @aicore-fivem/shared bumped from ^0.4.0 to ^0.5.0
+
 ## [0.4.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.3.0...lib-v0.4.0) (2026-11-01)
 
 
