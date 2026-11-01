@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.3.0...shared-v0.4.0) (2026-11-01)
+
+
+### New Features
+
+* **lib:** ban history, search and edits; open the admin panel on a section ([4db9b2d](https://github.com/aifivem/aicore-packages/commit/4db9b2daa00004eaeafe37de8da99767f5f3dea0))
+* **shared:** contracts for offline characters, bans, script job definitions, external character screens, item metadata and client key checks ([d5065d5](https://github.com/aifivem/aicore-packages/commit/d5065d524a077e5e47d23bef7cf03d946d16f75b))
+* **shared:** DeathInfo, the details of a player's death ([c98ed32](https://github.com/aifivem/aicore-packages/commit/c98ed325bce6946db03efb024fe965446a9a435c))
+
+
+### Code Refactoring
+
+* split the packages into concept files and folders; public API unchanged ([c80a9ee](https://github.com/aifivem/aicore-packages/commit/c80a9ee8464711295d2703039e024c0b227398e2))
+
 ## [0.3.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.2.0...shared-v0.3.0) (2026-10-31)
 
 

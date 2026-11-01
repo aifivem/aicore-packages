@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.3.0...lib-v0.4.0) (2026-11-01)
+
+
+### New Features
+
+* **lib:** ban history, search and edits; open the admin panel on a section ([4db9b2d](https://github.com/aifivem/aicore-packages/commit/4db9b2daa00004eaeafe37de8da99767f5f3dea0))
+* **lib:** entity searches, scaleform loader, spawn by model hash, players near a point and notification titles ([f508483](https://github.com/aifivem/aicore-packages/commit/f508483e0c78e3b300ff7c8a45d3e984c5818017))
+* **lib:** item metadata, weight limits, client item definitions and client key checks ([f6db5da](https://github.com/aifivem/aicore-packages/commit/f6db5da7a69b79dd81bd42f318284f1c74644765))
+* **lib:** offline characters, bans and script job definitions ([4e7d18c](https://github.com/aifivem/aicore-packages/commit/4e7d18cffd90fa32f221200797142ca7d6ccca3c))
+
+
+### Code Refactoring
+
+* split the packages into concept files and folders; public API unchanged ([c80a9ee](https://github.com/aifivem/aicore-packages/commit/c80a9ee8464711295d2703039e024c0b227398e2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @aicore-fivem/shared bumped from ^0.3.0 to ^0.4.0
+
 ## [0.3.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.2.0...lib-v0.3.0) (2026-10-31)
 
 

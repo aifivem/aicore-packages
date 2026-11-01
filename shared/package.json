@@ -1,6 +1,6 @@
 {
   "name": "@aicore-fivem/shared",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Contracts shared between ai-core resources: event names, payload types, export types.",
   "license": "GPL-3.0-only",
   "type": "module",

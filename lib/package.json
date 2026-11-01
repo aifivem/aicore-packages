@@ -1,6 +1,6 @@
 {
   "name": "@aicore-fivem/lib",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Helpers every ai-core resource uses: logging, exports, rate limits, database tables.",
   "license": "GPL-3.0-only",
   "type": "module",
@@ -17,7 +17,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@aicore-fivem/shared": "^0.3.0",
+    "@aicore-fivem/shared": "^0.4.0",
     "@aicore-fivem/mysql": "^0.1.0"
   },
   "devDependencies": {
