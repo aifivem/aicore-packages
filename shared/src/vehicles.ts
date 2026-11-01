@@ -49,17 +49,26 @@ export type AiVehiclesServerExports = {
     garage: string | null,
     props?: unknown,
   ): { id: number; plate: string } | null;
-  GetVehicle(ref: number | string): OwnedVehicle | null;
+  /** `shape` "framework": props in ox_lib / qb-core's shape with `fuelLevel` (scripts that apply looks themselves). */
+  GetVehicle(ref: number | string, shape?: "framework"): OwnedVehicle | null;
   /** Vehicles of an owner who is online (characters) or any job / gang fleet. */
-  GetVehicles(owner: VehicleOwner): OwnedVehicle[];
+  GetVehicles(owner: VehicleOwner, shape?: "framework"): OwnedVehicle[];
   IsOwnedPlate(plate: string): boolean;
   GetVehicleIdByEntity(entity: number): number | null;
   /** Every owned vehicle in memory as `[plate, ownerType, ownerId]` (key systems mirror it, then follow `VEHICLES_EVENTS.owners`). */
   GetPlateOwners(): Array<[plate: string, type: VehicleOwnerType, id: string]>;
   /** A vehicle by plate, also of an owner who is not online (from the database). */
-  FindVehicle(plate: string, done: (vehicle: OwnedVehicle | null) => void): void;
+  FindVehicle(
+    plate: string,
+    done: (vehicle: OwnedVehicle | null) => void,
+    shape?: "framework",
+  ): void;
   /** An owner's vehicles, also of a character who is not online (from the database). */
-  GetVehiclesOf(owner: VehicleOwner, done: (vehicles: OwnedVehicle[]) => void): void;
+  GetVehiclesOf(
+    owner: VehicleOwner,
+    done: (vehicles: OwnedVehicle[]) => void,
+    shape?: "framework",
+  ): void;
   /**
    * Another plate for a vehicle in memory (custom plate, plate changer; its entity too): 1-8 letters / digits, never
    * a generated `AI...` one; `done(false)` when it is taken or not valid.
