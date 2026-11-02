@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.5.0...lib-v0.6.0) (2026-11-02)
+
+
+### New Features
+
+* **lib:** online countMembers, membersOf and onJobState for job counts ([cc3308c](https://github.com/aifivem/aicore-packages/commit/cc3308c5d7c5fda02b38968f80082472b9b20df3))
+
 ## [0.5.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.4.0...lib-v0.5.0) (2026-11-01)
 
 
