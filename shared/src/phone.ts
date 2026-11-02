@@ -34,9 +34,7 @@ export interface PhoneAdapter {
 export interface PhoneClientAdapter {
   resource: string;
   /** Registers the phone's open signal (an event or a state bag) once at start; calls `opened()` on each opening. */
-  watch?(opened: () => void): void;
-  /** The phone's open-state export, for phones with no signal: read once a second while this phone is picked. */
-  isOpen?(): boolean;
+  watch(opened: () => void): void;
 }
 
 /** ai-core's phone exports: whatever phone script runs answers (none: null / false). */
