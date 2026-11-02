@@ -86,7 +86,7 @@ export const CORE = {
   phoneStateKey: "ai:phone",
   /** Client local: (phone: string) the local player opened the phone (resource name of the active phone); once per opening, at most once per 10 s. */
   clientPhoneUsedEvent: "ai-core:client:phoneUsed",
-  /** Client -> server: () the player opened the phone (sent with `clientPhoneUsedEvent`; the server checks and fires `phoneUsedEvent`). */
+  /** Client -> server: (phone: string) the player opened the phone (sent with `clientPhoneUsedEvent`; the server checks it is the active phone or a running signal-only one and fires `phoneUsedEvent`). */
   phoneOpenedEvent: "ai-core:phoneOpened",
   /** Server local: (src, phone: string) a player with a loaded character opened the phone (resource name of the active phone); at most once per 10 s per player. */
   phoneUsedEvent: "ai-core:phoneUsed",
