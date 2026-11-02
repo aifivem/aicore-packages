@@ -10,6 +10,7 @@ export type * from "./exports/coreGroups";
 export type * from "./exports/coreServices";
 export type * from "./exports/coreLayers";
 export * from "./exports/coreCharacters";
+export type * from "./exports/coreBans";
 export type * from "./exports/coreClient";
 export type * from "./exports/aiInventory";
 export type * from "./exports/resources";

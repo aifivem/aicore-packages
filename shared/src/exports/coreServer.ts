@@ -1,5 +1,6 @@
 import type { BankingServerExports } from "../banking";
 import type { BillingServerExports } from "../billing";
+import type { BanServerExports } from "./coreBans";
 import type { CharacterServerExports } from "./coreCharacters";
 import type { DispatchServerExports } from "../dispatch";
 import type { DoorlockServerExports } from "../doorlock";
@@ -88,4 +89,5 @@ export type AiCoreServerExports = {
   DoorlockServerExports &
   GaragesServerExports &
   CharacterServerExports &
+  BanServerExports &
   MulticharServerExports;
