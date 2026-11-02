@@ -82,6 +82,14 @@ export const CORE = {
   stressRelayEvent: "ai-core:client:stress",
   /** GlobalState: the resource name of the notification UI ai-lib's notifications go to (unset = ai-lib's own cards). */
   notifyStateKey: "ai:notify",
+  /** GlobalState: the resource name of the phone ai-core's phone layer uses (client adapter pick). */
+  phoneStateKey: "ai:phone",
+  /** Client local: (phone: string) the local player opened the phone (resource name of the active phone); once per opening, at most once per 10 s. */
+  clientPhoneUsedEvent: "ai-core:client:phoneUsed",
+  /** Client -> server: () the player opened the phone (sent with `clientPhoneUsedEvent`; the server checks and fires `phoneUsedEvent`). */
+  phoneOpenedEvent: "ai-core:phoneOpened",
+  /** Server local: (src, phone: string) a player with a loaded character opened the phone (resource name of the active phone); at most once per 10 s per player. */
+  phoneUsedEvent: "ai-core:phoneUsed",
 
   // Callbacks (character screen).
   charactersCallback: "ai-core:characters",

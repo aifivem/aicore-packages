@@ -6,6 +6,7 @@ export { ScriptCamera } from "./scriptCamera";
 export { medical } from "./medical";
 export { fuel } from "./fuel";
 export { mdt } from "./mdt";
+export { phone } from "./phone";
 export {
   NuiScreen,
   type NuiPageMessage,
@@ -48,11 +49,7 @@ export {
   type ProgressOptions,
 } from "./progress";
 export { input, itemPicker, menu } from "./menu/dialogs";
-export {
-  lockpick,
-  skillCheck,
-  type LockpickOptions,
-} from "./menu/minigames";
+export { lockpick, skillCheck, type LockpickOptions } from "./menu/minigames";
 export type { MenuListeners } from "./menu/requests";
 export { inventory } from "./inventory";
 export { vehicleKeys } from "./vehicleKeys";

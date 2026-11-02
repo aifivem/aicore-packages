@@ -27,6 +27,18 @@ export interface PhoneAdapter {
   notify(source: number, notification: PhoneNotification): boolean;
 }
 
+/**
+ * Client half of a phone behind ai-core's phone layer: how it tells that the local player opened it. A phone without
+ * a confirmed signal has neither member.
+ */
+export interface PhoneClientAdapter {
+  resource: string;
+  /** Registers the phone's open signal (an event or a state bag) once at start; calls `opened()` on each opening. */
+  watch?(opened: () => void): void;
+  /** The phone's open-state export, for phones with no signal: read once a second while this phone is picked. */
+  isOpen?(): boolean;
+}
+
 /** ai-core's phone exports: whatever phone script runs answers (none: null / false). */
 export type PhoneServerExports = {
   GetPhoneNumber(source: number): string | null;

@@ -1,8 +1,4 @@
-import {
-  CORE,
-  type PhoneMail,
-  type PhoneNotification,
-} from "@aifivem/shared";
+import { CORE, type PhoneMail, type PhoneNotification } from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);
@@ -19,4 +15,14 @@ export const phone = {
     core.SendPhoneMessage(from, to, text),
   notify: (source: number, notification: PhoneNotification): boolean =>
     core.PhoneNotify(source, notification),
+  /**
+   * `fn(source, phone)` when a player with a loaded character opens the phone (`phone`: the phone's resource name):
+   * once per opening, at most once per 10 s per player; nothing for a phone without an open signal.
+   */
+  onUsed(fn: (source: number, phone: string) => void): void {
+    on(CORE.phoneUsedEvent, (source: unknown, phone: unknown) => {
+      if (typeof source === "number" && typeof phone === "string")
+        fn(source, phone);
+    });
+  },
 };
