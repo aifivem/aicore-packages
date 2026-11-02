@@ -1,4 +1,4 @@
-import { CORE, LIB_UI, MENU_EVENTS } from "@aicore-fivem/shared";
+import { CORE, LIB_UI, MENU_EVENTS } from "@aifivem/shared";
 import { resourceExport } from "../../fivem/exports";
 
 export const ui = resourceExport(LIB_UI.resource);

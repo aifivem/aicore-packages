@@ -1,4 +1,4 @@
-import type { DataSpec, WidgetSpec } from "@aicore-fivem/shared";
+import type { DataSpec, WidgetSpec } from "@aifivem/shared";
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);

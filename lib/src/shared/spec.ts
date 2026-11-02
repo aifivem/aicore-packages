@@ -1,6 +1,6 @@
-import type { DataSpec } from "@aicore-fivem/shared";
+import type { DataSpec } from "@aifivem/shared";
 
-/** Panel data spec builders for a script's `schema.ts` (the panel's own value types stay in `@aicore-fivem/shared`). */
+/** Panel data spec builders for a script's `schema.ts` (the panel's own value types stay in `@aifivem/shared`). */
 export const spec = {
   /** A whole number from `min` to `max`. */
   int: (min: number, max: number, optional = false): DataSpec => ({

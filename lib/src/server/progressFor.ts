@@ -1,4 +1,4 @@
-import { CORE, LIB_UI, type ServerProgress } from "@aicore-fivem/shared";
+import { CORE, LIB_UI, type ServerProgress } from "@aifivem/shared";
 import { triggerClientCallback } from "./callback";
 import { PlayerMap } from "./players";
 

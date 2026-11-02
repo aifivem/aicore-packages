@@ -1,4 +1,4 @@
-import type { DataSpec } from "@aicore-fivem/shared";
+import type { DataSpec } from "@aifivem/shared";
 import { int, num, record } from "./read";
 
 /** A blip's style as the panel's `blip` widget stores it. */

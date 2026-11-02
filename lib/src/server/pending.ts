@@ -1,4 +1,4 @@
-import { CORE } from "@aicore-fivem/shared";
+import { CORE } from "@aifivem/shared";
 import { PlayerMap } from "./players";
 
 interface Pending<T> {

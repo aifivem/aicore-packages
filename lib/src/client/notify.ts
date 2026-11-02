@@ -1,4 +1,4 @@
-import { LIB_UI, type NotificationKind } from "@aicore-fivem/shared";
+import { LIB_UI, type NotificationKind } from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const ui = resourceExport(LIB_UI.resource);

@@ -1,4 +1,4 @@
-import type { DataSpec, WidgetSpec } from "@aicore-fivem/shared";
+import type { DataSpec, WidgetSpec } from "@aifivem/shared";
 import { bool, record } from "./read";
 
 /**

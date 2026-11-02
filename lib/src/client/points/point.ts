@@ -12,7 +12,7 @@ import {
 import type { BlipOptions } from "../blip";
 import type { LocalPed, LocalPedOptions } from "../localPed";
 import { hidePrompt, showPrompt } from "../prompt";
-import type { PromptAnchor } from "@aicore-fivem/shared";
+import type { PromptAnchor } from "@aifivem/shared";
 import type { TargetOption } from "./targets/adapter";
 
 interface Vec3 {

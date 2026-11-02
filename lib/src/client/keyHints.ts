@@ -1,4 +1,4 @@
-import { CORE, type KeyHintRequest } from "@aicore-fivem/shared";
+import { CORE, type KeyHintRequest } from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);

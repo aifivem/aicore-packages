@@ -4,7 +4,7 @@ import {
   type CharacterAppearance,
   type ClothingMenu,
   type JobOutfit,
-} from "@aicore-fivem/shared";
+} from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);

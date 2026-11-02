@@ -3,7 +3,7 @@
  * three natives, copies the value twice under two locks in the engine and decodes msgpack every time; on a busy server
  * it waits on the network thread's lock. These classes keep one change handler per key and resource and a `Map` of the
  * values, so a read is a map lookup (entities: one `NetworkGetNetworkIdFromEntity`). Writing is server only
- * (`sv_stateBagStrictMode`): the server classes in "@aicore-fivem/lib/server" add `set`.
+ * (`sv_stateBagStrictMode`): the server classes in "@aifivem/lib/server" add `set`.
  */
 
 /** Turns a replicated value into `T`; `undefined` = no (valid) value. */

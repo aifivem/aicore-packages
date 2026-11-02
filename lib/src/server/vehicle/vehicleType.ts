@@ -1,4 +1,4 @@
-import { CORE } from "@aicore-fivem/shared";
+import { CORE } from "@aifivem/shared";
 import { triggerClientCallback } from "../callback";
 
 /** Every type `CreateVehicleServerSetter` takes; a client answering anything else is ignored. */

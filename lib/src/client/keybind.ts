@@ -3,7 +3,7 @@ import {
   KEYBIND,
   type KeybindInfo,
   type KeyHintWhen,
-} from "@aicore-fivem/shared";
+} from "@aifivem/shared";
 import { isResourceStarted } from "../fivem/exports";
 
 export interface KeybindOptions {

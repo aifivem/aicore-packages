@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Database types from the resource's own tables: reads every `CREATE TABLE` in `sql/main.sql` and writes
- * `resource/server/tables.ts` with each table's row type (what a SELECT returns through @aicore-fivem/mysql) and its
+ * `resource/server/tables.ts` with each table's row type (what a SELECT returns through @aifivem/mysql) and its
  * insert type (columns with a default, NULL or AUTO_INCREMENT may be left out). The SQL file stays the one source of
  * truth: change it, build, and every query written with `typedDb<Tables, TableInserts>()` is checked against it.
  *
@@ -21,7 +21,7 @@ interface Table {
   columns: Column[];
 }
 
-/** SQL type -> the value @aicore-fivem/mysql returns (same as oxmysql: dates as epoch ms, TINYINT(1) as boolean). */
+/** SQL type -> the value @aifivem/mysql returns (same as oxmysql: dates as epoch ms, TINYINT(1) as boolean). */
 function tsType(sqlType: string): string {
   const t = sqlType.toLowerCase().trim();
   const base = t.replace(/\s+unsigned|\s+zerofill/g, "");
@@ -98,7 +98,7 @@ export function renderTables(tables: Table[], source: string): string {
   );
   return `// Generated from ${source} by aicore-db-types (the build runs it). Do not edit: change the SQL and build.
 
-/** Row of each table as @aicore-fivem/mysql returns it. */
+/** Row of each table as @aifivem/mysql returns it. */
 export type Tables = {
 ${rows.join("\n")}
 };

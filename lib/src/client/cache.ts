@@ -1,4 +1,4 @@
-import { CORE, type PlayerCache } from "@aicore-fivem/shared";
+import { CORE, type PlayerCache } from "@aifivem/shared";
 
 /** The unarmed "weapon" hash: cached as `false`. */
 const UNARMED = GetHashKey("WEAPON_UNARMED") | 0;

@@ -1,4 +1,4 @@
-import type { ActionResult } from "@aicore-fivem/shared";
+import type { ActionResult } from "@aifivem/shared";
 
 /** A refused action: `{ ok: false, error }` with a lang key the client shows. */
 export const fail = (error: string): { ok: false; error: string } => ({

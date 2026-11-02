@@ -1,4 +1,4 @@
-import { ADMIN, CORE } from "@aicore-fivem/shared";
+import { ADMIN, CORE } from "@aifivem/shared";
 import { createLogger, logSafe, previewJson } from "../shared";
 import type { Vec3 } from "../shared/vec";
 import { resourceExport } from "../fivem/exports";

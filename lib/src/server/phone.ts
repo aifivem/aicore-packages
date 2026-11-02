@@ -2,7 +2,7 @@ import {
   CORE,
   type PhoneMail,
   type PhoneNotification,
-} from "@aicore-fivem/shared";
+} from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);

@@ -1,4 +1,4 @@
-import { CORE, type DataSpec, type LookupSource } from "@aicore-fivem/shared";
+import { CORE, type DataSpec, type LookupSource } from "@aifivem/shared";
 import { resourceExport } from "../../fivem/exports";
 import { isRecord } from "../../shared";
 

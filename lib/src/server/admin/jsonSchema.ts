@@ -1,4 +1,4 @@
-import type { DataSpec, FileSpec, PanelSchema } from "@aicore-fivem/shared";
+import type { DataSpec, FileSpec, PanelSchema } from "@aifivem/shared";
 import { mkdir, writeFile } from "node:fs/promises";
 import type { Logger } from "../../shared";
 import { describe, texts, type Descriptions } from "./descriptions";

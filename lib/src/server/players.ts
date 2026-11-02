@@ -1,4 +1,4 @@
-import { CORE, type CharacterInfo } from "@aicore-fivem/shared";
+import { CORE, type CharacterInfo } from "@aifivem/shared";
 import { createLogger } from "../shared";
 import { online } from "./online/online";
 

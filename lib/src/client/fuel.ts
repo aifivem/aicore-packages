@@ -1,4 +1,4 @@
-import { VEHICLE_BAGS } from "@aicore-fivem/shared";
+import { VEHICLE_BAGS } from "@aifivem/shared";
 import { EntityState } from "../fivem/state/entityState";
 import { stateNumber } from "../fivem/state/mirror";
 

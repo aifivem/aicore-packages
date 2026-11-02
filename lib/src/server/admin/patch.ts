@@ -1,4 +1,4 @@
-import type { AdminPatch } from "@aicore-fivem/shared";
+import type { AdminPatch } from "@aifivem/shared";
 import { isRecord } from "../../shared";
 
 /** A patch from a client: only the known shapes pass, extra fields drop. */

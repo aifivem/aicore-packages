@@ -1,4 +1,4 @@
-import type { CharacterInfo } from "@aicore-fivem/shared";
+import type { CharacterInfo } from "@aifivem/shared";
 import { isPublic, type AccessRule } from "../../shared/access";
 import { OnlineMirror, type JobStateChange } from "./mirror";
 

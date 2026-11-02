@@ -3,7 +3,7 @@ import {
   type CommandInfo,
   type CommandParam,
   type NotificationKind,
-} from "@aicore-fivem/shared";
+} from "@aifivem/shared";
 import { createLogger, formatText } from "../../shared";
 import { loadLocaleTexts } from "../../fivem/locale";
 import { notify } from "../notify";

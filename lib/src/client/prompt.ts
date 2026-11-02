@@ -1,4 +1,4 @@
-import { LIB_UI, type PromptAnchor } from "@aicore-fivem/shared";
+import { LIB_UI, type PromptAnchor } from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const ui = resourceExport(LIB_UI.resource);

@@ -1,4 +1,4 @@
-import { VEHICLE_BAGS, type KeyPurpose } from "@aicore-fivem/shared";
+import { VEHICLE_BAGS, type KeyPurpose } from "@aifivem/shared";
 import { waitFor, type VehicleProps, type VehicleSetup } from "../../shared";
 import { fuel } from "../fuel";
 import { vehicleKeys } from "../vehicleKeys";

@@ -1,4 +1,4 @@
-import type { AdminPatch, DataSpec, FileSpec } from "@aicore-fivem/shared";
+import type { AdminPatch, DataSpec, FileSpec } from "@aifivem/shared";
 import { isRecord } from "../../shared";
 import { clone } from "./patch";
 import { ERR, validate } from "./validate";

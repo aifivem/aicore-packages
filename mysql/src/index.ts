@@ -3,7 +3,7 @@
  * per query); results have the same types oxmysql returns (dates as epoch ms, TINYINT(1) as boolean, DECIMAL as
  * string). Queries reject on failure; `transaction` resolves false after a rollback.
  *
- *   import { mysql } from "@aicore-fivem/mysql";
+ *   import { mysql } from "@aifivem/mysql";
  *   const row = await mysql.single<{ id: number }>("SELECT id FROM t WHERE name = ?", [name]);
  */
 import type { Params } from "./args";

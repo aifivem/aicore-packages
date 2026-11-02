@@ -4,7 +4,7 @@ import {
   type LedgerQuery,
   type LedgerRef,
   type MoneyRef,
-} from "@aicore-fivem/shared";
+} from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);

@@ -53,19 +53,19 @@
   ],
   "packages": {
     "build": {
-      "package-name": "@aicore-fivem/build",
+      "package-name": "@aifivem/build",
       "component": "build"
     },
     "lib": {
-      "package-name": "@aicore-fivem/lib",
+      "package-name": "@aifivem/lib",
       "component": "lib"
     },
     "mysql": {
-      "package-name": "@aicore-fivem/mysql",
+      "package-name": "@aifivem/mysql",
       "component": "mysql"
     },
     "shared": {
-      "package-name": "@aicore-fivem/shared",
+      "package-name": "@aifivem/shared",
       "component": "shared"
     }
   }

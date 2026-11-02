@@ -1,4 +1,4 @@
-import type { AiPlayerData } from "@aicore-fivem/shared";
+import type { AiPlayerData } from "@aifivem/shared";
 
 /**
  * ai-core's per-player channel: the server pushes `(key, value)` of `AiPlayerData` to the owner's client. One net

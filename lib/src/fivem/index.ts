@@ -1,4 +1,4 @@
-/** Helpers that call natives available on both sides; for `resource/common/` code. Import from "@aicore-fivem/lib/fivem". */
+/** Helpers that call natives available on both sides; for `resource/common/` code. Import from "@aifivem/lib/fivem". */
 
 export {
   callExport,

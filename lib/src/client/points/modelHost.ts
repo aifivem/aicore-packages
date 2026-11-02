@@ -1,4 +1,4 @@
-import { LIB_UI } from "@aicore-fivem/shared";
+import { LIB_UI } from "@aifivem/shared";
 import { callExport, isResourceStarted } from "../../fivem/exports";
 import type { ModelScanDef } from "../modelScan/def";
 import { ModelScanner } from "../modelScan/scanner";

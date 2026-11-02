@@ -1,4 +1,4 @@
-import { ADMIN, type CommandParam } from "@aicore-fivem/shared";
+import { ADMIN, type CommandParam } from "@aifivem/shared";
 import { Command } from "./command";
 import { commands } from "./commandSet";
 

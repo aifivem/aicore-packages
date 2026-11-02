@@ -1,4 +1,4 @@
-import { CORE } from "@aicore-fivem/shared";
+import { CORE } from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);

@@ -1,4 +1,4 @@
-import { CORE, type DistressCall } from "@aicore-fivem/shared";
+import { CORE, type DistressCall } from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 
 const core = resourceExport(CORE.resource);

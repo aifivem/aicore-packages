@@ -14,7 +14,7 @@
  */
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
-import { CORE } from "@aicore-fivem/shared";
+import { CORE } from "@aifivem/shared";
 
 const MARKER = "/*aicore-client-errors*/";
 

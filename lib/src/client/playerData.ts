@@ -1,11 +1,11 @@
-import type { AiPlayerData } from "@aicore-fivem/shared";
+import type { AiPlayerData } from "@aifivem/shared";
 import { isRecord } from "../shared";
 import {
   PLAYER_DATA_EVENT,
   PLAYER_DATA_PATCH_EVENT,
   type PlayerDataKey,
 } from "../fivem/playerData";
-import { CORE } from "@aicore-fivem/shared";
+import { CORE } from "@aifivem/shared";
 import { resourceExport } from "../fivem/exports";
 import { onServerEvent } from "./netEvent";
 

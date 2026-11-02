@@ -1,5 +1,5 @@
 import { decideAccess, type AccessRule } from "../shared/access";
-import type { GangMembership, JobMembership } from "@aicore-fivem/shared";
+import type { GangMembership, JobMembership } from "@aifivem/shared";
 import { getPlayerData, onPlayerData } from "./playerData";
 
 /** Whether the player holds one of `jobs` at `minGrade` or above (on duty or not). Empty list: everyone. */

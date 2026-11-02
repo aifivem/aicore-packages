@@ -1,5 +1,5 @@
 {
-  "name": "@aicore-fivem/mysql",
+  "name": "@aifivem/mysql",
   "version": "0.1.0",
   "description": "ai-core's MySQL/MariaDB engine: an in-process pool per resource with oxmysql-compatible behaviour.",
   "license": "GPL-3.0-only",

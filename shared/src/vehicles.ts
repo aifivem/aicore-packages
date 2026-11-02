@@ -16,7 +16,7 @@ export interface OwnedVehicle {
   plate: string;
   owner: VehicleOwner;
   model: string;
-  /** VehicleProps (`@aicore-fivem/lib/shared`) or null before the first save. */
+  /** VehicleProps (`@aifivem/lib/shared`) or null before the first save. */
   props: unknown;
   /** VehicleSetup (lib `spawnVehicle`'s `setup`) the vehicle spawns with while it has no props (a shop's colour). */
   setup: unknown;
