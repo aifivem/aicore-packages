@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.8.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.7.0...lib-v0.8.0) (2026-11-02)
+
+
+### New Features
+
+* **lib:** add illegal status, characters.idOf and paycheck and export types ([0f34765](https://github.com/aifivem/aicore-packages/commit/0f34765109482eed892fa94b34d5066c5a567f0b))
+* **lib:** add mdt.hasWarrant for the active MDT's warrant check ([16b3fda](https://github.com/aifivem/aicore-packages/commit/16b3fdaa3775e97a1bb83a6a56c3ca9cae7e03d7))
+* **lib:** add needs.set and type ai-hud's stress relief export ([531c402](https://github.com/aifivem/aicore-packages/commit/531c40292fcdde8a0097017a40dfdcabd7d9b337))
+* **lib:** add phone.onUsed on both sides ([2ce688a](https://github.com/aifivem/aicore-packages/commit/2ce688a9e16211de6253a1200f5e87995ba85737))
+* **lib:** add warrants for ai-core's own wanted system ([7b72635](https://github.com/aifivem/aicore-packages/commit/7b726359000c0e892e1a07fab80fbbf737afcbb7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @aifivem/shared bumped from ^0.6.0 to ^0.7.0
+
 ## [0.7.0](https://github.com/aifivem/aicore-packages/compare/lib-v0.6.0...lib-v0.7.0) (2026-11-02)
 
 

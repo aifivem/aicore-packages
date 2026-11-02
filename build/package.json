@@ -1,6 +1,6 @@
 {
   "name": "@aifivem/build",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Build steps every ai-core resource runs (client error wrapper, database types).",
   "license": "GPL-3.0-only",
   "repository": {
@@ -20,7 +20,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@aifivem/shared": "^0.6.0"
+    "@aifivem/shared": "^0.7.0"
   },
   "devDependencies": {
     "@types/bun": "latest"
