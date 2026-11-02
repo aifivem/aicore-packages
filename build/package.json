@@ -10,8 +10,8 @@
   },
   "type": "module",
   "bin": {
-    "aicore-client-errors": "./clientErrors.ts",
-    "aicore-db-types": "./dbTypes.ts"
+    "aicore-client-errors": "clientErrors.ts",
+    "aicore-db-types": "dbTypes.ts"
   },
   "files": [
     "*.ts"
