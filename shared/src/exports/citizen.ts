@@ -14,8 +14,10 @@ import type {
   AiHudClientExports,
   AiHudServerExports,
   AiPoliceAlertServerExports,
+  AiPoliceServerExports,
   AiRadialClientExports,
   AiSmallResourcesClientExports,
+  AiSmallResourcesServerExports,
   AiTargetClientExports,
   AiVehicleKeysServerExports,
   AiVehicleshopServerExports,
@@ -35,11 +37,13 @@ declare global {
     "ai-vehiclekeys": AiVehicleKeysServerExports;
     "ai-death": AiDeathServerExports;
     "ai-radialmenu": AiRadialClientExports;
+    "ai-police": AiPoliceServerExports;
     "ai-policealert": AiPoliceAlertServerExports;
     "ai-doorlock": AiDoorlockServerExports;
     "ai-garages": AiGaragesServerExports;
     "ai-inventory": AiInventoryServerExports & AiInventoryClientExports;
-    "ai-smallresources": AiSmallResourcesClientExports;
+    "ai-smallresources": AiSmallResourcesClientExports &
+      AiSmallResourcesServerExports;
     "ai-hud": AiHudClientExports & AiHudServerExports;
   }
 }

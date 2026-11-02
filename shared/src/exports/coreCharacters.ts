@@ -11,7 +11,10 @@ import type {
   CharacterInfoPatch,
   CharacterResult,
   CharacterSearchPage,
+  CharacterTarget,
   MembersPage,
+  PaycheckMode,
+  PaycheckWithdrawal,
   OfflineCharacter,
   StoredCharacter,
 } from "../characters";
@@ -32,6 +35,14 @@ export type CharacterServerExports = {
     text: string,
     done: (page: CharacterSearchPage) => void,
     cursor?: number,
+  ): void;
+  /**
+   * The character id of a citizenid, loaded or not (a loaded one from memory, a stored one by the unique `citizenid`
+   * key). `done(null)`: unknown or deleted.
+   */
+  GetCharIdByCitizenId(
+    citizenid: string,
+    done: (charId: number | null) => void,
   ): void;
   /** The characters of an account by its id or a license (`license:abc` or `abc`), by slot. */
   GetCharactersOfUser(
@@ -105,7 +116,10 @@ export type CharacterServerExports = {
     value: unknown,
     done?: (result: CharacterResult) => void,
   ): void;
-  /** Name, birth date, nationality, sex (sex only while not loaded: the ped model follows it). */
+  /**
+   * Name, birth date, nationality, sex / gender (sex only while not loaded: the ped model follows it) and height
+   * (metadata `height`); a loaded character gets the change as a delta.
+   */
   SetCharacterInfo(
     charId: number,
     patch: CharacterInfoPatch,
@@ -154,6 +168,30 @@ export type CharacterServerExports = {
   /** Turns a loaded player's paycheck off or on (runtime, until the character unloads); false when not loaded. */
   SetPaycheckEnabled(source: number, on: boolean): boolean;
   IsPaycheckEnabled(source: number): boolean;
+  /** The panel's `paycheck.mode`; clients follow GlobalState `CORE.paycheckModeStateKey`. */
+  GetPaycheckMode(): PaycheckMode;
+  /** Salary waiting in the paycheck office (metadata `paycheck`, panel `paycheck.mode` "office"); 0 when not loaded. */
+  GetPaycheckBalance(source: number): number;
+  /** Pays the office's salary into the pay account (`amount` left out = all of it); refusals are lang keys. */
+  WithdrawPaycheck(source: number, amount?: number): PaycheckWithdrawal;
+  /** Runs the paycheck for one loaded player now (same rules as the timer); false when not loaded. */
+  ForcePaycheck(source: number): boolean;
+
+  /**
+   * Legal / illegal status of a character (metadata `illegal`): a server id (false when not loaded) or a loaded
+   * character answers at once; otherwise it returns null and `done` gets the stored value (null: unknown character).
+   * `done` always gets the answer. Always false while the panel's `illegal.enabled` is off.
+   */
+  IsIllegal(
+    target: CharacterTarget,
+    done?: (illegal: boolean | null) => void,
+  ): boolean | null;
+  /** Marks a character illegal or legal, loaded or not; fires `CORE.illegalChangedEvent`. Refused while the feature is off. */
+  SetIllegal(
+    target: CharacterTarget,
+    illegal: boolean,
+    done?: (result: CharacterResult) => void,
+  ): void;
   /**
    * Played seconds (saved metadata `playtime` plus the running session): a server id answers at once (null when not
    * loaded); `{ charId }` answers at once while loaded, else returns null and `done` gets the stored value.

@@ -41,6 +41,11 @@ export const VEHICLE_BAGS = {
   fuel: "fuel",
 } as const;
 
+/** `DeleteVehicleByPlate`'s answer: `entities` = world entities with that plate that were deleted. */
+export type DeleteByPlateResult =
+  | { ok: true; id: number; entities: number }
+  | { ok: false; error: "invalid_plate" | "not_found" | "failed" };
+
 /** ai-vehicles' server exports. */
 export type AiVehiclesServerExports = {
   CreateVehicle(
@@ -95,6 +100,11 @@ export type AiVehiclesServerExports = {
   StoreVehicle(id: number, garage: string | null, state?: VehicleState): void;
   SetOwner(id: number, owner: VehicleOwner): void;
   DeleteVehicle(id: number): void;
+  /** Deletes an owned vehicle completely by plate (row and every world entity with the plate), owner online or not. */
+  DeleteVehicleByPlate(
+    plate: string,
+    done?: (result: DeleteByPlateResult) => void,
+  ): void;
   /**
    * Creates the entity; `cb` gets its net id (null when it failed). `asker` is a player whose client answers the model
    * type. `setup` (lib VehicleSetup, e.g. `{ colors }`) is kept with a vehicle that has no props yet and applied on every

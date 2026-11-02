@@ -161,5 +161,6 @@ export { fuel } from "./fuel";
 export { doors } from "./doors";
 export { garages } from "./garages";
 export { characters } from "./characters";
+export { illegal } from "./illegal";
 export { bans } from "./bans";
 export { isPrimeTime } from "./primeTime";

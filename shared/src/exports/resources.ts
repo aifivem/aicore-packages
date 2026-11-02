@@ -65,6 +65,15 @@ export type AiPoliceAlertServerExports = {
   DispatchAlert(alert: DispatchAlert): void;
 };
 
+/** ai-police's server exports (optional: callers use `optionalExport("ai-police")`). */
+export type AiPoliceServerExports = {
+  /**
+   * A place saw the player (`"atm"`, `"bank"`, `"shop"`, `"clothing"`, `"garage"`, `"phone"`, any other name uses the
+   * panel's default chance): with an active warrant the police may get a "wanted suspect seen" alert.
+   */
+  ReportSighting(source: number, place: string): void;
+};
+
 /** ai-doorlock's server exports (doors by panel id). */
 export type AiDoorlockServerExports = {
   SetDoorState(id: string, locked: boolean): void;
@@ -75,6 +84,13 @@ export type AiDoorlockServerExports = {
 export type AiSmallResourcesClientExports = {
   /** Whether the local player wears a seat belt; null while seat belts are off or not in a vehicle with one. */
   GetSeatbelt(): boolean | null;
+};
+
+/** ai-smallresources' server exports: ambient pedestrians and traffic off for everyone (ai-admin's `npc`). */
+export type AiSmallResourcesServerExports = {
+  /** false on a wrong argument. */
+  SetNpcDisabled(on: boolean): boolean;
+  IsNpcDisabled(): boolean;
 };
 
 /** ai-hud's client exports (ai-core opens its settings; ai-admin's minimap toggle). */

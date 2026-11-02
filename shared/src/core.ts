@@ -27,6 +27,8 @@ export const CORE = {
   definitionsChangedEvent: "ai-core:definitionsChanged",
   /** Server local: (charId, userId) a character was deleted (soft delete: character screen, admin panel, `DeleteCharacter`). */
   characterDeletedEvent: "ai-core:characterDeleted",
+  /** Server local: (charId, illegal: boolean, src | null) a character's legal / illegal status changed (`SetIllegal`); `src` while loaded. */
+  illegalChangedEvent: "ai-core:illegalChanged",
   /** GlobalState prefixes: `<prefix><name>` = a job / gang definition a script registered (`RegisterJobDefinition`); panel ones are not here. */
   runtimeJobPrefix: "ai:jobdef:",
   runtimeGangPrefix: "ai:gangdef:",
@@ -58,6 +60,8 @@ export const CORE = {
   vehicleTypeCallback: "ai-core:vehicleType",
   /** GlobalState: "prompt" | "target", how lib `Points` let players interact (ai-core panel setting). */
   interactionStateKey: "ai:interaction",
+  /** GlobalState: "account" | "office", ai-core's panel `paycheck.mode` (`PaycheckMode`; server scripts read `GetPaycheckMode`). */
+  paycheckModeStateKey: "ai:paycheckMode",
   /** GlobalState: boolean, players can hurt each other (ai-core panel setting `pvp`, `/togglepvp`). */
   pvpStateKey: "ai:pvp",
   /** GlobalState: the resource name of the death script ai-core's medical layer uses (client adapter pick). */

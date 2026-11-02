@@ -42,4 +42,6 @@ export type CoreLayerServerExports = {
   RefillNeeds(source: number): boolean;
   /** Adds hunger or thirst (0-100 scale, a negative amount takes it away) through the same HUD; false when refused. */
   AddNeed(source: number, need: "hunger" | "thirst", amount: number): boolean;
+  /** Sets hunger or thirst to `value` (0-100, clamped) through the same HUD; false when refused. */
+  SetNeed(source: number, need: "hunger" | "thirst", value: number): boolean;
 };

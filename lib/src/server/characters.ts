@@ -38,6 +38,12 @@ export const characters = {
    */
   search: (text: string, cursor?: number): Promise<CharacterSearchPage> =>
     ask((done) => core.SearchCharacters(text, done, cursor)),
+  /**
+   * The character id of a citizenid, loaded or not (a loaded one from memory, a stored one with one indexed read);
+   * null when unknown or deleted.
+   */
+  idOf: (citizenid: string): Promise<number | null> =>
+    ask((done) => core.GetCharIdByCitizenId(citizenid, done)),
   /** The characters of an account id or of every account with a license (`license:abc` or `abc`). */
   ofUser: (user: number | string): Promise<StoredCharacter[]> =>
     ask((done) => core.GetCharactersOfUser(user, done)),
@@ -50,8 +56,11 @@ export const characters = {
     ask((done) => core.GetJobMembers(job, done, after, limit)),
   /** Whether anyone holds a job, loaded or not (one row is read). */
   hasJobMember: async (job: string): Promise<boolean> =>
-    (await ask<MembersPage>((done) => core.GetJobMembers(job, done, undefined, 1)))
-      .members.length > 0,
+    (
+      await ask<MembersPage>((done) =>
+        core.GetJobMembers(job, done, undefined, 1),
+      )
+    ).members.length > 0,
   gangMembers: (
     gang: string,
     after?: number,
@@ -107,7 +116,7 @@ export const characters = {
     value: unknown,
   ): Promise<CharacterResult> =>
     ask((done) => core.SetOfflineMeta(charId, key, value, done)),
-  /** Name, birth date, nationality, sex (sex only while not loaded), each checked like the creation form. */
+  /** Name, birth date, nationality, sex / gender (sex only while not loaded), height (cm), each checked like the creation form. */
   setInfo: (
     charId: number,
     patch: CharacterInfoPatch,

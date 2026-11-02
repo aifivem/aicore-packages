@@ -68,4 +68,20 @@ export interface CharacterInfoPatch {
   birthdate?: string;
   nationality?: string;
   sex?: "male" | "female";
+  /** QB's numbering of the sex (0 male, 1 female); `sex` wins when both are given. */
+  gender?: 0 | 1;
+  /** Centimetres, a whole number 0-300 (0 = not set), kept in metadata `height`. */
+  height?: number;
 }
+
+/** A character `IsIllegal` / `SetIllegal` name: a loaded player's server id, a citizenid, or a character id. */
+export type CharacterTarget = number | string | { charId: number };
+
+/** ai-core's panel `paycheck.mode`: salary straight into the pay account, or kept in the paycheck office until withdrawn. */
+export type PaycheckMode = "account" | "office";
+
+/** `WithdrawPaycheck`'s answer: the amount paid out and what stays in the paycheck office, or a lang key. */
+export type PaycheckWithdrawal = ActionResult<{
+  amount: number;
+  balance: number;
+}>;
