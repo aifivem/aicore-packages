@@ -78,11 +78,9 @@ export type MdtServerExports = {
   /** Writes a record into the active MDT; false when it is invalid, no MDT runs or it takes no such record. */
   AddMdtRecord(record: MdtRecord): boolean;
   /**
-   * Whether a character (a loaded player's server id or a citizenid) has an active warrant in the active MDT;
-   * `done(false)` when not, no MDT runs or it exposes no warrants. A callback: no promise crosses a resource boundary.
+   * Whether a character (a loaded player's server id or a citizenid) has an active warrant: the active MDT's and / or
+   * ai-core's own, by the panel setting `warrants`; `done(false)` when not. A callback: no promise crosses a resource
+   * boundary.
    */
-  HasMdtWarrant(
-    target: number | string,
-    done: (wanted: boolean) => void,
-  ): void;
+  HasMdtWarrant(target: number | string, done: (wanted: boolean) => void): void;
 };

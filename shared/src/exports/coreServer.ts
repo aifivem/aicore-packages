@@ -9,6 +9,7 @@ import type { FuelServerExports } from "../fuel";
 import type { GaragesServerExports } from "../garages";
 import type { InventoryServerExports } from "../inventory/exports";
 import type { MdtServerExports } from "../mdt";
+import type { WarrantServerExports } from "../warrants";
 import type { MulticharServerExports } from "../multichar";
 import type { PhoneServerExports } from "../phone";
 import type { AiPlayerData, CharacterInfo } from "../player";
@@ -84,6 +85,7 @@ export type AiCoreServerExports = {
   BillingServerExports &
   BankingServerExports &
   MdtServerExports &
+  WarrantServerExports &
   EmsServerExports &
   FuelServerExports &
   DoorlockServerExports &

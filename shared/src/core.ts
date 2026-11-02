@@ -29,6 +29,8 @@ export const CORE = {
   characterDeletedEvent: "ai-core:characterDeleted",
   /** Server local: (charId, illegal: boolean, src | null) a character's legal / illegal status changed (`SetIllegal`); `src` while loaded. */
   illegalChangedEvent: "ai-core:illegalChanged",
+  /** Server local: (kind: "added" | "cleared", warrant: Warrant, by: src | null) one of ai-core's own warrants was issued or cleared (`by`: the issuer's or clearer's server id). */
+  warrantChangedEvent: "ai-core:warrantChanged",
   /** GlobalState prefixes: `<prefix><name>` = a job / gang definition a script registered (`RegisterJobDefinition`); panel ones are not here. */
   runtimeJobPrefix: "ai:jobdef:",
   runtimeGangPrefix: "ai:gangdef:",

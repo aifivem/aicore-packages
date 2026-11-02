@@ -8,9 +8,9 @@ export const mdt = {
   /** Writes a record; false when no MDT runs or it takes no such record. */
   record: (record: MdtRecord): boolean => core.AddMdtRecord(record),
   /**
-   * Whether a character (a loaded player's server id or a citizenid) has an active warrant in the active MDT. False
-   * when not, when no MDT runs, when the MDT exposes no warrants (`docs/compat/mdt.md`) or ai-core is stopped.
-   * ai-core keeps each answer 30 s.
+   * Whether a character (a loaded player's server id or a citizenid) has an active warrant: the active MDT's and / or
+   * ai-core's own (`warrants`), by ai-core's panel setting `warrants` (`docs/compat/mdt.md`). False when not or when
+   * ai-core is stopped. ai-core keeps a stored character's answer 30 s.
    */
   hasWarrant: (target: number | string): Promise<boolean> =>
     new Promise((resolve) => {
