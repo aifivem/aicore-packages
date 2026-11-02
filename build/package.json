@@ -3,6 +3,11 @@
   "version": "0.1.4",
   "description": "Build steps every ai-core resource runs (client error wrapper, database types).",
   "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aifivem/aicore-packages.git",
+    "directory": "build"
+  },
   "type": "module",
   "bin": {
     "aicore-client-errors": "./clientErrors.ts",

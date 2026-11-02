@@ -3,6 +3,11 @@
   "version": "0.5.0",
   "description": "Contracts shared between ai-core resources: event names, payload types, export types.",
   "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aifivem/aicore-packages.git",
+    "directory": "shared"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
