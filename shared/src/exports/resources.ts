@@ -100,20 +100,10 @@ export type AiHudClientExports = {
   GetMinimapAlways(): boolean;
 };
 
-/** ai-hud's server exports (ai-core's stress layer adds stress through `AddNeed`). */
+/** ai-hud's server exports (ai-core's stress layer asks how fast stress fades while ai-hud keeps it). */
 export type AiHudServerExports = {
-  /** Adds `delta` to a loaded player's need (0-100, clamped). */
-  AddNeed(
-    source: number,
-    need: "hunger" | "thirst" | "stress",
-    delta: number,
-  ): void;
-  /** Sets a loaded player's need to `value` (0-100, clamped). */
-  SetNeed(
-    source: number,
-    need: "hunger" | "thirst" | "stress",
-    value: number,
-  ): void;
+  /** Stress points that fade per minute (ai-hud's panel). */
+  GetStressRelief(): number;
 };
 
 /** ai-vehicleshop's server exports. */

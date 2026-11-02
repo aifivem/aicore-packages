@@ -38,10 +38,10 @@ export type CoreLayerServerExports = {
   GetStressSystem(): string | null;
   /** Adds stress to a player (a negative amount relieves it) through whichever HUD keeps it; false without one. */
   AddStress(source: number, amount: number): boolean;
-  /** Fills a player's hunger and thirst through the HUD that keeps them (metadata without one); false when not loaded. */
+  /** Fills a loaded player's hunger and thirst (ai-core keeps them in metadata, any HUD draws them); false when not loaded. */
   RefillNeeds(source: number): boolean;
-  /** Adds hunger or thirst (0-100 scale, a negative amount takes it away) through the same HUD; false when refused. */
+  /** Adds hunger or thirst (0-100 scale, a negative amount takes it away); false when refused. */
   AddNeed(source: number, need: "hunger" | "thirst", amount: number): boolean;
-  /** Sets hunger or thirst to `value` (0-100, clamped) through the same HUD; false when refused. */
+  /** Sets hunger or thirst to `value` (0-100, clamped); false when refused. */
   SetNeed(source: number, need: "hunger" | "thirst", value: number): boolean;
 };

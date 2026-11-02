@@ -15,11 +15,14 @@ export const stress = {
   provider: (): string | null => core.GetStressSystem(),
 };
 
-/** Players' hunger and thirst through the same layer (the HUD that keeps them, ai-core's metadata without one). */
+/** Players' hunger and thirst, kept by ai-core (character metadata, 0-100); any HUD only draws them. */
 export const needs = {
   /** Hunger and thirst to full (admin revive, hospital); false when the player has no character. */
   refill: (source: number): boolean => core.RefillNeeds(source),
   /** Adds hunger or thirst (0-100 scale; a negative amount takes it away), a food or drink's value. */
   add: (source: number, need: "hunger" | "thirst", amount: number): boolean =>
     core.AddNeed(source, need, amount),
+  /** Sets hunger or thirst to a value (0-100, clamped); false when the player has no character. */
+  set: (source: number, need: "hunger" | "thirst", value: number): boolean =>
+    core.SetNeed(source, need, value),
 };
