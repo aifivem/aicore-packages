@@ -1,4 +1,7 @@
 # Releases come from Conventional Commits on main (feat:, fix:, perf:...): see aifivem/.github.
+# A merged release pull request publishes each released package to npm through trusted publishing (OIDC, no token;
+# provenance is automatic). npm checks this file's name: every package's trusted publisher on npmjs.com is
+# aifivem/aicore-packages + release.yml.
 name: release
 
 on:
@@ -13,3 +16,26 @@ jobs:
   release:
     uses: aifivem/.github/.github/workflows/release.yml@main
     secrets: inherit
+
+  npm:
+    needs: release
+    if: needs.release.outputs.paths_released != '' && needs.release.outputs.paths_released != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@11
+      - name: Publish the released packages
+        env:
+          PATHS: ${{ needs.release.outputs.paths_released }}
+        run: |
+          for path in $(echo "$PATHS" | jq -r '.[]'); do
+            npm publish "./$path"
+          done
