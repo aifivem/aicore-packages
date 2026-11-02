@@ -46,6 +46,18 @@ export type DeleteByPlateResult =
   | { ok: true; id: number; entities: number }
   | { ok: false; error: "invalid_plate" | "not_found" | "failed" };
 
+/**
+ * `AdoptVehicle`'s answer: `owned` = the entity is already an owned vehicle, `plate_owned` = its plate belongs to an
+ * owned vehicle (owner online or not), `model` = the model name is not the entity's, `invalid` = no vehicle entity, a
+ * wrong owner or props that are not the entity's.
+ */
+export type AdoptVehicleResult =
+  | { ok: true; id: number; plate: string }
+  | {
+      ok: false;
+      error: "invalid" | "model" | "owned" | "plate_owned" | "failed";
+    };
+
 /** ai-vehicles' server exports. */
 export type AiVehiclesServerExports = {
   CreateVehicle(
@@ -104,6 +116,19 @@ export type AiVehiclesServerExports = {
   DeleteVehicleByPlate(
     plate: string,
     done?: (result: DeleteByPlateResult) => void,
+  ): void;
+  /**
+   * Makes an existing world vehicle an owned one, "out" and tracked like a spawned one (admin `/admincar`). `model` is
+   * the entity's model name (the server cannot read it; checked against the entity), `props` its look read on a client
+   * (lib VehicleProps or ox_lib / qb-core's shape, of the entity's model). The entity keeps its plate when that is a
+   * valid custom plate (`SetPlate`'s rules), else it gets the generated one.
+   */
+  AdoptVehicle(
+    owner: VehicleOwner,
+    entity: number,
+    model: string,
+    props: unknown,
+    done?: (result: AdoptVehicleResult) => void,
   ): void;
   /**
    * Creates the entity; `cb` gets its net id (null when it failed). `asker` is a player whose client answers the model
