@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.7.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.6.0...shared-v0.7.0) (2026-11-02)
+
+
+### New Features
+
+* **lib:** add illegal status, characters.idOf and paycheck and export types ([0f34765](https://github.com/aifivem/aicore-packages/commit/0f34765109482eed892fa94b34d5066c5a567f0b))
+* **lib:** add mdt.hasWarrant for the active MDT's warrant check ([16b3fda](https://github.com/aifivem/aicore-packages/commit/16b3fdaa3775e97a1bb83a6a56c3ca9cae7e03d7))
+* **lib:** add needs.set and type ai-hud's stress relief export ([531c402](https://github.com/aifivem/aicore-packages/commit/531c40292fcdde8a0097017a40dfdcabd7d9b337))
+* **lib:** add phone.onUsed on both sides ([2ce688a](https://github.com/aifivem/aicore-packages/commit/2ce688a9e16211de6253a1200f5e87995ba85737))
+* **lib:** add warrants for ai-core's own wanted system ([7b72635](https://github.com/aifivem/aicore-packages/commit/7b726359000c0e892e1a07fab80fbbf737afcbb7))
+* **shared:** phone client adapters always watch an event or state bag ([008c1a8](https://github.com/aifivem/aicore-packages/commit/008c1a840abcb33e9b697b4e2ab74a0642310b81))
+* **shared:** type ai-vehicles' AdoptVehicle export ([a14693a](https://github.com/aifivem/aicore-packages/commit/a14693ac66d11a013501556a1cf0a7ca4718df50))
+
+
+### Code Refactoring
+
+* **shared:** move ban export types into their own file ([48f71b6](https://github.com/aifivem/aicore-packages/commit/48f71b640f8d29e9184467cd77580bd148e77627))
+
+
+### Documentation
+
+* **shared:** the phone opened event carries no arguments ([a5989cb](https://github.com/aifivem/aicore-packages/commit/a5989cb43cca167bcc84a62a4e02deab07ebe7cb))
+* **shared:** the phone opened event carries the phone's name ([f9c53f2](https://github.com/aifivem/aicore-packages/commit/f9c53f2adf1f210be0952bd44785801ccbb5247d))
+
 ## [0.6.0](https://github.com/aifivem/aicore-packages/compare/shared-v0.5.0...shared-v0.6.0) (2026-11-02)
 
 

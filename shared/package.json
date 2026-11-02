@@ -1,6 +1,6 @@
 {
   "name": "@aifivem/shared",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Contracts shared between ai-core resources: event names, payload types, export types.",
   "license": "GPL-3.0-only",
   "repository": {
